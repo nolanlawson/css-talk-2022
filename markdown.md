@@ -1,21 +1,25 @@
 class: center, middle
 
-# Title
+# CSS runtime performance
+
+## Nolan Lawson, 2022
 
 ???
 
-This is a note
+Notes
 
 ---
 
-# Agenda
+# Target audience
 
-1. Introduction
-2. Deep-dive
-3. ...
+- Performance engineers
+- Framework authors
+- Folks working on large apps
+- Anyone interested in how browsers work
 
 ???
-This is another note
+
+Notes
 
 ---
 
@@ -32,3 +36,6 @@ div {
 console.log('foo')
 *console.log('bar')
 ```
+
+???
+Notes
