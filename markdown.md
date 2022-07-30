@@ -2,6 +2,10 @@ class: center, middle
 
 # Title
 
+???
+
+This is a note
+
 ---
 
 # Agenda
@@ -9,6 +13,9 @@ class: center, middle
 1. Introduction
 2. Deep-dive
 3. ...
+
+???
+This is another note
 
 ---
 
