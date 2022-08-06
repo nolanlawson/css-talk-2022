@@ -293,6 +293,29 @@ Again, note that here we're actually talking about the geometry of the page. Tha
 
 ---
 
+# What slows down style/layout
+
+|                                 | Style | Layout |
+|---------------------------------|:-----:|:------:|
+| Complexity of CSS selectors     |   ✅   |   ❌    |
+| Complexity of layout            |   ❌   |   ✅    |
+| Size/depth of DOM               |   ✅   |   ✅    |
+| Repeated re-renders (thrashing) |   ✅   |   ✅    |
+
+???
+
+At a high level, if you're seeing a large amount of time spent in style or layout, it usually comes down to one of these four things.
+
+Either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation.
+
+Or your layout itself, i.e. the geometry of the page, is very large or complex, which slows down layout calculation.
+
+Or your DOM is very large, or you are doing repeated re-renders, which slows down both style and layout.
+
+This is a lot to unpack, so let's go over each of these points.
+
+---
+
 # Style/layout performance
 
 ```css
@@ -484,18 +507,3 @@ But the result is exactly the same. All we did was move the style/layout costs f
 the browser's rendering loop. The total time spent is the same. So this DevTools warning can be very misleading.
 
 [Demo](https://nolanlawson.github.io/measure-style-and-layout/)
-
----
-
-# Style vs layout performance
-
---
-- Style
-  - Complexity of CSS selectors
-- Layout
-  - Complexity of layout
-
-???
-
-In general, style calculation problems are caused by slow CSS selectors (e.g. `nth-child()`, `not:()` and ancestor selectors), and layout calculation problems are caused by
-complex layout (e.g. grids inside of flexboxes inside of grids).
