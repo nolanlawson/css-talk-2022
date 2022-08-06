@@ -455,6 +455,8 @@ the browser to be more efficient because it's doing all the calculations at once
 
 Or in many cases, you should probably do your layout in CSS rather than JavaScript! This will avoid this cost entirely.
 
+[Demo](https://bl.ocks.org/nolanlawson/raw/6a4e514d16331594bef2d4b9ee91f150/)
+
 ---
 
 # Don't be misled
@@ -480,6 +482,8 @@ have rewarded us! Our "Recalculate style" doesn't have a little red triangle wit
 
 But the result is exactly the same. All we did was move the style/layout costs from the `getBoundingClientRect` to
 the browser's rendering loop. The total time spent is the same. So this DevTools warning can be very misleading.
+
+[Demo](https://nolanlawson.github.io/measure-style-and-layout/)
 
 ---
 
