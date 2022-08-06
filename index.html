@@ -37,7 +37,16 @@
         }
 
         .remark-slide-content li {
-            font-size: 2em;
+            font-size: 38px;
+            line-height: 1.5em;
+        }
+
+        .remark-slide-content > ul > li:not(:first-child) {
+            margin-top: 15px;
+        }
+
+        .remark-slide-content li ul li {
+            font-size: 32px;
         }
 
         .remark-slide-content h1 {
@@ -48,8 +57,48 @@
             font-size: 64px;
         }
 
+        .remark-slide-content p {
+            font-size: 40px;
+        }
+
         .remark-code {
             font-size: 32px;
+        }
+
+        .center > img {
+            object-fit: contain;
+            width: 100%;
+        }
+
+        .contain-vertical {
+            position: relative;
+        }
+        .contain-vertical > p {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0;
+        }
+        .contain-vertical > p > span.center {
+            height: 100%
+        }
+        .contain-vertical > p > span.center > img {
+            height: 100%;
+        }
+
+        kbd {
+            box-shadow: 0.1em 0.1em 0.1em #777;
+            padding: 0.1em 0.35em;
+            border-radius: 3px;
+            font-family: Consolas, "Lucida Console", monospace;
+            font-variant: small-caps;
+            background: #eee;
+        }
+
+        .muted {
+            font-size: 0.5em;
+            opacity: 0.5;
         }
     </style>
   </head>
