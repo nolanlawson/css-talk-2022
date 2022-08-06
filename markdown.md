@@ -480,3 +480,18 @@ have rewarded us! Our "Recalculate style" doesn't have a little red triangle wit
 
 But the result is exactly the same. All we did was move the style/layout costs from the `getBoundingClientRect` to
 the browser's rendering loop. The total time spent is the same. So this DevTools warning can be very misleading.
+
+---
+
+# Style vs layout performance
+
+--
+- Style
+  - Complexity of CSS selectors
+- Layout
+  - Complexity of layout
+
+???
+
+In general, style calculation problems are caused by slow CSS selectors (e.g. `nth-child()`, `not:()` and ancestor selectors), and layout calculation problems are caused by
+complex layout (e.g. grids inside of flexboxes inside of grids).
