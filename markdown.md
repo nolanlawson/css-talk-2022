@@ -288,7 +288,7 @@ Again, note that here we're actually talking about the geometry of the page. Tha
 
 ---
 
-## Style/layout performance
+# Style/layout performance
 
 ```css
 h1 {
@@ -306,7 +306,7 @@ versus the other?
 
 ---
 
-## Style/layout performance
+# Style/layout performance
 
 ```css
 *h1 {
@@ -323,7 +323,7 @@ Well, speaking in generalities, we can say that style calculation is about the p
 
 ---
 
-## Style/layout performance
+# Style/layout performance
 
 ```css
 h1 {
@@ -340,7 +340,7 @@ Whereas layout calculation is about the part inside of the braces (i.e. the rule
 
 ---
 
-## Style/layout performance
+# Style/layout performance
 
 ```html
 <div>
@@ -359,3 +359,104 @@ Whereas layout calculation is about the part inside of the braces (i.e. the rule
 Both of them are also going to be affected by the number of DOM elements on the page. A larger DOM means more for the browser
 to do, in terms of both style and layout. This is why techniques such as virtualization are good at improving both style
 and layout performance.
+
+---
+
+# Layout thrashing
+
+```js 
+for (const el of elements) {
+  const width = el.parentElement.offsetWidth
+  el.style.width = width + 'px'
+}
+```
+
+???
+
+Another important topic is layout thrashing, which affects both style and layout costs.
+
+Layout thrashing is a situation where, in a loop, you're both reading from the DOM's style and writing to the DOM's styles. This
+forces the browser to re-run style and layout repeatedly.
+
+---
+
+# Layout thrashing
+
+```js
+for (const el of elements) {
+* const width = el.parentElement.offsetWidth
+  el.style.width = width + 'px'
+}
+```
+
+???
+
+So in this case here we are reading from the DOM
+
+---
+
+# Layout thrashing
+
+```js
+for (const el of elements) {
+  const width = el.parentElement.offsetWidth
+* el.style.width = width + 'px'
+}
+```
+
+???
+
+And here we are writing to the DOM
+
+---
+
+.center[![TODO](./images/thrashing.png)]
+
+???
+
+The telltale sign that this is happening is this kind of thing in the Dev Tools. Note the repeated sections of purple
+style and layout, and the warning about "forced reflow." (Reflow is another name for layout.)
+
+---
+
+# Solving layout thrashing
+
+```js
+// All the reads
+const widths = elements.map(el => el.parentElement.offsetWidth)
+
+// All the writes
+for (let i = 0; i < elements.length; i++) {
+  elements[i] = widths[i] + 'px'
+}
+```
+
+???
+
+In these cases, it's better to batch your reads and writes together, so that you do all the reads at once, followed
+by all the writes. This ensures you only at most pay for style calculation twice – once during the reads, and again during
+the writes.
+
+Or in many cases, you should probably do your layout in CSS rather than JavaScript! This will avoid this cost entirely.
+
+---
+
+.center[![TODO](./images/not-thrashing1.png)]
+
+???
+
+Now note that the DevTools can be misleading. They warn you about "forced reflow" _anytime_ you use one of [the APIs that force style/layout](https://gist.github.com/paulirish/5d52fb081b3570c81e3a), such as `getBoundingClientRect` or `offsetWidth`. But if you're only reading from the DOM once,
+then it's almost useless to eliminate that call; you're just moving the costs later to when the browser would normally
+run its style/layout loop.
+
+---
+
+.center[![TODO](./images/not-thrashing2.png)]
+
+???
+
+See look, here we've gone through a lot of effort to remove that `getBoundingClientRect` call. And the Chrome DevTools
+have rewarded us! Our "Recalculate style" doesn't have a little red triangle with a warning anymore.
+
+But the result is exactly the same. All we did was move the style/layout costs from the `getBoundingClientRect` to
+the browser's rendering loop. The total time spent is the same. So this DevTools warning can be very misleading.
