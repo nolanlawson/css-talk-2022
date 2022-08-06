@@ -222,10 +222,13 @@ inline styles.
 # Inline styles == no style cost?
 
 --
-- Yes.
-
---
-- But it's probably not worth it.
+```html
+<div style="padding: 5px; margin: 10px; display: flex">
+  <div style="flex: 1; color: blue">
+    Inline all the things?
+  </div>
+</div>
+```
 
 ???
 
@@ -235,8 +238,10 @@ the place, my style costs go to zero?
 And actually yeah, that's basically what I'm saying. Now there are other parts of style calculation that come into play
 here, like inheritance, custom properties, counters, etc., but 99% of your style costs go away if you only use inline styles.
 
+So you may be tempted to "inline all the things."
+
 However, if you did this, you would probably end up with a lot of repeated styles all over the place, so you would pay
-for it in terms of extra HTML parsing. And it would be harder to maintain. So I'm not advocating this
+for it in terms of extra HTML parsing. And it would be harder to maintain. So I'm not advocating this. CSS is pretty good.
 
 ---
 
@@ -426,9 +431,9 @@ style and layout, and the warning about "forced reflow." (Reflow is another name
 const widths = elements.map(el => el.parentElement.offsetWidth)
 
 // All the writes
-for (let i = 0; i < elements.length; i++) {
-  elements[i] = widths[i] + 'px'
-}
+elements.forEach((element, i) => {
+  element = widths[i] + 'px'
+})
 ```
 
 ???
@@ -437,9 +442,22 @@ In these cases, it's better to batch your reads and writes together, so that you
 by all the writes. This ensures you only at most pay for style calculation twice – once during the reads, and again during
 the writes.
 
+---
+
+# Solving layout thrashing
+
+.center[![TODO](./images/no-thrashie.png)]
+
+???
+
+If you do this correctly, then you should see one big style/layout cost (or at most two) rather than multiple. This allows
+the browser to be more efficient because it's doing all the calculations at once rather than piece by piece.
+
 Or in many cases, you should probably do your layout in CSS rather than JavaScript! This will avoid this cost entirely.
 
 ---
+
+# Don't be misled
 
 .center[![TODO](./images/not-thrashing1.png)]
 
@@ -450,6 +468,8 @@ then it's almost useless to eliminate that call; you're just moving the costs la
 run its style/layout loop.
 
 ---
+
+# Don't be misled
 
 .center[![TODO](./images/not-thrashing2.png)]
 
