@@ -46,12 +46,12 @@ customElements.define('dom-visualization', class extends HTMLElement {
     </div>
     <slot></slot>
     `
-    this.shadowRoot.onslotchange = this.onSlotChange
+    this.shadowRoot.onslotchange = this._onSlotChange
     this._root = this.shadowRoot.querySelector('.root')
     this._slot = this.shadowRoot.querySelector('slot')
   }
 
-  onSlotChange = () => {
+  _onSlotChange = () => {
     const { _root: root, _slot: slot } = this
 
     const clear = () => {
