@@ -19,6 +19,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
       width: calc(var(--root-width) / var(--max-tree-depth));
       transform: translateX(100%);
       position: relative;
+      font-size: 36px;
     }
     .root {
       --tree-depth: 0;

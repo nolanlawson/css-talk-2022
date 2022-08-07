@@ -11,13 +11,29 @@ customElements.define('example-1', class extends HTMLElement {
 </style>
 <dom-visualization>
   <div class="foo">
+    <div>
+    <div>
     <div></div>
+</div>
+</div>
     <div>
       <div class="bar"></div>
     </div>
   </div>
+  <div></div>
   <div>
-    <div class="bar">
+    <div>
+      <div class="bar">
+      </div>
+      <div>
+      <div></div>
+</div>
+    </div>
+  </div>
+  <div class="foo">
+    <div>
+      <div><div></div></div>
+      <div><div></div></div>
     </div>
   </div>
 </dom-visualization>    
