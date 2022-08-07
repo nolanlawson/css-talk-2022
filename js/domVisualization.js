@@ -7,6 +7,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
         display: block;
         width: 100%;
         height: 100%;
+        position: relative;
     }
     ::slotted(*) {
       display: none;
@@ -24,6 +25,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
     .root {
       --tree-depth: 0;
       transform: translateX(0);
+      z-index: 2;
     }
     .root::after, .root *::after {
        content: attr(data-content);
@@ -45,40 +47,64 @@ customElements.define('dom-visualization', class extends HTMLElement {
     <slot></slot>
     `
     this.shadowRoot.onslotchange = this.onSlotChange
+    this._root = this.shadowRoot.querySelector('.root')
+    this._slot = this.shadowRoot.querySelector('slot')
   }
 
-  onSlotChange = (e) => {
-    const nodes = e.target.assignedNodes()
-    const root = this.shadowRoot.querySelector('.root')
-    root.innerHTML = ''
-    for (const node of nodes) {
-      root.appendChild(node.cloneNode(true))
+  onSlotChange = () => {
+    const { _root: root, _slot: slot } = this
+
+    const clear = () => {
+      root.innerHTML = ''
     }
-
-    let maxDepth = 0
-    let maxWidth = 0
-
-    const setDepth = (element, depth, width) => {
-      maxDepth = Math.max(depth, maxDepth)
-      maxWidth = Math.max(width, maxWidth)
-      element.style.setProperty('--tree-depth', depth)
-      for (const child of element.children) {
-        setDepth(child, depth + 1, element.children.length * width)
+    const copySlotContent = () => {
+      const nodes = slot.assignedNodes()
+      for (const node of nodes) {
+        root.appendChild(node.cloneNode(true))
       }
     }
 
-    for (const element of root.children) {
-      setDepth(element, 2, root.children.length)
+    const calculateWidthAndDepth = () => {
+      let maxDepth = 0
+      let maxWidth = 0
+
+      const setDepth = (element, depth, width) => {
+        maxDepth = Math.max(depth, maxDepth)
+        maxWidth = Math.max(width, maxWidth)
+        element.style.setProperty('--tree-depth', depth)
+        for (const child of element.children) {
+          setDepth(child, depth + 1, element.children.length * width)
+        }
+      }
+
+      for (const element of root.children) {
+        setDepth(element, 2, root.children.length)
+      }
+      this.style.setProperty('--max-tree-depth', maxDepth)
+      this.style.setProperty('--max-tree-width', maxWidth)
     }
 
-    for (const element of root.querySelectorAll('*')) {
-      if (element.className) {
-        element.setAttribute('data-content', '.' + element.className)
+    const updateStyles = () => {
+      const drawLine = (element) => {
+        const { parentElement } = element
+        requestAnimationFrame(() => {
+          const parentRect = parentElement.getBoundingClientRect()
+          const rect = element.getBoundingClientRect()
+
+        })
+      }
+      for (const element of root.querySelectorAll('*')) {
+        drawLine(element)
+        if (element.className) {
+          element.setAttribute('data-content', '.' + element.className)
+        }
       }
     }
 
-    this.style.setProperty('--max-tree-depth', maxDepth)
-    this.style.setProperty('--max-tree-width', maxWidth)
+    clear()
+    copySlotContent()
+    calculateWidthAndDepth()
+    updateStyles()
   }
 
   connectedCallback() {
