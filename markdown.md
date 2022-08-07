@@ -306,9 +306,9 @@ Again, note that here we're actually talking about the geometry of the page. Tha
 
 At a high level, if you're seeing a large amount of time spent in style or layout, it usually comes down to one of these four things.
 
-Either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation.
+Either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation. Note this has no effect on layout calculation.
 
-Or your layout itself, i.e. the geometry of the page, is very large or complex, which slows down layout calculation.
+Or your layout itself, i.e. the geometry of the page, is very large or complex, which slows down layout calculation. Note this has no effect on style calculation.
 
 Or your DOM is very large, or you are doing repeated re-renders, which slows down both style and layout.
 
@@ -316,7 +316,24 @@ This is a lot to unpack, so let's go over each of these points.
 
 ---
 
-# Style/layout performance
+# Style vs layout performance
+
+These are not the same!
+
+.center[![TODO](./images/style-layout-1.png)]
+
+.center[![TODO](./images/style-layout-2.png)]
+
+???
+
+Now first off, when you're looking at a perf trace, it's important to understand whether you primarily have a
+problem with style calculation, layout calculation, or both. Because these two traces are not the same!
+
+These two look the same on the surface because they're both purple. But in one trace, we have massive style costs and
+very little layout cost, and in the other, we have small style costs but large layout costs. The causes of slowness
+in these two cases is very different, and if you confuse them, then you can very easily go down the wrong track.
+
+# Style vs layout performance
 
 ```css
 h1 {
@@ -334,7 +351,7 @@ versus the other?
 
 ---
 
-# Style/layout performance
+# Style vs layout performance
 
 ```css
 *h1 {
@@ -347,11 +364,11 @@ versus the other?
 
 ???
 
-Well, speaking in generalities, we can say that style calculation is about the part outside of the braces (i.e. selectors)
+Well, speaking in generalities, we can say that style calculation is about the part outside of the braces (i.e. selectors that locate elemenets on the page)
 
 ---
 
-# Style/layout performance
+# Style vs layout performance
 
 ```css
 h1 {
@@ -365,6 +382,70 @@ h2 {
 ???
 
 Whereas layout calculation is about the part inside of the braces (i.e. the rules that actually place things geometrically on the page).
+
+---
+
+# Style performance
+
+```css
+*h1 {
+  padding: 5px;
+}
+*h2 {
+  padding: 10px;
+}
+```
+
+???
+
+To understand style vs layout performance a bit more, we need to go into detail on how each one works. Let's start with style. Remember: this
+is the part outside of the braces.
+
+---
+
+# Style performance
+
+> "For most websites I would posit that selector performance is not the best area to spend your time trying to find performance optimizations."
+
+.muted.right[– Greg Whitworth, via [Enduring CSS](https://ecss.benfrain.com/) by Ben Frain (2016)] 
+
+???
+
+Now first off, I want to clear a bit of a misunderstanding. There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote from my colleague Greg Whitworth, but there are others.
+
+Now to be clear, this is probably true for most sites. However, sometimes you have a large webapp with a lot of CSS, or sometimes your framework or design system may have a flaw that repeats some unperformant CSS selectors all over the place.
+
+The proof is in the pudding: if you profile your site and you see large style costs, like in the trace I showed above, then you have a CSS selector problem, full stop. So sure, don't prematurely overoptimize, but if you recognize you have a problem, then it's time to solve it.
+
+- https://calendar.perfplanet.com/2011/css-selector-performance-has-changed-for-the-better/
+- https://calibreapp.com/blog/css-performance
+- https://ecss.benfrain.com/appendix2.html
+
+---
+
+# Style performance
+
+```js
+for (const element of page) {
+  for (const rule of cssRules) {
+    if (matches(element, rule)) {
+      applyStyles(element, rule)
+    }
+  }
+}
+```
+
+--
+.center[_O(n * m)_]
+
+???
+
+To understand style performance, first it's important to note how browsers actually implement their style engines, so you can understand the kinds of optimizations they have in place so that we don't have to worry about style performance most of the time.
+
+To illustrate, let's imagine we're building a browser. Here is a naive implementation of style calculation that we might have. Raise your hand if you think this is what browsers actually do? 
+
+Of course not, this is an `O(n * m)` operation, where `n` is the number of elements and `m` is the number of CSS rules. On any reasonably-sized page,
+the browser would slow to a crawl.
 
 ---
 
