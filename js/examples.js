@@ -17,7 +17,7 @@ customElements.define('example-1', class extends HTMLElement {
     </div>
   </div>
   <div>
-    <div>
+    <div class="bar">
     </div>
   </div>
 </dom-visualization>    
