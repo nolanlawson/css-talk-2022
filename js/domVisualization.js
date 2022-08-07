@@ -7,25 +7,29 @@ customElements.define('dom-visualization', class extends HTMLElement {
         display: block;
         width: 100%;
         height: 100%;
-        position: relative;
     }
     ::slotted(*) {
       display: none;
     }
     .root, .root * {
       display: flex;
-      flex: 1;
       flex-direction: column;
       height: 100%;
-      width: calc(var(--root-width) / var(--max-tree-depth));
-      transform: translateX(100%);
+      --width: calc(var(--root-width) / var(--max-tree-depth));
+      width: var(--width);
+      left: var(--width);
       position: relative;
       font-size: 36px;
+    }
+    .tree {
+      position: relative;
+      width: 100%;
+      height: 100%;
     }
     .root {
       --tree-depth: 0;
       transform: translateX(0);
-      z-index: 2;
+      left: 0;
     }
     .root::after, .root *::after {
        content: attr(data-content);
@@ -42,7 +46,9 @@ customElements.define('dom-visualization', class extends HTMLElement {
        align-items: center;
     }
     </style>
-    <div class="root" data-content="body">
+    <div class="tree">
+      <div class="root" data-content="body">
+    </div>
     </div>
     <slot></slot>
     `
@@ -78,9 +84,9 @@ customElements.define('dom-visualization', class extends HTMLElement {
       }
 
       for (const element of root.children) {
-        setDepth(element, 2, root.children.length)
+        setDepth(element, 1, root.children.length)
       }
-      this.style.setProperty('--max-tree-depth', maxDepth)
+      this.style.setProperty('--max-tree-depth', maxDepth + 1)
       this.style.setProperty('--max-tree-width', maxWidth)
     }
 
@@ -108,6 +114,15 @@ customElements.define('dom-visualization', class extends HTMLElement {
   }
 
   connectedCallback() {
+    window.addEventListener('resize', this._onResize)
+    this._onResize()
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('resize', this._onResize)
+  }
+
+  _onResize = () => {
     requestAnimationFrame(() => {
       const rect = this.getBoundingClientRect()
 
