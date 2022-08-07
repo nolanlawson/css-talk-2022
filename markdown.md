@@ -449,6 +449,12 @@ the browser would slow to a crawl.
 
 ---
 
+class: fill-custom
+
+<example-1></example-1>
+
+---
+
 # Style/layout performance
 
 ```html
