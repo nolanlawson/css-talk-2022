@@ -1,136 +1,165 @@
+import { rough } from './rough.js'
+
+// 16.9 ratio
+const WIDTH = 1920
+const HEIGHT = 1080
+
+const CIRCLE_WIDTH_RELATIVE = 0.6
+const CIRCLE_HEIGHT_RELATIVE = 0.75
+
+const TEXT_SIZE = 64
+
+const loadFontsPromise = (async () => {
+  const fontFace = new FontFace('Yahfie', "url('./fonts/yahfie/Yahfie-Heavy.ttf')");
+  const font = await fontFace.load()
+  document.fonts.add(font)
+})()
+
+const calculateTree = (root) => {
+  const tree = {
+    children: []
+  }
+  let maxDepth = 0
+  let maxWidth = 0
+
+  const calculateProperties = (element, treeNode, width, depth, offset, parentOffset, parentWidth) => {
+    maxDepth = Math.max(depth, maxDepth)
+    maxWidth = Math.max(width, maxWidth)
+
+    const label = element.className && ('.' + element.className)
+
+    Array.from(element.children).forEach((child, i) => {
+      const childNode = {}
+      if (!treeNode.children) {
+        treeNode.children = []
+      }
+      treeNode.children.push(childNode)
+      Object.assign(
+        childNode,
+        calculateProperties(
+          child,
+          childNode,
+          element.children.length * width,
+          depth + 1,
+          i,
+          parentOffset + (i * (parentWidth / (element.children.length))),
+          parentWidth / (element.children.length)
+        )
+      )
+    })
+    return {
+      depth,
+      width,
+      offset,
+      label,
+      parentOffset,
+      parentWidth
+    }
+  }
+
+  Object.assign(tree, calculateProperties(root, tree, 1, 1, 0, 0, 1))
+
+  Object.assign(tree, {
+    maxDepth,
+    maxWidth,
+    label: 'body'
+  })
+  return tree
+}
+
+function drawTree(root, roughCanvas) {
+
+  const { maxWidth, maxDepth } = root
+
+  const columnWidth = WIDTH / maxDepth
+  const rowHeight = HEIGHT / maxWidth
+
+  const circleWidth = columnWidth * CIRCLE_WIDTH_RELATIVE
+  const circleHeight = rowHeight * CIRCLE_HEIGHT_RELATIVE
+
+
+  const walk = (node, parentRightEdge) => {
+    const { depth, width, label, parentOffset } = node
+
+    const availableCircleHeight = (HEIGHT / width)
+    const circleX = (columnWidth * depth) - (columnWidth / 2)
+    const circleY = (HEIGHT * parentOffset) + availableCircleHeight - (availableCircleHeight / 2)
+
+    if (parentRightEdge) {
+      const leftEdge = {
+        x: circleX - (circleWidth / 2),
+        y: circleY
+      }
+      roughCanvas.line(parentRightEdge.x, parentRightEdge.y, leftEdge.x, leftEdge.y)
+    }
+
+    roughCanvas.ellipse(circleX, circleY, circleWidth, circleHeight)
+
+    if (label) {
+      const { width: textWidth, actualBoundingBoxAscent } = roughCanvas.ctx.measureText(label)
+      roughCanvas.ctx.fillText(label, circleX - (textWidth / 2), circleY + (actualBoundingBoxAscent / 2))
+    }
+
+    if (node.children) {
+      const rightEdge = {
+        x: circleX + (circleWidth / 2),
+        y: circleY
+      }
+      for (const child of node.children) {
+        walk(child, rightEdge)
+      }
+    }
+
+  }
+
+  walk(root)
+
+}
+
 customElements.define('dom-visualization', class extends HTMLElement {
   constructor() {
     super()
     this.attachShadow({ mode: 'open'}).innerHTML = `
     <style>
-    :host {
-        display: block;
+      :host {
+          display: block;
+          width: 100%;
+          height: 100%;
+      }
+      canvas {
         width: 100%;
-        height: 100%;
-    }
-    ::slotted(*) {
-      display: none;
-    }
-    .root, .root * {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      --width: calc(var(--root-width) / var(--max-tree-depth));
-      width: var(--width);
-      position: absolute;
-      left: 0;
-      font-size: 36px;
-    }
-    .tree {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
-    .root {
-      --tree-depth: 0;
-      transform: translateX(0);
-      --num-siblings: 1;
-    }
-    .root::after, .root *::after {
-       content: attr(data-content);
-       border: 2px solid black;
-       border-radius: 100%;
-       left: 20px;
-       right: 20px;
-       --height: calc(var(--root-height) / var(--max-tree-width));
-       height: var(--height);
-       top: calc(50% - (var(--height) / 2));
-       display: flex;
-       justify-content: center;
-       align-items: center;
-    }
+        height: 100%
+      }
     </style>
-    <div class="tree">
-      <div class="root" data-content="body">
-    </div>
-    </div>
     <slot></slot>
     `
     this.shadowRoot.onslotchange = this._onSlotChange
-    this._root = this.shadowRoot.querySelector('.root')
     this._slot = this.shadowRoot.querySelector('slot')
   }
 
-  _onSlotChange = () => {
-    const { _root: root, _slot: slot } = this
+  _onSlotChange = async () => {
+    const { _slot: slot } = this
 
-    const clear = () => {
-      root.innerHTML = ''
-    }
-    const copySlotContent = () => {
-      const nodes = slot.assignedNodes()
-      for (const node of nodes) {
-        root.appendChild(node.cloneNode(true))
-      }
+    const template = slot.assignedElements()[0]
+
+    let canvas = this.shadowRoot.querySelector('canvas')
+    if (canvas) {
+      canvas.remove()
     }
 
-    const calculateWidthAndDepth = () => {
-      let maxDepth = 0
-      let maxWidth = 0
+    canvas = document.createElement('canvas')
+    canvas.width = WIDTH
+    canvas.height = HEIGHT
+    this.shadowRoot.appendChild(canvas)
 
-      const setDepth = (element, depth, width, i) => {
-        maxDepth = Math.max(depth, maxDepth)
-        maxWidth = Math.max(width, maxWidth)
-        element.style.setProperty('--tree-depth', depth)
-        element.style.setProperty('--num-siblings', width)
-        element.style.setProperty('--sibling-order', i)
-        Array.from(element.children).forEach((child, i) => {
-          setDepth(child, depth + 1, element.children.length * width, i)
-        })
-      }
+    const roughCanvas = rough.canvas(canvas)
 
-      for (const element of root.children) {
-        setDepth(element, 1, root.children.length, 0)
-      }
-      this.style.setProperty('--max-tree-depth', maxDepth + 1)
-      this.style.setProperty('--max-tree-width', maxWidth)
-    }
+    const tree = calculateTree(template.content)
 
-    const updateStyles = () => {
-      const drawLine = (element) => {
-        const { parentElement } = element
-        requestAnimationFrame(() => {
-          const parentRect = parentElement.getBoundingClientRect()
-          const rect = element.getBoundingClientRect()
+    await loadFontsPromise
+    roughCanvas.ctx.font = `${TEXT_SIZE}px Yahfie`
 
-        })
-      }
-      for (const element of root.querySelectorAll('*')) {
-        drawLine(element)
-        if (element.className) {
-          element.setAttribute('data-content', '.' + element.className)
-        }
-      }
-    }
-
-    clear()
-    copySlotContent()
-    calculateWidthAndDepth()
-    updateStyles()
+    drawTree(tree, roughCanvas)
   }
 
-  connectedCallback() {
-    window.addEventListener('resize', this._onResize)
-    this._onResize()
-  }
-
-  disconnectedCallback() {
-    window.removeEventListener('resize', this._onResize)
-  }
-
-  _onResize = () => {
-    requestAnimationFrame(() => {
-      const rect = this.getBoundingClientRect()
-
-      requestAnimationFrame(() => {
-        this.style.setProperty('--root-width', rect.width + 'px')
-        this.style.setProperty('--root-height', rect.height + 'px')
-      })
-    })
-  }
 })
