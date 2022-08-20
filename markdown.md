@@ -455,6 +455,13 @@ class: fill-custom
 
 ---
 
+
+class: fill-custom
+
+<example-1 animate="true"></example-1>
+
+---
+
 # Style/layout performance
 
 ```html
