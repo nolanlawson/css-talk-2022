@@ -310,7 +310,9 @@ Either your CSS selectors are too complex, or there are a lot of them, which slo
 
 Or your layout itself, i.e. the geometry of the page, is very large or complex, which slows down layout calculation. Note this has no effect on style calculation.
 
-Or your DOM is very large, or you are doing repeated re-renders, which slows down both style and layout.
+Or your DOM is very large. A bigger DOM just means more work for the browser to do. This affects both style and layout.
+
+Or you are doing repeated re-renders over time, also called thrashing, which slows down both style and layout.
 
 This is a lot to unpack, so let's go over each of these points.
 
@@ -332,6 +334,11 @@ problem with style calculation, layout calculation, or both. Because these two t
 These two look the same on the surface because they're both purple. But in one trace, we have massive style costs and
 very little layout cost, and in the other, we have small style costs but large layout costs. The causes of slowness
 in these two cases is very different, and if you confuse them, then you can very easily go down the wrong track.
+
+If you don't remember anything else from my talk, please remember this: style and layout are not the same thing! And you
+can actually reason about why one is expensive versus the other.
+
+---
 
 # Style vs layout performance
 
@@ -364,7 +371,7 @@ versus the other?
 
 ???
 
-Well, speaking in generalities, we can say that style calculation is about the part outside of the braces (i.e. selectors that locate elemenets on the page)
+Well, speaking in generalities, we can say that style calculation is about the part outside of the braces (i.e. selectors that locate elements on the page)
 
 ---
 
@@ -435,8 +442,7 @@ for (const element of page) {
 }
 ```
 
---
-.center[_O(n * m)_]
+.center[`O(n * m)`]
 
 ???
 
@@ -444,8 +450,7 @@ To understand style performance, first it's important to note how browsers actua
 
 To illustrate, let's imagine we're building a browser. Here is a naive implementation of style calculation that we might have. Raise your hand if you think this is what browsers actually do? 
 
-Of course not, this is an `O(n * m)` operation, where `n` is the number of elements and `m` is the number of CSS rules. On any reasonably-sized page,
-the browser would slow to a crawl.
+Of course not, this is an `O(n * m)` operation, where `n` is the number of elements and `m` is the number of CSS rules. On any reasonably-sized page, the browser would slow to a crawl.
 
 ---
 
@@ -510,8 +515,8 @@ class: fill-custom
 
 ???
 
-Now, there's still a problem with our algorithm. What about descendant selectors? In this case, we have `.foo .bar`, so
-we're trying to find all the `.bar` elements inside of a `.foo` element.
+Now, there's still a problem with our algorithm. What about descendant selectors? In this case, we can find `.foo` instantly,
+but that doesn't help us much with `.bar`, because what we care about is the relationship between the two nodes.
 
 ---
 
@@ -521,8 +526,10 @@ class: fill-custom
 
 ???
 
-Thanks to the hashmap, we can instantly find the `.foo` elements. But we still need to walk to find all the `.bar`
-elements inside of those `.foo` elements. This involves walking a lot of DOM nodes!
+So we still have to traverse the descendants of `.foo` to try to find all the `.bar` elements.
+
+Thanks to the hashmap, we can instantly find the `.foo` elements, but this is still pretty inefficient. We're walking a
+lot of DOM nodes just to find the `.bar` elements.
 
 ---
 
@@ -561,6 +568,8 @@ You may have heard that browser engines evaluate CSS selectors from right to lef
 this is the reason! Any given node in the DOM tree tends to have fewer ancestors than descendants, so this optimization
 works out really well for most DOM trees.
 
+- https://css-tricks.com/why-browsers-read-selectors-right-to-left/
+
 ---
 
 # Problem: generic descendants
@@ -572,6 +581,8 @@ works out really well for most DOM trees.
 ???
 
 This right-to-left technique works out pretty well. But we have another problem. What about selectors like this one?
+
+The right-hand-side (i.e. the descendant) is pretty generic. Most DOM trees have a lot of `div`s.
 
 ---
 
@@ -592,7 +603,7 @@ class: fill-custom
 ???
 
 With the right-to-left technique, we're able to instantly find every `div` (thanks to the hashmap), but we have
-to crawl up the entire ancestor chain every time just to find `.foo`. So this is one of those cases where it would
+to crawl up the entire ancestor chain every time just to find `.foo`. So this is a case where it would
 have been faster for us to go left-to-right.
 
 But we just established that left-to-right is pretty slow most of the time, since DOM nodes tend to have more
@@ -605,6 +616,10 @@ descendants than ancestors, just due to the shape of the tree. So how can we sol
 > "We stole the Bloom filter from [WebKit]. The idea is to optimize cases where the page author writes a descendant combinator and the thing to the [right-hand side] matches a lot, e.g. `.foo div`."
 
 .muted.right[– Boris Zbarsky (Mozilla), via [Servo meeting notes](https://github.com/servo/servo/wiki/Css-selector-matching-meeting-2013-07-19) (2013)] 
+
+???
+
+Enter the Bloom filter. WebKit came up with the optimization first, and now it exists in all browsers.
 
 ---
 
@@ -649,6 +664,32 @@ tuned correctly, this shouldn't happen too frequently, so it won't dramatically 
 
 ---
 
+<h1 class="smaller">What's in the Bloom filter?</h1>
+
+| Supported? | Type                | Example                                       |
+|------------|---------------------|-----------------------------------------------|
+| ✅          | ID                  | `#id div`                                     |
+| ✅          | Class️              | `.foo div`                                    |
+| ✅          | Tag️                | `main div`                                    |
+| ✅          | Attribute 🆕        | `[foo] div`                                   |
+| ⚠️| Attribute value 🆕  | `[foo="bar"] div`                             |
+| ❌️        | Other stuff         | `:nth-child(2) div` |
+
+???
+
+So what's in the Bloom filter? Well, originally it was only IDs, classes, and tags. In 2018 WebKit added attributes, and
+Firefox and Chrome added them in 2021 when I filed bugs on them (you're welcome). Note that the attribute optimization
+only applies to attribute names, not values, but attribute value selectors can kind of piggyback off of them because
+the browser will quickly check if any ancestors even have the attribute name, before checking the value.
+
+Other stuff could be optimized in theory, but as far as I know no browsers have expanded the Bloom filter to anything else.
+
+- https://trac.webkit.org/changeset/229090/webkit
+- https://bugs.chromium.org/p/chromium/issues/detail?id=1196474
+- https://bugzilla.mozilla.org/show_bug.cgi?id=1704551
+
+---
+
 # Browser style optimizations
 
 - WebKit CSS JIT Compiler (2014)
@@ -684,7 +725,7 @@ Well, one thing you can do to reduce style calculation costs is to remove unused
 
 This is a really important point, because it's an area where unused CSS is actually different from unused JavaScript. Both cost you
 in terms of transfer time, and JavaScript costs you in terms of parse and compile time, but unused CSS costs you in terms of parse, compile, _and_
-in making all of your style calculations slower. After all, the browser doesn't _know_ your selectors are unused until it runs the algorithm! This can actually end up costing you multiple times over the lifetime of your page for every style recalculation, or in cases of layout thrashing (which I'll get to later).
+in making all of your style calculations slower. After all, the browser doesn't _know_ your selectors are unused until it runs the style calculation algorithm! This can actually end up costing you multiple times over the lifetime of your page for every style recalculation, or in cases of layout thrashing (which I'll get to later).
 
 So trim that unused CSS!
 
@@ -698,14 +739,17 @@ So trim that unused CSS!
 
 ???
 
-Now, I don't want to get too deep into this, because again, it's hard to predict these kinds of things. But just don't use selectors like these.
+Now, I don't want to get too deep into this, because again, it's hard to predict these kinds of things. But just don't use zany selectors like these.
+
 And if you think I'm exaggerating, the thing is that it's pretty easy to generate stuff like this if you're not careful. Using tools like SASS
-and LESS, it's really easy to deeply nest things, or to have zany for-loops that generate all sorts of `:nth-child()` selectors. One or two
+and LESS, it's really easy to deeply nest things, or to have for-loops that generate all sorts of `:nth-child()` selectors.
+
+One or two
 of these will probably not wreck your page's performance, but in aggregate, these can do a lot of damage.
 
 ---
 
-## Rough selector cost estimate
+<h1 class="smaller">Rough selector cost estimate</h1>
 
 | ~Cost | Type            | Example                                    |
 |--|-----------------|--------------------------------------------|
@@ -721,7 +765,7 @@ of these will probably not wreck your page's performance, but in aggregate, thes
 In general, browsers have optimized for things like tag names, IDs, and classes. Attributes are also fairly optimized, although less so.
 Excessive combinators can cost you. Sibling selectors are also less optimized. And fancier stuff like `:nth-child()` and `:nth-of-type()` is less optimized.
 
-Again, I can't provide hard-and-fast rules, but the intuition you should have is that IDs, classes, and tag names will always be fast, and other stuff you should be cautious with. And again, most of this stuff doesn't matter in isolation, but it does matter if you're building a framework
+Again, I can't provide hard-and-fast rules, and all of this could become outdated tomorrow. But the intuition you should have is that IDs, classes, and tag names will always be fast, and other stuff you should be cautious with. And again, most of this stuff doesn't matter in isolation, but it does matter if you're building a framework or a design system
 where rules might be repeated multiple times on the page.
 
 More details (although I quibble with some of the rankings): https://www.sitepoint.com/optimizing-css-id-selectors-and-other-myths/
@@ -748,7 +792,8 @@ So this actually means that any expensive selectors you may have outside of this
 elements inside of the shadow root. And any expensive selectors _inside_ of this component also don't need to be calculated
 for elements outside of it.
 
-Effectively, this cuts down the number of elements and rules that a browser needs to check against each other.
+If you recall our naive algorithm from earlier, where we check every DOM element against every CSS rule, this effectively
+cuts down the number of elements and rules that need to be checked against each other.
 
 ---
 
@@ -759,7 +804,10 @@ Effectively, this cuts down the number of elements and rules that a browser need
 I have a whole blog post going into the details on this. Basically you should just observe that shadow DOM (the yellow one)
 is always much smaller than the other ones.
 
-Firefox is incredibly fast because of their Stylo engine. If every browser were like Firefox, then I wouldn't have much
+Now, I'm not saying to go rewrite your entire app in shadow DOM. But I am saying that shadow DOM has some unexpected benefits
+in terms of style calculation. So you can be a bit more freewheeling with your selectors, since they're effectively scoped.
+
+Firefox is incredibly fast in this chart because of their Stylo engine. If every browser were like Firefox, then I wouldn't have much
 material for this part of the talk! This is what makes me optimistic that, someday, we'll be able to use whatever zany
 selectors we want, and it won't matter much for web performance, even on web apps with tons of CSS.
 
@@ -767,25 +815,45 @@ https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fast
 
 ---
 
-# Style/layout performance
+# Finding expensive CSS rules
 
-```html
-<div>
-  <div>
-    <div>
-      <div>
-        !-- Big DOM tree! -->
-      </div>
-    </div>
-  </div>
-</div>
-```
+> "In practice, people discover performance problems with CSS and start removing rules one by one until the problem [goes] away. I think that is the right way to go about this, it is easy, and will lead to [the] correct outcome."
+
+.muted.right[– Benjamin Poulain (WebKit), via [CSS Performance Revisited](https://benfrain.com/css-performance-revisited-selectors-bloat-expensive-styles/) by Ben Frain (2014)]
 
 ???
 
-Both of them are also going to be affected by the number of DOM elements on the page. A larger DOM means more for the browser
-to do, in terms of both style and layout. This is why techniques such as virtualization are good at improving both style
-and layout performance.
+Now if you've got high style calculation costs, and you're really stuck trying to figure it out, unfortunately the best
+approach is to remove CSS rules, re-run your perf tests, and see if they made an impact.
+
+I've used this approach a few times. You can optimize it a bit by using a binary search – remove half the CSS, test, remove another half, repeat. It's not pretty, but sometimes this is the only way to figure this kind of thing out.
+
+---
+
+# Layout performance
+
+???
+
+OK, so now that I've covered all the bases on style performance, I want to move on to layout performance.
+
+Now remember, I've been trying to convince you that style and layout are not the same thing! Up until
+this point, I haven't talked about layout at all – I haven't talked about the geometry of the page, or how text flows,
+or anything like that. So if you see high style calculation costs, remember that it's all about your CSS selectors, not your page layout.
+
+If you don't remember anything else from my talk, please remember that!
+
+---
+
+# Layout performance
+
+
+---
+
+# Style and layout performance
+
+???
+
+Now I want to move on to things that affect _both_ style and layout performance.
 
 ---
 
@@ -906,3 +974,22 @@ But the result is exactly the same. All we did was move the style/layout costs f
 the browser's rendering loop. The total time spent is the same. So this DevTools warning can be very misleading.
 
 [Demo](https://nolanlawson.github.io/measure-style-and-layout/)
+
+---
+
+# APIs that force style/layout recalc
+
+- `getBoundingClientRect`
+- `offsetWidth`
+- `getComputedStyle`
+- `innerText` 🤯
+- etc.
+
+???
+
+Now if you're interested in the full list of browser APIs that force style/layout recalculation, Paul Irish has a master
+list that is very useful. It contains some APIs that seem obvious (like `getBoundingClientRect`) and others that
+are a bit suprising (like `innerText`). Some force style _and_ layout, whereas others only force style.
+
+I have this linked in my slide notes: https://gist.github.com/paulirish/5d52fb081b3570c81e3a
+
