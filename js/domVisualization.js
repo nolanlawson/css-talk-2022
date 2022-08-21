@@ -24,7 +24,7 @@ const loadFontsPromise = (async () => {
   document.fonts.add(font)
 })()
 
-const calculateTree = (root) => {
+const calculateTree = (root, showTags) => {
   const tree = {
     children: []
   }
@@ -35,10 +35,15 @@ const calculateTree = (root) => {
     maxDepth = Math.max(depth, maxDepth)
     maxWidth = Math.max(width, maxWidth)
 
-    const label = element.className && ('.' + element.className)
+    let label = (element.className && ('.' + element.className))
+    if (!label && showTags && element.tagName) {
+      label = element.tagName.toLowerCase()
+    }
 
     Array.from(element.children).forEach((child, i) => {
-      const childNode = {}
+      const childNode = {
+        parent: treeNode
+      }
       if (!treeNode.children) {
         treeNode.children = []
       }
@@ -174,6 +179,8 @@ customElements.define('dom-visualization', class extends HTMLElement {
     this.shadowRoot.onslotchange = this._onSlotChange
     this._slot = this.shadowRoot.querySelector('slot')
     this._selectorText = this.shadowRoot.querySelector('.selector-text')
+
+    this._draw()
   }
 
   connectedCallback() {
@@ -189,11 +196,9 @@ customElements.define('dom-visualization', class extends HTMLElement {
     const slideNode = document.querySelector(`.remark-slide-container:nth-child(${slide.getSlideIndex() + 1})`)
     const isVisible = slideNode && slideNode.contains(this)
 
-    if (isVisible) {
-      await this._draw()
-      if (animate) {
-        requestAnimationFrame(() => this._animate())
-      }
+    if (isVisible && animate) {
+      await this._draw() // redraw to refresh canvas
+      await this._animate()
     }
   }
 
@@ -216,7 +221,8 @@ customElements.define('dom-visualization', class extends HTMLElement {
       disableMultiStroke: true,
     })
 
-    const tree = calculateTree(template.content)
+    const showTags = this.getAttribute('show-tags') === 'true'
+    const tree = calculateTree(template.content, showTags)
 
     await loadFontsPromise
     roughCanvas.ctx.font = `${TEXT_SIZE}px Yahfie`
@@ -232,38 +238,118 @@ customElements.define('dom-visualization', class extends HTMLElement {
     await rafPromise()
     const { _roughCanvas: roughCanvas, _tree: tree } = this
     const selector = this.getAttribute('selector')
+    const strategy = this.getAttribute('strategy')
 
+    const instant = strategy === 'instant'
 
-    const checkNode = async node => {
-      await timeoutPromise(ANIMATION_DELAY)
-      await rafPromise()
+    const matches = (element, sel = selector) => element.matches && element.matches(sel)
+
+    const drawingQueue = []
+
+    const flushDrawingQueue = () => {
+      for (const func of drawingQueue) {
+        func()
+      }
+      drawingQueue.length = 0
+    }
+
+    const checkNode = async (node, { bottomToTop } = {}) => {
       const { element, circleX, circleY, circleWidth, circleHeight, label } = node
-      roughCanvas.ellipse(circleX, circleY, circleWidth, circleHeight, {
-        strokeWidth: 0,
-        fill: 'rgba(255, 255, 0, 0.4)',
-        fillStyle: 'solid'
-      })
-      if (element.matches && element.matches(selector)) {
+
+      const match = matches(element)
+      if (!instant || match) {
         roughCanvas.ellipse(circleX, circleY, circleWidth, circleHeight, {
-          strokeWidth: STROKE_WIDTH * 4,
-          stroke: 'rgba(255, 15, 80, 1)'
+          strokeWidth: 0,
+          fill: 'rgba(255, 255, 0, 0.4)',
+          fillStyle: 'solid'
         })
+      }
+      if (match) {
+        const drawMatch = () => {
+          roughCanvas.ellipse(circleX, circleY, circleWidth, circleHeight, {
+            strokeWidth: STROKE_WIDTH * 4,
+            stroke: 'rgba(255, 15, 80, 1)'
+          })
+        }
+        if (bottomToTop) {
+          drawingQueue.push(drawMatch)
+        } else {
+          drawMatch()
+        }
       }
       // have to redraw the text to put it on top
       fillText({roughCanvas, label, circleX, circleY})
     }
 
-    const walk = async node => {
-      await checkNode(node)
+    const walk = async (node, { bottomToTop, stopAtSelector } = { bottomToTop: false }) => {
+      if (!instant || node === tree) {
+        await timeoutPromise(ANIMATION_DELAY)
+        await rafPromise()
+      }
+      await checkNode(node, { bottomToTop })
+
+      if (bottomToTop) {
+        if (node.parent) {
+          if (matches(node.element, stopAtSelector)) {
+            flushDrawingQueue()
+          } else {
+            await walk(node.parent, {bottomToTop, stopAtSelector})
+          }
+        }
+      } else {
+        if (node.children) {
+          for (const child of node.children) {
+            await walk(child)
+          }
+        }
+      }
+      
+    }
+
+    const querySelectorAll = (node, selector) => {
+      let res = []
+
+      if (matches(node.element, selector)) {
+        res.push(node)
+      }
 
       if (node.children) {
         for (const child of node.children) {
-          await walk(child)
+          res = res.concat(querySelectorAll(child, selector))
         }
+      }
+
+      return res
+    }
+
+    const walkNaiveDescendant = async node => {
+      const [ ancestor, descendant ] = selector.split(' ')
+      const elementsMatchingAncestor = querySelectorAll(node, ancestor)
+      for (const element of elementsMatchingAncestor) {
+        await walk(element)
       }
     }
 
-    await walk(tree)
+    const walkNaiveAncestor = async node => {
+      const [ ancestor, descendant ] = selector.split(' ')
+      const elementsMatchingDescendant = querySelectorAll(node, descendant)
+      for (const element of elementsMatchingDescendant) {
+        await walk(element, { bottomToTop: true, stopAtSelector: ancestor })
+      }
+    }
+
+    switch (strategy) {
+      case 'naive':
+      case 'instant':
+        await walk(tree)
+        break
+      case 'naive-descendant':
+        await walkNaiveDescendant(tree)
+        break
+      case 'naive-ancestor':
+        await walkNaiveAncestor(tree)
+        break
+    }
   }
 
 })

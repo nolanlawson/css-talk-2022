@@ -453,12 +453,145 @@ class: fill-custom
 
 <example-1></example-1>
 
+???
+
+For example, let's look at a simple DOM tree. In this case, the selector is `.foo` and we want to find all the nodes
+whose class is `foo`.
+
 ---
 
 
 class: fill-custom
 
 <example-1 animate="true"></example-1>
+
+???
+
+
+If we were doing the naive approach, then the browser would have to walk through the entire DOM just to find the `foo` nodes.
+
+You can see how this would be inefficient, especially given it has to be run for every rule on the page, and every time
+the DOM changes!
+
+---
+
+# Style optimization 1: hash maps
+
+- Tag name (`div`, `button`)
+- ID (`#foo`, `#bar`)
+- Class (`.foo`, `.bar`)
+
+???
+
+So let's look at the first optimization browsers have, which is pretty straightforward. Rather than looking for
+every DOM element that has a class, or an ID, or a given tag name, let's keep a lookup of tag names, IDs, and classes
+to elements.
+
+If you're not familiar with a hashmap, think of it as a Map of strings to some list of DOM elements.
+
+This is pretty reasonable, because tag names for an element never change, and IDs and classes are pretty small and simple most of the time.
+
+---
+
+class: fill-custom
+
+<example-1 animate="true" strategy="instant"></example-1>
+
+???
+
+As you can see, this has a big impact of the efficiency of our algorithm. Rather than checking all nodes, we can
+find the two `foo` nodes in constant time, thanks to the hashmap.
+
+---
+
+class: fill-custom
+
+<example-2></example-2>
+
+???
+
+Now, there's still a problem with our algorithm. What about descendant selectors? In this case, we have `.foo .bar`, so
+we're trying to find all the `.bar` elements inside of a `.foo` element.
+
+---
+
+class: fill-custom
+
+<example-2 animate="true" strategy="naive-descendant"></example-2>
+
+???
+
+Thanks to the hashmap, we can instantly find the `.foo` elements. But we still need to walk to find all the `.bar`
+elements inside of those `.foo` elements. This involves walking a lot of DOM nodes!
+
+---
+
+# Style optimization 2: right-to-left
+
+```css
+.foo .bar {}
+```
+
+--
+- Left-to-right
+  - `.foo` then `.bar`
+
+--
+- Right-to-left
+  - `.bar` then `.foo`
+
+???
+
+So here's another optimization we can do. How about instead of walking from the left to the right, we evaluate the
+selector from _right to left_?
+
+---
+
+class: fill-custom
+
+<example-2></example-2>
+
+???
+
+Here is our same DOM tree from before.
+
+---
+
+class: fill-custom
+
+<example-2 animate="true" strategy="naive-ancestor"></example-2>
+
+???
+
+It turns out we check a lot fewer DOM nodes this way.
+
+You may have heard that browser engines evaluate CSS selectors from right to left. If you've ever wondered why,
+this is the reason! Any given node in the DOM tree tends to have fewer ancestors than descendants, so this optimization
+works out really well for most DOM trees.
+
+---
+
+# Problem: generic descendants
+
+```css
+.foo div {}
+```
+
+???
+
+This right-to-left technique works out pretty well. But we have another problem. What about selectors like this one?
+
+---
+
+class: fill-custom
+
+<example-3 show-tags="true"></example-3>
+
+---
+
+class: fill-custom
+
+<example-3 show-tags="true" animate="true" strategy="naive-ancestor"></example-3>
 
 ---
 
