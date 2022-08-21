@@ -22,6 +22,12 @@ const loadFontsPromise = (async () => {
   document.fonts.add(font)
 })()
 
+const makeDom = str => {
+  const template = document.createElement('template')
+  template.innerHTML = str
+  return template.content.children[0]
+}
+
 const uniq = array => {
   const result = []
   const set = new Set()
@@ -119,8 +125,6 @@ function fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight
     return
   }
 
-  const container = document.createElement('div')
-
   let x
   let y
   let textHeight
@@ -138,7 +142,7 @@ function fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight
     y = circleY - (circleHeight / 2)
   }
 
-  container.innerHTML = `<svg>
+  const svg = makeDom(`<svg>
     <g>
       <rect x=${x} y=${y} width=${textWidth} height=${textHeight} style="stroke: none; fill: none;" />
       <text class="${subText ? 'sub-text' : ''}" 
@@ -148,9 +152,9 @@ function fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight
             text-anchor="middle"
       >${label}</text>
     </g>
-  </svg>`
+  </svg>`)
 
-  const text = container.querySelector('g')
+  const text = svg.querySelector('g')
 
   roughSvg.svg.appendChild(text)
 }
@@ -289,21 +293,19 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
     const template = slot.assignedElements()[0]
 
-    let container = this.shadowRoot.querySelector('div')
+    let svg = this.shadowRoot.querySelector('svg')
 
-    if (container) {
-      container.remove()
+    if (svg) {
+      svg.remove()
     }
-    container = document.createElement('div')
-    container.innerHTML = `
+    svg = makeDom(`
       <svg viewBox="0 0 ${WIDTH} ${HEIGHT}"></svg>
-    `
+    `)
 
-    this.shadowRoot.appendChild(container)
-    const svg = container.querySelector('svg')
+    this.shadowRoot.appendChild(svg)
 
     const roughSvg = rough.svg(svg, {
-      disableMultiStroke: true,
+      disableMultiStroke: false,
     })
 
     const showTags = this.getAttribute('show-tags') === 'true'
@@ -348,7 +350,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
       const drawTouchedNode = () => {
         if (!touchedNodes.has(node)) {
-          roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
+          roughSvg.svg.prepend(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
             strokeWidth: 0,
             fill: 'rgba(255, 255, 0, 0.4)',
             fillStyle: 'solid'
