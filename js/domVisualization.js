@@ -323,7 +323,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
     }
 
     const walkNaiveDescendant = async node => {
-      const [ ancestor, descendant ] = selector.split(' ')
+      const [ ancestor ] = selector.split(' ')
       const elementsMatchingAncestor = querySelectorAll(node, ancestor)
       for (const element of elementsMatchingAncestor) {
         await walk(element)
