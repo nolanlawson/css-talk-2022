@@ -12,6 +12,22 @@ Hi, my name is Nolan Lawson and today I'd like to talk to you about CSS runtime 
 
 ---
 
+class: contain-vertical
+
+.center[![TODO](./images/nolanlawson.png)]
+
+???
+
+First off, who am I?
+
+Most likely if you've seen me on the internet, it's from my blog where I talk about performance, accessibility, and
+various web development topics.
+
+I was on the Microsoft Edge performance team for a couple years, then moved to the performance team at Salesforce,
+and now I work on Lightning Web Components at Salesforce, which is our JavaScript framework.
+
+---
+
 .center[![TODO](./images/devtools1.png)]
 
 --
