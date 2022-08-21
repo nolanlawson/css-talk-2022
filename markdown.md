@@ -587,11 +587,73 @@ class: fill-custom
 
 <example-3 show-tags="true"></example-3>
 
+???
+
+Consider this DOM tree, where we have a lot of divs and want to find `.foo div`.
+
 ---
 
 class: fill-custom
 
 <example-3 show-tags="true" animate="true" strategy="naive-ancestor"></example-3>
+
+???
+
+With the right-to-left technique, we're able to instantly find every `div` (thanks to the hashmap), but we have
+to crawl up the entire ancestor chain every time just to find `.foo`. So this is one of those cases where it would
+have been faster for us to go left-to-right.
+
+But we just established that left-to-right is pretty slow most of the time, since DOM nodes tend to have more
+descendants than ancestors, just due to the shape of the tree. So how can we solve this?
+
+---
+
+# Style optimization 3: Bloom filter
+
+> "We stole the Bloom filter from [WebKit]. The idea is to optimize cases where the page author writes a descendant combinator and the thing to the [right-hand side] matches a lot, e.g. `.foo div`."
+
+.muted.right[– Boris Zbarsky (Mozilla), via [Servo meeting notes](https://github.com/servo/servo/wiki/Css-selector-matching-meeting-2013-07-19) (2013)] 
+
+---
+
+# Bloom filter
+
+.center[![TODO](./images/bloom-filter.svg)]
+
+???
+
+So how does the Bloom filter work? Basically, you can think of it as a Hash Set that may give false positives, but never gives false negatives. The main thing is, it's very fast, so it can be used widely.
+
+In this example, we have x, y, and z, which (let's say) are CSS classes. Each of those strings is hashed and then bits are flipped in the Bloom filter from 0 to 1. If we want to check if the Bloom filter contains x, we hash x again and check up the 1s. Now, because we're spraying 1s all over the place, this might also match some other string, let's say w. So that's a false positive. But it's a tradeoff we're willing to make since this data structure is so fast.
+
+Taken from https://commons.wikimedia.org/wiki/File:Bloom_filter.svg
+
+---
+
+class: fill-custom
+
+<example-3 show-tags="true" show-bloom-filter="true"></example-3>
+
+???
+
+How does this work in the DOM tree? Well basically, the browser keeps a little Bloom filter hash on each node of its parents'
+tag name, IDs, and classes.
+
+This means that if we're on `div`, and we want to figure out if `.foo` is an ancestor, then we don't have to walk up the tree – we know
+instantly, because `.foo` is in the Bloom filter.
+
+---
+
+class: fill-custom
+
+<example-3 show-tags="true" show-bloom-filter="true" animate="true" strategy="instant"></example-3>
+
+???
+
+So now we can basically instantly find the `.foo div`s, assuming we don't get false positives in the Bloom filter.
+
+And hey, if we do get false positives, then we just fall back to crawling up the DOM tree. Assuming the Bloom filter is
+tuned correctly, this shouldn't happen too frequently, so it won't dramatically affect page performance.
 
 ---
 

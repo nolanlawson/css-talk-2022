@@ -22,7 +22,41 @@ const loadFontsPromise = (async () => {
   document.fonts.add(font)
 })()
 
-const calculateTree = (root, showTags) => {
+const uniq = array => {
+  const result = []
+  const set = new Set()
+  for (const item of array) {
+    if (!set.has(item)) {
+      set.add(item)
+      result.push(item)
+    }
+  }
+  return result
+}
+
+const generateLabel = (element, showTags) => {
+  let label = (element.className && ('.' + element.className))
+  if (!label && showTags && element.tagName) {
+    label = element.tagName.toLowerCase()
+  }
+  return label
+}
+
+const generateBloomFilterLabel = (leafElement, showTags) => {
+  let labels = []
+  let element = leafElement.parentElement
+  while (element) {
+    labels.push(generateLabel(element, showTags))
+    element = element.parentElement
+  }
+  if (leafElement.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) { // not root
+    labels.push('body')
+  }
+  labels = labels.reverse()
+  return `{${uniq(labels).join(',')}}`
+}
+
+const calculateTree = (root, showTags, showBloomFilter) => {
   const tree = {
     children: []
   }
@@ -33,10 +67,9 @@ const calculateTree = (root, showTags) => {
     maxDepth = Math.max(depth, maxDepth)
     maxWidth = Math.max(width, maxWidth)
 
-    let label = (element.className && ('.' + element.className))
-    if (!label && showTags && element.tagName) {
-      label = element.tagName.toLowerCase()
-    }
+    const label = generateLabel(element, showTags)
+
+    const subLabel = showBloomFilter && generateBloomFilterLabel(element, showTags)
 
     Array.from(element.children).forEach((child, i) => {
       const childNode = {
@@ -66,7 +99,8 @@ const calculateTree = (root, showTags) => {
       label,
       parentOffset,
       parentWidth,
-      element
+      element,
+      subLabel
     }
   }
 
@@ -80,18 +114,39 @@ const calculateTree = (root, showTags) => {
   return tree
 }
 
-function fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight }) {
+function fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight, subText = false }) {
   if (!label) {
     return
   }
 
   const container = document.createElement('div')
-  const x = circleX - (circleWidth / 2)
-  const y = circleY - (circleHeight / 2)
+
+  let x
+  let y
+  let textHeight
+  let textWidth
+
+  if (subText) {
+    textWidth = circleWidth
+    textHeight = circleHeight / 2
+    x = circleX - (circleWidth / 2)
+    y = circleY + 10 // padding
+  } else {
+    textHeight = circleHeight
+    textWidth = circleWidth
+    x = circleX - (circleWidth / 2)
+    y = circleY - (circleHeight / 2)
+  }
+
   container.innerHTML = `<svg>
     <g>
-      <rect x=${x} y=${y} width=${circleWidth} height=${circleHeight} style="stroke: none; fill: none;" />
-      <text x="${x + circleWidth / 2}" y="${y + circleHeight / 2}" dominant-baseline="middle" text-anchor="middle" fill="#000">${label}</text>
+      <rect x=${x} y=${y} width=${textWidth} height=${textHeight} style="stroke: none; fill: none;" />
+      <text class="${subText ? 'sub-text' : ''}" 
+            x="${x + textWidth / 2}" 
+            y="${y + textHeight / 2}" 
+            dominant-baseline="middle" 
+            text-anchor="middle"
+      >${label}</text>
     </g>
   </svg>`
 
@@ -112,7 +167,7 @@ function drawTree(root, roughSvg) {
 
 
   const walk = (node, parentRightEdge) => {
-    const { depth, width, label, parentOffset } = node
+    const { depth, width, label, parentOffset, subLabel } = node
 
     const availableCircleHeight = (HEIGHT / width)
     const circleX = (columnWidth * depth) - (columnWidth / 2)
@@ -140,6 +195,7 @@ function drawTree(root, roughSvg) {
     })
 
     fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight })
+    fillText({ roughSvg, label: subLabel, circleX, circleY, circleWidth, circleHeight, subText: true })
 
     if (node.children) {
       const rightEdge = {
@@ -175,6 +231,10 @@ customElements.define('dom-visualization', class extends HTMLElement {
       svg text {
         font-size: 2em;
         font-family: Yahfie;
+        fill: #000;
+      }
+      svg text.sub-text {
+        font-size: 0.8em;
       }
       .selector {
         position: absolute;
@@ -247,7 +307,8 @@ customElements.define('dom-visualization', class extends HTMLElement {
     })
 
     const showTags = this.getAttribute('show-tags') === 'true'
-    const tree = calculateTree(template.content, showTags)
+    const showBloomFilter = this.getAttribute('show-bloom-filter') === 'true'
+    const tree = calculateTree(template.content, showTags, showBloomFilter)
 
     await loadFontsPromise
 
@@ -281,7 +342,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
     }
 
     const checkNode = async (node, { bottomToTop } = {}) => {
-      const { element, circleX, circleY, circleWidth, circleHeight, label } = node
+      const { element, circleX, circleY, circleWidth, circleHeight } = node
 
       const match = matches(element)
 

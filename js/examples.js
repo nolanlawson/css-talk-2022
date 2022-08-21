@@ -83,14 +83,15 @@ customElements.define('example-3', class extends HTMLElement {
   animate="${this.getAttribute('animate') ?? false}"
   strategy="${this.getAttribute('strategy') ?? 'naive'}"
   show-tags="${this.getAttribute('show-tags') ?? false}"
+  show-bloom-filter="${this.getAttribute('show-bloom-filter') ?? false}"
 >
   <template>
     <div>
-      <main class="foo">
+      <div class="foo">
         <div>
           <div></div>
         </div>
-      </main>
+      </div>
       <div>
         <div>
           <div></div>
