@@ -8,8 +8,6 @@ const HEIGHT = 1080
 const CIRCLE_WIDTH_RELATIVE = 0.6
 const CIRCLE_HEIGHT_RELATIVE = 0.75
 
-const TEXT_SIZE = 64
-
 const STROKE_WIDTH = 2
 
 const ANIMATION_DELAY = 250
@@ -82,15 +80,27 @@ const calculateTree = (root, showTags) => {
   return tree
 }
 
-function fillText({ roughCanvas, label, circleX, circleY }) {
+function fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight }) {
   if (!label) {
     return
   }
-  const { width: textWidth, actualBoundingBoxAscent } = roughCanvas.ctx.measureText(label)
-  roughCanvas.ctx.fillText(label, circleX - (textWidth / 2), circleY + (actualBoundingBoxAscent / 2))
+
+  const container = document.createElement('div')
+  const x = circleX - (circleWidth / 2)
+  const y = circleY - (circleHeight / 2)
+  container.innerHTML = `<svg>
+    <g>
+      <rect x=${x} y=${y} width=${circleWidth} height=${circleHeight} style="stroke: none; fill: none;" />
+      <text x="${x + circleWidth / 2}" y="${y + circleHeight / 2}" dominant-baseline="middle" text-anchor="middle" fill="#000">${label}</text>
+    </g>
+  </svg>`
+
+  const text = container.querySelector('g')
+
+  roughSvg.svg.appendChild(text)
 }
 
-function drawTree(root, roughCanvas) {
+function drawTree(root, roughSvg) {
 
   const { maxWidth, maxDepth } = root
 
@@ -113,14 +123,14 @@ function drawTree(root, roughCanvas) {
         x: circleX - (circleWidth / 2),
         y: circleY
       }
-      roughCanvas.line(parentRightEdge.x, parentRightEdge.y, leftEdge.x, leftEdge.y, {
+      roughSvg.svg.appendChild(roughSvg.line(parentRightEdge.x, parentRightEdge.y, leftEdge.x, leftEdge.y, {
         strokeWidth: STROKE_WIDTH
-      })
+      }))
     }
 
-    roughCanvas.ellipse(circleX, circleY, circleWidth, circleHeight, {
+    roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
       strokeWidth: STROKE_WIDTH
-    })
+    }))
 
     Object.assign(node, {
       circleX,
@@ -129,7 +139,7 @@ function drawTree(root, roughCanvas) {
       circleHeight
     })
 
-    fillText({ roughCanvas, label, circleX, circleY })
+    fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight })
 
     if (node.children) {
       const rightEdge = {
@@ -158,9 +168,13 @@ customElements.define('dom-visualization', class extends HTMLElement {
           height: 100%;
           position: relative;
       }
-      canvas {
+      svg {
         width: 100%;
-        height: 100%
+        height: 100%;
+      }
+      svg text {
+        font-size: 2em;
+        font-family: Yahfie;
       }
       .selector {
         position: absolute;
@@ -207,17 +221,20 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
     const template = slot.assignedElements()[0]
 
-    let canvas = this.shadowRoot.querySelector('canvas')
-    if (canvas) {
-      canvas.remove()
+    let container = this.shadowRoot.querySelector('div')
+
+    if (container) {
+      container.remove()
     }
+    container = document.createElement('div')
+    container.innerHTML = `
+      <svg viewBox="0 0 ${WIDTH} ${HEIGHT}"></svg>
+    `
 
-    canvas = document.createElement('canvas')
-    canvas.width = WIDTH
-    canvas.height = HEIGHT
-    this.shadowRoot.appendChild(canvas)
+    this.shadowRoot.appendChild(container)
+    const svg = container.querySelector('svg')
 
-    const roughCanvas = rough.canvas(canvas, {
+    const roughSvg = rough.svg(svg, {
       disableMultiStroke: true,
     })
 
@@ -225,18 +242,17 @@ customElements.define('dom-visualization', class extends HTMLElement {
     const tree = calculateTree(template.content, showTags)
 
     await loadFontsPromise
-    roughCanvas.ctx.font = `${TEXT_SIZE}px Yahfie`
 
-    drawTree(tree, roughCanvas)
+    drawTree(tree, roughSvg)
 
     selectorText.textContent = this.getAttribute('selector')
     this._tree = tree
-    this._roughCanvas = roughCanvas
+    this._roughSvg = roughSvg
   }
 
   _animate = async () => {
     await rafPromise()
-    const { _roughCanvas: roughCanvas, _tree: tree } = this
+    const { _roughSvg: roughSvg, _tree: tree } = this
     const selector = this.getAttribute('selector')
     const strategy = this.getAttribute('strategy')
 
@@ -258,18 +274,18 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
       const match = matches(element)
       if (!instant || match) {
-        roughCanvas.ellipse(circleX, circleY, circleWidth, circleHeight, {
+        roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
           strokeWidth: 0,
           fill: 'rgba(255, 255, 0, 0.4)',
           fillStyle: 'solid'
-        })
+        }))
       }
       if (match) {
         const drawMatch = () => {
-          roughCanvas.ellipse(circleX, circleY, circleWidth, circleHeight, {
+          roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
             strokeWidth: STROKE_WIDTH * 4,
             stroke: 'rgba(255, 15, 80, 1)'
-          })
+          }))
         }
         if (bottomToTop) {
           drawingQueue.push(drawMatch)
@@ -277,8 +293,6 @@ customElements.define('dom-visualization', class extends HTMLElement {
           drawMatch()
         }
       }
-      // have to redraw the text to put it on top
-      fillText({roughCanvas, label, circleX, circleY})
     }
 
     const walk = async (node, { bottomToTop, stopAtSelector } = { bottomToTop: false }) => {
