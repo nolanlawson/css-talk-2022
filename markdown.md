@@ -75,7 +75,7 @@ some of this stuff is just plain interesting!
 
 # How browsers render
 
-.center[![TODO](./images/pixel-pipeline.avif)]
+.center[![TODO](./images/pixel-pipeline.png)]
 
 ???
 
@@ -99,7 +99,7 @@ The last two steps, paint and composite, are about actually writing pixels to th
 
 # How browsers render
 
-.center[![TODO](./images/pixel-pipeline-style-layout.avif)]
+.center[![TODO](./images/pixel-pipeline-style-layout.png)]
 
 ???
 
@@ -107,7 +107,7 @@ Let's focus on the style/layout part
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style-layout.avif)]
+.center[![TODO](./images/pixel-pipeline-style-layout.png)]
 
 --
 - Style
@@ -132,7 +132,7 @@ you're chasing ghosts, and vice versa.
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style.avif)]
+.center[![TODO](./images/pixel-pipeline-style.png)]
 
 ```css
 h1 {
@@ -156,7 +156,7 @@ In this case, we have a 5px-padding h1 and a 10px-padding h2. So style calculati
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style.avif)]
+.center[![TODO](./images/pixel-pipeline-style.png)]
 
 ```css
 h1 {
@@ -178,7 +178,7 @@ this h1 is red and
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style.avif)]
+.center[![TODO](./images/pixel-pipeline-style.png)]
 
 ```css
 h1 {
@@ -205,7 +205,7 @@ So in a sense, it's almost as if the browser is taking this page, and turning it
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style.avif)]
+.center[![TODO](./images/pixel-pipeline-style.png)]
 
 ```html
 <h1 style="padding: 5px;" >Hello</h1>
@@ -245,7 +245,7 @@ for it in terms of extra HTML parsing. And it would be harder to maintain. So I'
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-layout.avif)]
+.center[![TODO](./images/pixel-pipeline-layout.png)]
 
 --
 ```html
@@ -532,14 +532,6 @@ elements inside of those `.foo` elements. This involves walking a lot of DOM nod
 .foo .bar {}
 ```
 
---
-- Left-to-right
-  - `.foo` then `.bar`
-
---
-- Right-to-left
-  - `.bar` then `.foo`
-
 ???
 
 So here's another optimization we can do. How about instead of walking from the left to the right, we evaluate the
@@ -624,7 +616,7 @@ descendants than ancestors, just due to the shape of the tree. So how can we sol
 
 So how does the Bloom filter work? Basically, you can think of it as a Hash Set that may give false positives, but never gives false negatives. The main thing is, it's very fast, so it can be used widely.
 
-In this example, we have x, y, and z, which (let's say) are CSS classes. Each of those strings is hashed and then bits are flipped in the Bloom filter from 0 to 1. If we want to check if the Bloom filter contains x, we hash x again and check up the 1s. Now, because we're spraying 1s all over the place, this might also match some other string, let's say w. So that's a false positive. But it's a tradeoff we're willing to make since this data structure is so fast.
+In this example, we have x, y, and z, which (let's say) are CSS classes. Each of those strings is hashed and then bits are flipped in the Bloom filter from 0 to 1. If we want to check if the Bloom filter contains x, we hash x again and check up the 1s. Now, because we're spraying 1s all over the place, this might also match some other string. So that's a false positive. But it's a tradeoff we're willing to make since this data structure is so fast.
 
 Taken from https://commons.wikimedia.org/wiki/File:Bloom_filter.svg
 
@@ -654,6 +646,124 @@ So now we can basically instantly find the `.foo div`s, assuming we don't get fa
 
 And hey, if we do get false positives, then we just fall back to crawling up the DOM tree. Assuming the Bloom filter is
 tuned correctly, this shouldn't happen too frequently, so it won't dramatically affect page performance.
+
+---
+
+# Browser style optimizations
+
+- WebKit CSS JIT Compiler (2014)
+- Firefox Stylo (2017)
+- WebKit making `:has` happen (2022)
+
+???
+
+Now, there are many more browser style optimizations than what I've mentioned here. Here are a few more (and I have links in my slide nodes).
+
+My goal in telling you all this is not to tell you to use this CSS selector or this other one. That information could quickly become outdated.
+My goal instead is to give you an appreciation for all the work a browser has to do to do style calculation. So when you see high style
+calculation costs, you understand that a browser is doing something like this.
+
+So now, knowing a bit more about how browsers work under the hood, what can we as web developers do if we see high style
+calculation costs?
+
+Notes:
+
+- https://webkit.org/blog/3271/webkit-css-selector-jit-compiler/
+- https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/
+- https://webkit.org/blog/13096/css-has-pseudo-class/
+
+---
+
+# Remove unused CSS
+
+.center[![TODO](./images/unused-css.png)]
+
+???
+
+Well, one thing you can do to reduce style calculation costs is to remove unused CSS.
+
+This is a really important point, because it's an area where unused CSS is actually different from unused JavaScript. Both cost you
+in terms of transfer time, and JavaScript costs you in terms of parse and compile time, but unused CSS costs you in terms of parse, compile, _and_
+in making all of your style calculations slower. After all, the browser doesn't _know_ your selectors are unused until it runs the algorithm! This can actually end up costing you multiple times over the lifetime of your page for every style recalculation, or in cases of layout thrashing (which I'll get to later).
+
+So trim that unused CSS!
+
+---
+
+# Avoid excessive complexity in selectors
+
+```css
+:not([foo^="bar"]) div:nth-of-type(2n) :nth-child(3) > * ~ * {}
+```
+
+???
+
+Now, I don't want to get too deep into this, because again, it's hard to predict these kinds of things. But just don't use selectors like these.
+And if you think I'm exaggerating, the thing is that it's pretty easy to generate stuff like this if you're not careful. Using tools like SASS
+and LESS, it's really easy to deeply nest things, or to have zany for-loops that generate all sorts of `:nth-child()` selectors. One or two
+of these will probably not wreck your page's performance, but in aggregate, these can do a lot of damage.
+
+---
+
+## Rough selector cost estimate
+
+| ~Cost | Type            | Example                                    |
+|--|-----------------|--------------------------------------------|
+| ✅ | ID, class, tag  | `#id`, `.cls`, `a`                         |
+| ⚠️| Descendant      | `.foo .bar`, `.foo > .bar`                 |
+| ⚠️| Attribute       | `[foo]`                      |
+| 🌶️️| Attribute value | `[foo="bar"]`, `[foo~="bar"]`              |
+| 🌶️ | Sibling         | `.foo ~ bar`, `.foo + .bar`                |
+| 🌶️ | Pseudo-class    | `:nth-of-type()`, `:not()`, `:nth-child()` |
+
+???
+
+In general, browsers have optimized for things like tag names, IDs, and classes. Attributes are also fairly optimized, although less so.
+Excessive combinators can cost you. Sibling selectors are also less optimized. And fancier stuff like `:nth-child()` and `:nth-of-type()` is less optimized.
+
+Again, I can't provide hard-and-fast rules, but the intuition you should have is that IDs, classes, and tag names will always be fast, and other stuff you should be cautious with. And again, most of this stuff doesn't matter in isolation, but it does matter if you're building a framework
+where rules might be repeated multiple times on the page.
+
+More details (although I quibble with some of the rankings): https://www.sitepoint.com/optimizing-css-id-selectors-and-other-myths/
+
+---
+
+# Use Shadow DOM
+
+```html
+<my-component>
+  #shadow-root
+    <style>
+      div { color: red }
+    </style>
+    <div>Hello!</div>
+</my-component>
+```
+
+???
+
+Shadow DOM is interesting because it encapsulates styles. They don't bleed in and out of the shadow root.
+
+So this actually means that any expensive selectors you may have outside of this component don't need to be calculated for
+elements inside of the shadow root. And any expensive selectors _inside_ of this component also don't need to be calculated
+for elements outside of it.
+
+Effectively, this cuts down the number of elements and rules that a browser needs to check against each other.
+
+---
+
+.center[![TODO](./images/style-perf-chart.png)]
+
+???
+
+I have a whole blog post going into the details on this. Basically you should just observe that shadow DOM (the yellow one)
+is always much smaller than the other ones.
+
+Firefox is incredibly fast because of their Stylo engine. If every browser were like Firefox, then I wouldn't have much
+material for this part of the talk! This is what makes me optimistic that, someday, we'll be able to use whatever zany
+selectors we want, and it won't matter much for web performance, even on web apps with tons of CSS.
+
+https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/
 
 ---
 
