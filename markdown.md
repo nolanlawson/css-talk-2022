@@ -221,7 +221,6 @@ inline styles.
 
 # Inline styles == no style cost?
 
---
 ```html
 <div style="padding: 5px; margin: 10px; display: flex">
   <div style="flex: 1; color: blue">
