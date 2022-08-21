@@ -102,7 +102,7 @@ customElements.define('example-3', class extends HTMLElement {
         <div>
           <div></div>
         </div>
-        <div>
+        <div class="foo">
           <div></div>
         </div>
         <div>

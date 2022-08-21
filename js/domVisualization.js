@@ -186,6 +186,14 @@ customElements.define('dom-visualization', class extends HTMLElement {
         font-family: 'Ubuntu Mono', monospace;
         background: rgba(30, 30, 30, 0.05);
       }
+      .fade {
+        will-change: opacity;
+        opacity: 1;
+        transition: 0.75s opacity linear;
+      }
+      .fade.fade-out {
+        opacity: 0;
+      }
     </style>
     <slot></slot>
     <span class="selector"><span class="selector-text"></span></span>
@@ -258,6 +266,9 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
     const instant = strategy === 'instant'
 
+    const touchedNodes = new Set()
+    const matchedNodes = new Set()
+
     const matches = (element, sel = selector) => element.matches && element.matches(sel)
 
     const drawingQueue = []
@@ -273,19 +284,41 @@ customElements.define('dom-visualization', class extends HTMLElement {
       const { element, circleX, circleY, circleWidth, circleHeight, label } = node
 
       const match = matches(element)
+
+      const drawTouchedNode = () => {
+        if (!touchedNodes.has(node)) {
+          roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
+            strokeWidth: 0,
+            fill: 'rgba(255, 255, 0, 0.4)',
+            fillStyle: 'solid'
+          }))
+          touchedNodes.add(node)
+        }
+        const animatedBorder = roughSvg.ellipse(circleX, circleY, circleWidth + (STROKE_WIDTH * 8), circleHeight + (STROKE_WIDTH * 8), {
+          strokeWidth: STROKE_WIDTH * 8,
+          stroke: 'rgb(187,187,13)'
+        })
+        animatedBorder.classList.add('fade')
+        requestAnimationFrame(() => {
+          animatedBorder.classList.add('fade-out')
+        })
+        roughSvg.svg.appendChild(animatedBorder)
+      }
+
       if (!instant || match) {
-        roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
-          strokeWidth: 0,
-          fill: 'rgba(255, 255, 0, 0.4)',
-          fillStyle: 'solid'
-        }))
+        drawTouchedNode()
       }
       if (match) {
         const drawMatch = () => {
-          roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
-            strokeWidth: STROKE_WIDTH * 4,
-            stroke: 'rgba(255, 15, 80, 1)'
-          }))
+          if (!matchedNodes.has(node)) {
+            const matchBorder = roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
+              strokeWidth: STROKE_WIDTH * 4,
+              stroke: 'rgba(255, 15, 80, 1)',
+            })
+            matchBorder.classList.add('matched')
+            roughSvg.svg.appendChild(matchBorder)
+            matchedNodes.add(node)
+          }
         }
         if (bottomToTop) {
           drawingQueue.push(drawMatch)
