@@ -104,7 +104,7 @@ I'm also speaking to anyone interested in how browsers work. Some of this stuff 
 To understand the purple part, we first need to start with how browsers render content. This process is called
 ["updating the rendering"](https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering) in the HTML spec.
 
-This graphic is taken from a blog post on web dot dev where they call it "the pixel pipeline."
+This graphic is taken from [a blog post on web dot dev](https://web.dev/rendering-performance/#the-pixel-pipeline) where they call it "the pixel pipeline."
 
 You can see that the main steps described here are JavaScript, style/layout, and paint/composite. Helpfully, these
 are color-coded in the same way they would be in the Chrome DevTools.
@@ -146,10 +146,6 @@ The input of these steps is the state of the DOM – all the CSS rules and DOM n
 
 The output of these steps is the "layout tree" (or "render tree"), and that's the thing
 that is passed to the paint (green) step that actually lays out pixels on the screen.
-
-If you take nothing else from my talk, I want you to understand that these are two separate steps, and they
-can be slow for two completely different reasons. If your style is slow but you're focused on layout, then
-you're chasing ghosts, and vice versa.
 
 ---
 
@@ -195,7 +191,7 @@ h2 {
 
 ???
 
-this h1 is red and 
+this h1 is 5px padding and 
 
 ---
 
@@ -217,9 +213,9 @@ h2 {
 
 ???
 
-this h2 is blue. I'm simplifying some stuff, but this is mostly what style calculation is about.
+this h2 is 10px padding.
 
-In this case, it's about applying the CSS selectors, and figuring out that `h1` refers to the `<h1>` element,
+In this case, style calculation is (basically) about applying the CSS selectors, and figuring out that `h1` refers to the `<h1>` element,
 and `h2` refers to the `<h2>` element.
 
 So in a sense, it's almost as if the browser is taking this page, and turning it into this one:
@@ -261,7 +257,9 @@ here, like inheritance, custom properties, counters, etc., but 99% of your style
 So you may be tempted to "inline all the things."
 
 However, if you did this, you would probably end up with a lot of repeated styles all over the place, so you would pay
-for it in terms of extra HTML parsing. And it would be harder to maintain. So I'm not advocating this. CSS is pretty good.
+for it in terms of extra HTML parsing. And it would be harder to maintain. So I'm not advocating this. CSS is good. Use it!
+
+However, this is a good fact about style calculation to internalize: it's mostly about CSS selectors.
 
 ---
 
@@ -279,8 +277,8 @@ Now let's move on to layout. Note that, with style, at no point were we talking 
 Style calculation has nothing to do with where things actually go geometrically on the page; that's the job of layout
 calculation.
 
-So recall we have our h1 and h2 where the browser has (somehow) figured out that one has 5px padding and the other
-has 10px padding (either because our styles are inline or because it ran style calcuation).
+So recall we have our h1 and h2 where the browser has figured out that one has 5px padding and the other
+has 10px padding.
 
 ---
 
@@ -351,7 +349,7 @@ These are not the same!
 Now first off, when you're looking at a perf trace, it's important to understand whether you primarily have a
 problem with style calculation, layout calculation, or both. Because these two traces are not the same!
 
-These two look the same on the surface because they're both purple. But in one trace, we have massive style costs and
+These two look the same on the surface because they're both purple. But in one trace, we have huge style costs and
 very little layout cost, and in the other, we have small style costs but large layout costs. The causes of slowness
 in these two cases is very different, and if you confuse them, then you can very easily go down the wrong track.
 
