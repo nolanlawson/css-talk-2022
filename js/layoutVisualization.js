@@ -95,7 +95,7 @@ customElements.define('layout-visualization', class extends HTMLElement {
       )
     }
 
-    const sidebarWidth = version === 2 ? 0.2 : 0.4
+    const sidebarWidth = version === 2 ? 0.15 : 0.4
 
     const rects = [
       [0, 0, 1, 0.2, PASTEL_RED],
