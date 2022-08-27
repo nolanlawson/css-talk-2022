@@ -872,20 +872,196 @@ Now remember, I've been trying to convince you that style and layout are not the
 this point, I haven't talked about layout at all – I haven't talked about the geometry of the page, or how text flows,
 or anything like that. So if you see high style calculation costs, remember that it's all about your CSS selectors, not your page layout.
 
-If you don't remember anything else from my talk, please remember that!
+Now when it comes to layout, I'm going to admit that I'm not a huge expert on this topic, so I'm not going to spend a lot of time on it. But I do have some tricks I can share.
 
 ---
 
-# Layout performance
+class: fill-custom
 
-
----
-
-# Style and layout performance
+<layout-example-1></layout-example-1>
 
 ???
 
-Now I want to move on to things that affect _both_ style and layout performance.
+So let's say we have a simple layout like this. We've got a header, a sidebar, and the main content.
+
+Each of these boxes contains other boxes, but the browser already knows which elements have which styles, so it's just
+a matter of laying them out. This can get very complicated, because some of these boxes may have absolute/relative positioning,
+others may use flexbox, others may use grid, etc.
+
+---
+
+class: fill-custom
+
+<layout-example-1 version="2"></layout-example-1>
+
+???
+
+But let's say our main content suddenly takes up a bit more space, so now the sidebar has to shrink. If that happens,
+then the browser has to recalculate the sidebar width. The sidebar width is dependent on the main content.
+
+Now sometimes, this can never actually happen in our layout. For instance, we never have text that will overflow inside
+of the main content. But the _browser_ doesn't know that in advance. So it has to assume that changes to the blue box
+may affect the green box, and vice versa.
+
+---
+
+# CSS containment
+
+???
+
+Is there a way we can reassure the browser that a change in one box won't affect the other boxes? Yes, it's called
+CSS containment.
+
+---
+
+class: fill-custom
+
+<layout-example-1 version="3"></layout-example-1>
+
+???
+
+If we apply the CSS `contain: content` to each of these boxes, then the browser can calculate their sizes independently
+of each other. This has the potential to speed up layout performance.
+
+Now, this has some downsides. If there's a dropdown or something that might peek out of one box and into the other one,
+then it'll get cut off because we promised the browser that one box wouldn't bleed into another.
+
+---
+
+# CSS containment
+
+- `contain: content`
+- `contain: strict`
+
+???
+
+My recommendation would be to try applying `contain: content` to logically separate parts of your page
+(sidebars, modals, individual items in a list, etc.), and then measure
+and see if it improves layout performance.
+
+There is also `contain: strict`, but it's a bit more aggressive and in my experience `contain: content` already gets
+you most of the performance wins. But you can try this one out too.
+
+---
+
+# Encapsulation
+
+|           | Encapsulates |
+|-----------------|-----------------|
+| Shadow DOM      | Style           |
+| CSS containment | Layout          |
+
+???
+
+So, just to make a point of clarification here: there are two ways you can use encapsulation to improve style/layout
+performance. There's shadow DOM, which we already mentioned, which encapsulates your _styles_ and improves style
+calculation. And then this is CSS containment, which encapsulates your _layout_ and improves layout performance.
+
+So if you have high style costs, don't go thinking that CSS containment will help you! And if you have high layout costs,
+shadow DOM won't help there either.
+
+---
+
+# Principles of layout performance
+
+- Explicit is better than implicit
+- Use fewer DOM nodes (e.g. virtualization)
+- Use `content-visibility`
+
+???
+
+Other than CSS containment, I can only share a few general tips on improving layout performance. First off, explicitly
+telling the browser the sizes of things will always be less work than asking it to run its layout algorithm. If you
+know the exact width/height of something, you can set the explicit size rather than letting the browser calculate it.
+Absolute/relative positioninng is always fast.
+
+Also, of course, use fewer DOM nodes. If you have an infinite-scrolling list, use virtualization so that you're not
+rendering a bunch of DOM nodes that are off-screen.
+
+There is also a new property that you can use called `content-visibility`, that allows the browser to skip rendering
+large portions of the page while still allowing them to be searchable with Cmd-F/Ctrl-F.
+
+So I'd say if you have high layout costs, try CSS containment first, then try these techniques.
+
+---
+
+# Invalidation
+
+???
+
+OK, so now that I've covered the principles of style and layout, and how they're different, I want to move on to
+topics that affect both style and layout calculation. The first topic is invalidation.
+
+Up to now, we've mostly talked about what happens to a page that calculates style/layout once. But of course, a lot of
+us are building very dynamic pages that are constantly changing, so the browser calculates style/layout more than once.
+This process is called "invalidation."
+
+---
+
+# Invalidation
+
+<layout-example-2></layout-example-2>
+
+???
+
+Basically it means we are going from one layout state to another state.
+
+This can happen for two different reasons: either 1) the DOM changed, and/or 2) the CSS rules changed.
+
+---
+
+# Invalidation
+
+.center[![TODO](./images/pixel-pipeline-raf.png)]
+
+???
+
+When the browser
+detects this, it will automatically redraw the new layout during the next style/layout pass, which typically happens
+one frame later.
+
+That's why, when you call `requestAnimationFrame`, you get the point in time right before the next
+style/layout operation.
+
+---
+
+# Forcing style/layout calculation
+
+
+```js
+element.style.margin = '20px';   // Invalidate
+
+element.getBoundingClientRect(); // Force style/layout
+```
+
+
+???
+
+Now, normally this is fine. But it gets dangerous if you're explicitly telling the browser that you want style
+and layout to be calculated immediately, rather than waiting for the next frame.
+
+In the example above, we're _invalidating_ by setting the margin on the element to 20px. This doesn't actually
+cause the browser to do any style/layout work yet. Normally it would happen in the next frame.
+
+But instead, we immediately call `element.getBoundingClientRect()`. This forces the browser to immediately
+and synchronously calculate both style and layout.
+
+---
+
+# APIs that force style/layout recalc
+
+- `getBoundingClientRect`
+- `offsetWidth`
+- `getComputedStyle`
+- `innerText` 🤯
+- etc.
+
+???
+
+Now if you're interested in the full list of browser APIs that force style/layout recalculation, Paul Irish has 
+[a complete list]((https://gist.github.com/paulirish/5d52fb081b3570c81e3a))
+that is very useful. It contains some APIs that seem obvious (like `getBoundingClientRect`) and others that
+are a bit suprising (like `innerText`). Some force style _and_ layout, whereas others only force style.
 
 ---
 
@@ -900,7 +1076,7 @@ for (const el of elements) {
 
 ???
 
-Another important topic is layout thrashing, which affects both style and layout costs.
+This leads us to another important topic, which is layout thrashing.
 
 Layout thrashing is a situation where, in a loop, you're both reading from the DOM's style and writing to the DOM's styles. This
 forces the browser to re-run style and layout repeatedly.
@@ -1009,19 +1185,99 @@ the browser's rendering loop. The total time spent is the same. So this DevTools
 
 ---
 
-# APIs that force style/layout recalc
-
-- `getBoundingClientRect`
-- `offsetWidth`
-- `getComputedStyle`
-- `innerText` 🤯
-- etc.
+# Invalidation optimizations
 
 ???
 
-Now if you're interested in the full list of browser APIs that force style/layout recalculation, Paul Irish has a master
-list that is very useful. It contains some APIs that seem obvious (like `getBoundingClientRect`) and others that
-are a bit suprising (like `innerText`). Some force style _and_ layout, whereas others only force style.
+Invalidation is another area where it's good to be aware of browser optimizations. Imagine if, every time a single
+element were invalidated, the browser had to recalculate all the styles and layout for the entire DOM! Building a complex
+web app would be impossible.
 
-I have this linked in my slide notes: https://gist.github.com/paulirish/5d52fb081b3570c81e3a
+So browsers take lots of shortcuts. We already mentioned some ways we can help give the browser shortcuts, such as
+shadow DOM and CSS containment, but there are some other ones to be aware of.
 
+---
+
+# Invalidation optimizations
+
+```js
+for (let i = 0; i < 1000; i++) {
+  el.style.width = '1px'
+  el.getBoundingClientRect()
+}
+```
+
+???
+
+For instance, this is a fun one. This is layout thrashing, right? In fact this should be awful, right?
+
+Well actually it's not, because browsers have optimized this.
+
+---
+
+# Invalidation optimizations
+
+.center[![TODO](./images/browser-optimization-demo.png)]
+
+???
+
+If you look at [a demo](https://gist.github.com/nolanlawson/2d70b4f01d1d77ca47f069ad51177ff4) of this code and trace it,
+you'll see a very curious thing. We pay the cost of the `getBoundingClientRect`s, sure, but we're only paying yellow
+cost, not purple cost. Style and layout is only calculated once. We're just paying the cost of creating the rectangle
+objects – the browser has optimized everything else.
+
+---
+
+class: fill-custom
+
+<layout-example-1></layout-example-1>
+
+???
+
+Now imagine applying that to the entire page. And think of all the ways that a browser might have optimized to make
+sure that it doesn't redo work that it's already done. If something changes in one small part of the page,
+the browser wants to avoid having to redo work elsewhere.
+
+---
+
+# Typical page flow
+
+.center[![TODO](./images/typical-flow.png)]
+
+???
+
+This is why, in the typical flow for a web app, we have a lot of high upfront style/layout costs, and very small
+residual style/layout costs on every interaction. This is a good thing – this is what we want.
+
+Sometimes though, these residual costs are surprisingly high. And it can be really tricky to figure out exactly
+why something was invalidated and is causing these high residual costs.
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/invalidation-tracking-1.png)]
+
+???
+
+One tool you can use to inspect this is "invalidation tracking" in the Chrome DevTools. This is an experimental
+feature, so use at your own risk!
+
+Also note that this only really works for Chrome – other browsers have different
+heuristics and different performance characteristics when it comes to invalidation.
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/invalidation-tracking-2.png)]
+
+???
+
+If you do this, and then you click on the "Recalculate style" or "Recalculate Layout" slice in Dev Tools, then
+it will show you which CSS rules were invalidated for which elements (in the case of style recalc), or which elements
+needed layout (in "recalculate layout"). This can be really invaluable in debugging high invalidation costs!
+
+---
+
+# Conclusion

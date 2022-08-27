@@ -1,3 +1,3 @@
 import './slideshow.js'
-import './domVisualization.js'
-import './examples.js'
+import './domVisualizationExamples.js'
+import './layoutVisualizationExamples.js'

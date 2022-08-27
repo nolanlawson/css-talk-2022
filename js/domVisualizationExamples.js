@@ -1,3 +1,5 @@
+import './domVisualization.js'
+
 customElements.define('example-1', class extends HTMLElement {
   constructor() {
     super()

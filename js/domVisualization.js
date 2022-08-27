@@ -1,44 +1,17 @@
 import { rough } from './rough.js'
 import {slideshow} from './slideshow.js';
-
-// 16.9 ratio
-const WIDTH = 1920
-const HEIGHT = 1080
+import {drawCenteredSvgText, loadFontsPromise, makeDom, uniq} from './utils.js';
+import {DARK_RED, DARK_YELLOW, LIGHT_YELLOW} from './colors.js';
+import {HEIGHT, WIDTH, STROKE_WIDTH} from './constants.js';
 
 const CIRCLE_WIDTH_RELATIVE = 0.6
 const CIRCLE_HEIGHT_RELATIVE = 0.75
-
-const STROKE_WIDTH = 2
 
 const ANIMATION_DELAY = 250
 
 const rafPromise = () => new Promise(resolve => requestAnimationFrame(resolve))
 
 const timeoutPromise = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-
-const loadFontsPromise = (async () => {
-  const fontFace = new FontFace('Yahfie', "url('./fonts/yahfie/Yahfie-Heavy.ttf')");
-  const font = await fontFace.load()
-  document.fonts.add(font)
-})()
-
-const makeDom = str => {
-  const template = document.createElement('template')
-  template.innerHTML = str
-  return template.content.children[0]
-}
-
-const uniq = array => {
-  const result = []
-  const set = new Set()
-  for (const item of array) {
-    if (!set.has(item)) {
-      set.add(item)
-      result.push(item)
-    }
-  }
-  return result
-}
 
 const generateLabel = (element, showTags) => {
   let label = (element.className && ('.' + element.className))
@@ -120,7 +93,7 @@ const calculateTree = (root, showTags, showBloomFilter) => {
   return tree
 }
 
-function fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight, subText = false }) {
+function drawText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight, subText = false }) {
   if (!label) {
     return
   }
@@ -142,19 +115,14 @@ function fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight
     y = circleY - (circleHeight / 2)
   }
 
-  const svg = makeDom(`<svg>
-    <g>
-      <rect x=${x} y=${y} width=${textWidth} height=${textHeight} style="stroke: none; fill: none;" />
-      <text class="${subText ? 'sub-text' : ''}" 
-            x="${x + textWidth / 2}" 
-            y="${y + textHeight / 2}" 
-            dominant-baseline="middle" 
-            text-anchor="middle"
-      >${label}</text>
-    </g>
-  </svg>`)
-
-  const text = svg.querySelector('g')
+  const text = drawCenteredSvgText({
+    x,
+    y,
+    width: textWidth,
+    height: textHeight,
+    className: subText ? 'sub-text' : '',
+    label
+  })
 
   roughSvg.svg.appendChild(text)
 }
@@ -198,8 +166,8 @@ function drawTree(root, roughSvg) {
       circleHeight
     })
 
-    fillText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight })
-    fillText({ roughSvg, label: subLabel, circleX, circleY, circleWidth, circleHeight, subText: true })
+    drawText({ roughSvg, label, circleX, circleY, circleWidth, circleHeight })
+    drawText({ roughSvg, label: subLabel, circleX, circleY, circleWidth, circleHeight, subText: true })
 
     if (node.children) {
       const rightEdge = {
@@ -304,9 +272,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
     this.shadowRoot.appendChild(svg)
 
-    const roughSvg = rough.svg(svg, {
-      disableMultiStroke: false,
-    })
+    const roughSvg = rough.svg(svg)
 
     const showTags = this.getAttribute('show-tags') === 'true'
     const showBloomFilter = this.getAttribute('show-bloom-filter') === 'true'
@@ -352,14 +318,14 @@ customElements.define('dom-visualization', class extends HTMLElement {
         if (!touchedNodes.has(node)) {
           roughSvg.svg.prepend(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
             strokeWidth: 0,
-            fill: 'rgba(255, 255, 0, 0.4)',
+            fill: LIGHT_YELLOW,
             fillStyle: 'solid'
           }))
           touchedNodes.add(node)
         }
         const animatedBorder = roughSvg.ellipse(circleX, circleY, circleWidth + (STROKE_WIDTH * 8), circleHeight + (STROKE_WIDTH * 8), {
           strokeWidth: STROKE_WIDTH * 8,
-          stroke: 'rgb(187,187,13)'
+          stroke: DARK_YELLOW
         })
         animatedBorder.classList.add('fade')
         requestAnimationFrame(() => {
@@ -376,7 +342,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
           if (!matchedNodes.has(node)) {
             const matchBorder = roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
               strokeWidth: STROKE_WIDTH * 4,
-              stroke: 'rgba(255, 15, 80, 1)',
+              stroke: DARK_RED,
             })
             matchBorder.classList.add('matched')
             roughSvg.svg.appendChild(matchBorder)
