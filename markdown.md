@@ -50,15 +50,15 @@ If you're like me, you've spent a lot of time looking at performance traces like
 
 And there are two main parts here: the yellow (JavaScript) part, and the purple (style/layout) part.
 
-I think a lot of us look at the JavaScript side of this equation and feel pretty comfortable with it. In there there
-are function names we recognize. We see our JavaScript framework doing work, we see our state library crunching data.
+If you've worked in performance for a while, you might look at the JavaScript side of this equation and feel pretty comfortable with it. It has
+function names we recognize. We see our JavaScript framework doing work, we see our state library crunching data, we see the names of methods we wrote ourseles.
 
 
 But a lot of us probably look at the purple part and think, "Well, that's just the browser doing browser things." I
 couldn't possibly understand what that's about.
 
 But the thing is, sometimes that purple part is pretty big. And as it turns out, there _are_ ways to understand what's
-going on in there. In this talk, I'd like to shed some light about the "purple part," and give you some tools for
+going on in there, and even to reduce the time spent. In this talk, I'd like to shed some light about the "purple part," and give you some tools for
 understanding what the browser is doing in there.
 
 ---
@@ -80,12 +80,17 @@ understanding what the browser is doing in there.
 ???
 
 Now first off, I should mention who this talk is for. I'm going to go into a lot of details, and these details aren't
-going to be relevant to anyone. What I'm going to cover is mostly going to be interesting to people who deal with
-performance all the time, so they're responsible for every part of the performance of their app, including style and layout.
+going to be relevant to everyone. For your average website, the "purple part" is just not usually the biggest bottleneck – I will readily admit that.
+
+What I'm going to cover is mostly going to be interesting to people who really focus on performance, so they're interested in everything that can impact it, including somewhat unusual things like style/layout.
+
 I'm also targeting authors of frameworks and design systems, since their decisions may be multiplied several times, so
-it's important to get all the details right. I'm also speaking to people working on large web apps – static content sites
-usually don't have performance problems iwth style/layout. I'm also speaking to anyone interested in how browsers work;
-some of this stuff is just plain interesting!
+it's important to get all the details right.
+
+I'm also speaking to people working on large web apps – static content sites
+usually don't have performance problems with style/layout, but big web apps often do.
+
+I'm also speaking to anyone interested in how browsers work. Some of this stuff is just plain interesting!
 
 ---
 
@@ -703,6 +708,14 @@ Other stuff could be optimized in theory, but as far as I know no browsers have 
 - https://bugs.chromium.org/p/chromium/issues/detail?id=1196474
 - https://bugzilla.mozilla.org/show_bug.cgi?id=1704551
 
+Source:
+
+Bloom filter source:
+
+- https://github.com/WebKit/WebKit/blob/596fdf7c2cec599f8c826787363c54c4b008a7fe/Source/WebCore/css/SelectorFilter.h#L57-L60
+- https://chromium.googlesource.com/chromium/src/+/refs/tags/107.0.5258.1/third_party/blink/renderer/core/css/selector_filter.cc#43
+- https://phabricator.services.mozilla.com/source/mozilla-central/browse/default/servo/components/style/bloom.rs$114
+
 ---
 
 # Browser style optimizations
@@ -783,6 +796,8 @@ Excessive combinators can cost you. Sibling selectors are also less optimized. A
 Again, I can't provide hard-and-fast rules, and all of this could become outdated tomorrow. But the intuition you should have is that IDs, classes, and tag names will always be fast, and other stuff you should be cautious with. And again, most of this stuff doesn't matter in isolation, but it does matter if you're building a framework or a design system
 where rules might be repeated multiple times on the page.
 
+A good example of an exception to this rule: WebKit and Chromium implemented `:has`, they used a Bloom filter for it with the standard classes, IDs, tags, and attributes, but they also added the pseudo-class `:hover` because they expected people would be using it a lot. And a comment in the WebKit code says they plan to add more pseudo-classes later, so I wouldn't be surprised if they added `:focus` or `:focus-visible` or things like that.
+
 More details (although I quibble with some of the rankings): https://www.sitepoint.com/optimizing-css-id-selectors-and-other-myths/
 
 ---
@@ -802,6 +817,8 @@ More details (although I quibble with some of the rankings): https://www.sitepoi
 ???
 
 Shadow DOM is interesting because it encapsulates styles. They don't bleed in and out of the shadow root.
+
+If you're not familiar with Shadow DOM, it works very similarly to "scoped styles" you may have used in frameworks like Vue or Svelte, or with systems like CSS modules. Shadow DOM can be recursively nested, so there isn't just "the" shadow DOM – you can have shadow within shadows, one for each component.
 
 So this actually means that any expensive selectors you may have outside of this component don't need to be calculated for
 elements inside of the shadow root. And any expensive selectors _inside_ of this component also don't need to be calculated
@@ -841,7 +858,9 @@ https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fast
 Now if you've got high style calculation costs, and you're really stuck trying to figure it out, unfortunately the best
 approach is to remove CSS rules, re-run your perf tests, and see if they made an impact.
 
-I've used this approach a few times. You can optimize it a bit by using a binary search – remove half the CSS, test, remove another half, repeat. It's not pretty, but sometimes this is the only way to figure this kind of thing out.
+I've used this approach a few times. You can optimize it a bit by using a binary search – remove half the CSS, test, remove another half, repeat. It's not pretty, but sometimes this is the only way to figure this kind of thing out. And I wish I could say it's changed since 2014, but this is still a good technique today.
+
+Now, you might be clever and think "I'll just go through all my CSS selectors, run `document.querySelectorAll()`, and time it." But this goes through a slightly different code path in the browser, so I really wouldn't recommend it. It's not going to tell you the same thing as how long style calculation took.
 
 ---
 
