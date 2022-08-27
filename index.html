@@ -101,9 +101,17 @@
             right: 0;
             bottom: 0;
             top: 0;
+            margin: 0;
+            padding: 0;
         }
         .contain-vertical > p > span.center {
-            height: 100%
+            position: absolute;
+            left: 25px;
+            right: 25px;
+            bottom: 25px;
+            top: 25px;
+            margin: 0;
+            padding: 0;
         }
         .contain-vertical > p > span.center > img {
             height: 100%;
@@ -125,6 +133,18 @@
 
         .fill-custom > p {
             display: contents;
+        }
+
+        .remark-slide-content .float-left {
+            display: block;
+            text-align: left;
+            float: left;
+        }
+
+        .remark-slide-content .float-right {
+            display: block;
+            text-align: right;
+            float: right;
         }
     </style>
   </head>

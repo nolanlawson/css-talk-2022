@@ -31,17 +31,13 @@ and now I work on Lightning Web Components at Salesforce, which is our JavaScrip
 .center[![TODO](./images/devtools1.png)]
 
 --
-.left[
-JavaScript
-<br/>
-(yellow part)
+.float-left[
+JavaScript (yellow part)
 ]
 
 --
-.right[
-<br/>
-Style/Layout
-(purple part)
+.float-right[
+Style/Layout (purple part)
 ]
 
 ???
@@ -583,11 +579,10 @@ class: fill-custom
 
 It turns out we check a lot fewer DOM nodes this way.
 
-You may have heard that browser engines evaluate CSS selectors from right to left. If you've ever wondered why,
+You may have heard that [browser engines evaluate CSS selectors from right to left](ttps://css-tricks.com/why-browsers-read-selectors-right-to-left/).
+If you've ever wondered why,
 this is the reason! Any given node in the DOM tree tends to have fewer ancestors than descendants, so this optimization
 works out really well for most DOM trees.
-
-- https://css-tricks.com/why-browsers-read-selectors-right-to-left/
 
 ---
 
@@ -722,7 +717,7 @@ Bloom filter source:
 - WebKit CSS JIT Compiler (2014)
 - Firefox Stylo (2017)
 - WebKit `:has` (2022)
-- Many more
+- etc.
 
 ???
 
@@ -757,7 +752,7 @@ Notes:
 
 ???
 
-Well, one thing you can do to reduce style calculation costs is to remove unused CSS.
+Well, one thing you can do to reduce style calculation costs is to remove unused CSS. (The example shows a screenshot from Chrome Dev Tools "Coverage" tool.)
 
 This is a really important point, because it's an area where unused CSS is actually different from unused JavaScript. Both cost you
 in terms of transfer time, and JavaScript costs you in terms of parse and compile time, but unused CSS costs you in terms of parse, compile, _and_
@@ -1363,18 +1358,15 @@ You kind of just have to know how the browser works, and also do a lot of guessw
 
 .center[![TODO](./images/devtools1.png)]
 
-.left[
-JavaScript
-<br/>
-(yellow part)
+--
+.float-left[
+JavaScript (yellow part)
 ]
 
-.right[
-<br/>
-Style/Layout
-(purple part)
+--
+.float-right[
+Style/Layout (purple part)
 ]
-
 
 ???
 
@@ -1436,7 +1428,7 @@ spent in each part of the algorithm. So now you can map this back to the declara
 
 class: contain-vertical
 
-.center[![TODO](./images/explain-mockup.png)]
+.center[![TODO](./images/explain-mockup-2.png)]
 
 ???
 
