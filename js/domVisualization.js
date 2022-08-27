@@ -1,8 +1,8 @@
 import { rough } from './rough.js'
 import {slideshow} from './slideshow.js';
-import {drawCenteredSvgText, loadFontsPromise, makeDom, uniq} from './utils.js';
+import {drawCenteredSvgText, hashCode, loadFontsPromise, makeDom, uniq} from './utils.js';
 import {DARK_RED, DARK_YELLOW, LIGHT_YELLOW} from './colors.js';
-import {HEIGHT, WIDTH, STROKE_WIDTH, SEED} from './constants.js';
+import {HEIGHT, WIDTH, STROKE_WIDTH} from './constants.js';
 
 const CIRCLE_WIDTH_RELATIVE = 0.6
 const CIRCLE_HEIGHT_RELATIVE = 0.75
@@ -33,6 +33,13 @@ const generateBloomFilterLabel = (leafElement, showTags) => {
   }
   labels = labels.reverse()
   return `{${uniq(labels).join(',')}}`
+}
+
+// Use a different seed for each individual shape, but make sure that from slide to slide they're the same
+const consistentShape = (roughSvg, shape, ...args) => {
+  const seed = hashCode(JSON.stringify(args))
+  args[args.length - 1] = { ...args[args.length - 1], seed }
+  roughSvg.svg.appendChild(roughSvg[shape](...args))
 }
 
 const calculateTree = (root, showTags, showBloomFilter) => {
@@ -150,16 +157,14 @@ function drawTree(root, roughSvg) {
         x: circleX - (circleWidth / 2),
         y: circleY
       }
-      roughSvg.svg.appendChild(roughSvg.line(parentRightEdge.x, parentRightEdge.y, leftEdge.x, leftEdge.y, {
+      consistentShape(roughSvg, 'line', parentRightEdge.x, parentRightEdge.y, leftEdge.x, leftEdge.y, {
         strokeWidth: STROKE_WIDTH,
-        seed: SEED
-      }))
+      })
     }
 
-    roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
+    consistentShape(roughSvg, 'ellipse', circleX, circleY, circleWidth, circleHeight, {
       strokeWidth: STROKE_WIDTH,
-      seed: SEED
-    }))
+    })
 
     Object.assign(node, {
       circleX,
