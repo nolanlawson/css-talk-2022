@@ -1281,3 +1281,135 @@ needed layout (in "recalculate layout"). This can be really invaluable in debugg
 ---
 
 # Conclusion
+
+---
+
+# New CSS features
+
+- Container queries
+- `:has` selector
+- Cascade layers
+- Scoping
+- Nesting
+
+???
+
+CSS has been getting a lot of new features recently. Here are some new and draft specs.
+
+---
+
+# New layout features
+
+- Subgrid
+- Masonry
+- Multi-column layout
+
+???
+
+Layout has been getting new features too.
+
+All of this is cool, and you should be using it. I don't want anyone to take away from my talk that they shouldn't
+be using CSS or layout features. These are all really cool! They should be used!
+
+But the more complex that CSS and layout becomes, and the bigger and more ambitious apps we're trying to build, the
+more likely we are to run into high style and layout calculation costs. And right now, it's really hard to debug.
+You kind of just have to know how the browser works, and also do a lot of guesswork.
+
+---
+
+.center[![TODO](./images/devtools1.png)]
+
+.left[
+JavaScript
+<br/>
+(yellow part)
+]
+
+.right[
+<br/>
+Style/Layout
+(purple part)
+]
+
+
+???
+
+Going back to the performance trace I showed at the beginning, I think part of the reason it can be so much
+harder to understand the "purple part" than the yellow part is that JavaScript is imperative, whereas CSS is declarative.
+With JavaScript, we procedurally tell the browser exactly what to do, and the performance trace is a one-to-one
+mapping of what we wrote.
+
+With CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm. And every
+browser does it differently. So when something goes wrong, it's really hard to tell what we did to cause the problem.
+And the browser Dev Tools, in all three browsers, are frankly not very good at debugging this.
+
+---
+
+# SQL
+
+```sql
+
+SELECT Order.id, Customer.name, Order.date
+FROM Order
+INNER JOIN Customer ON Order.customerId = Customer.id;
+```
+
+???
+
+You know, another declarative language with performance considerations is SQL. But one thing I like about SQL is that
+most databases have a way to ask the database why your query is slow. After all, you implemented this thing, but you
+have no idea how exactly the SQL engine does an `INNER JOIN`.
+
+---
+
+# SQL
+
+```sql
+EXPLAIN
+SELECT Order.id, Customer.name, Order.date
+FROM Order
+INNER JOIN Customer ON Order.customerId = Customer.id;
+```
+
+???
+
+But it can tell you, with `EXPLAIN`.
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/sql-explain.png)]
+
+???
+
+If you ask Postgres to explain itself, it'll tell you exactly what algorithm it implemented, and how much time it
+spent in each part of the algorithm. So now you can map this back to the declarative query you wrote.
+
+(Image courtesy of [StackOverflow](https://stackoverflow.com/questions/42459572/how-to-export-explain-data-output-from-pgadmin-4).)
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/explain-mockup.png)]
+
+???
+
+So wouldn't it be cool if browsers could give us the same thing? Something like "invalidation tracking," but with
+even more details.
+
+This is just a mockup of the kind of thing I would love for browsers to provide.
+
+---
+
+# Thank you
+
+.center[nolanlawson.com]
+
+???
+
+So that's my talk on style/layout performance. I hope you enjoyed it and learned something about how browsers work
+and how to optimize style/layout calculation.
+
+If you'd like to follow my work online, I'd recommend going to my website and following the RSS feed. Thanks a lot!
