@@ -4,3 +4,4 @@ export const HEIGHT = 1080
 
 export const STROKE_WIDTH = 2
 
+export const SEED = 5142483

@@ -2,7 +2,7 @@
 import {drawCenteredSvgText, loadFontsPromise, makeDom} from './utils.js';
 import {rough} from './rough.js';
 import {PASTEL_BLUE, PASTEL_GREEN, PASTEL_RED} from './colors.js';
-import {STROKE_WIDTH} from './constants.js';
+import {SEED, STROKE_WIDTH} from './constants.js';
 
 const WIDTH = 1920
 const HEIGHT = 1080
@@ -71,7 +71,8 @@ customElements.define('layout-visualization', class extends HTMLElement {
       roughSvg.svg.appendChild(roughSvg.rectangle(drawX, drawY, drawWidth, drawHeight, {
         stroke,
         fill: stroke + '33',
-        strokeWidth
+        strokeWidth,
+        seed: SEED
       }))
     }
 

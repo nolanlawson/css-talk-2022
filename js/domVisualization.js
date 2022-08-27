@@ -2,7 +2,7 @@ import { rough } from './rough.js'
 import {slideshow} from './slideshow.js';
 import {drawCenteredSvgText, loadFontsPromise, makeDom, uniq} from './utils.js';
 import {DARK_RED, DARK_YELLOW, LIGHT_YELLOW} from './colors.js';
-import {HEIGHT, WIDTH, STROKE_WIDTH} from './constants.js';
+import {HEIGHT, WIDTH, STROKE_WIDTH, SEED} from './constants.js';
 
 const CIRCLE_WIDTH_RELATIVE = 0.6
 const CIRCLE_HEIGHT_RELATIVE = 0.75
@@ -151,12 +151,14 @@ function drawTree(root, roughSvg) {
         y: circleY
       }
       roughSvg.svg.appendChild(roughSvg.line(parentRightEdge.x, parentRightEdge.y, leftEdge.x, leftEdge.y, {
-        strokeWidth: STROKE_WIDTH
+        strokeWidth: STROKE_WIDTH,
+        seed: SEED
       }))
     }
 
     roughSvg.svg.appendChild(roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
-      strokeWidth: STROKE_WIDTH
+      strokeWidth: STROKE_WIDTH,
+      seed: SEED
     }))
 
     Object.assign(node, {
