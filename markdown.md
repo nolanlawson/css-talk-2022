@@ -1025,7 +1025,7 @@ So I'd say if you have high layout costs, try CSS containment first, then try th
 ???
 
 OK, so now that I've covered the principles of style and layout, and how they're different, I want to move on to
-topics that affect both style and layout calculation. The first topic is invalidation.
+topics that affect both style and layout calculation.
 
 Up to now, we've mostly talked about what happens to a page that calculates style/layout once. But of course, a lot of
 us are building very dynamic pages that are constantly changing, so the browser calculates style/layout more than once.
