@@ -1013,7 +1013,7 @@ shadow DOM won't help there either.
 
 - Explicit is better than implicit
 - Use fewer DOM nodes (e.g. virtualization)
-- Use `display:none`, containment, and `content-visibility`
+- Use `display:none` and `content-visibility`
 
 ???
 
