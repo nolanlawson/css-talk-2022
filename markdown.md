@@ -899,6 +899,17 @@ Now, you might be clever and think "I'll just go through all my CSS selectors, r
 
 # Layout performance
 
+--
+```css
+h1 {
+* padding: 5px;
+}
+h2 {
+* padding: 10px;
+}
+```
+
+
 ???
 
 OK, so now that I've covered all the bases on style performance, I want to move on to layout performance.
@@ -906,6 +917,9 @@ OK, so now that I've covered all the bases on style performance, I want to move 
 Now remember, I've been trying to convince you that style and layout are not the same thing! Up until
 this point, I haven't talked about layout at all – I haven't talked about the geometry of the page, or how text flows,
 or anything like that. So if you see high style calculation costs, remember that it's all about your CSS selectors, not your page layout.
+
+Going back to our example from earlier, layout performance is the part inside of the curly braces, whereas style performance is the
+part outside of it.
 
 Now when it comes to layout, I'm going to admit that I'm not a huge expert on this topic, so I'm not going to spend a lot of time on it. But I do have some tricks I can share.
 
