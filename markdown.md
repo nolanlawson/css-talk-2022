@@ -1094,7 +1094,7 @@ and synchronously calculate both style and layout.
 ???
 
 Now if you're interested in the full list of browser APIs that force style/layout recalculation, Paul Irish has 
-[a complete list]((https://gist.github.com/paulirish/5d52fb081b3570c81e3a))
+[a complete list]((https://gist.github.com/paulirish/5d52fb081b3570c81e3a)
 that is very useful. It contains some APIs that seem obvious (like `getBoundingClientRect`) and others that
 are a bit suprising (like `innerText`). Some force style _and_ layout, whereas others only force style.
 
