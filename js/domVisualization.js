@@ -1,4 +1,4 @@
-import { rough } from './rough.js'
+import rough from './rough.js'
 import {slideshow} from './slideshow.js';
 import {drawCenteredSvgText, hashCode, loadFontsPromise, makeDom, uniq} from './utils.js';
 import {DARK_RED, DARK_YELLOW, LIGHT_YELLOW} from './colors.js';
