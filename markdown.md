@@ -932,7 +932,7 @@ class: fill-custom
 ???
 
 But let's say our main content suddenly takes up a bit more space, so now the sidebar has to shrink. If that happens,
-then the browser has to recalculate the sidebar width. The sidebar width is dependent on the main content.
+then the browser might have to recalculate the layout for everything inside the sidebar.
 
 Now sometimes, this can never actually happen in our layout. For instance, we never have text that will overflow inside
 of the main content. But the _browser_ doesn't know that in advance. So it has to assume that changes to the blue box
