@@ -1015,7 +1015,7 @@ shadow DOM won't help there either.
 
 - Explicit is better than implicit
 - Use fewer DOM nodes (e.g. virtualization)
-- Use `content-visibility`
+- Use `display:none`, containment, and `content-visibility`
 
 ???
 
@@ -1026,6 +1026,8 @@ Absolute/relative positioninng is always fast.
 
 Also, of course, use fewer DOM nodes. If you have an infinite-scrolling list, use virtualization so that you're not
 rendering a bunch of DOM nodes that are off-screen.
+
+If you use something like `display:none`, it will also avoid paying the layout cost for everything that is currently being hidden.
 
 There is also a new property that you can use called `content-visibility`, that allows the browser to skip rendering
 large portions of the page while still allowing them to be searchable with Cmd-F/Ctrl-F.
