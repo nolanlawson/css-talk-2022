@@ -1104,8 +1104,8 @@ are a bit suprising (like `innerText`). Some force style _and_ layout, whereas o
 
 ```js 
 for (const el of elements) {
-  const width = el.parentElement.offsetWidth
-  el.style.width = width + 'px'
+  const width = el.parentElement.offsetWidth;
+  el.style.width = width + 'px';
 }
 ```
 
@@ -1122,8 +1122,8 @@ forces the browser to re-run style and layout repeatedly.
 
 ```js
 for (const el of elements) {
-* const width = el.parentElement.offsetWidth
-  el.style.width = width + 'px'
+* const width = el.parentElement.offsetWidth;
+  el.style.width = width + 'px';
 }
 ```
 
@@ -1137,8 +1137,8 @@ So in this case here we are reading from the DOM
 
 ```js
 for (const el of elements) {
-  const width = el.parentElement.offsetWidth
-* el.style.width = width + 'px'
+  const width = el.parentElement.offsetWidth;
+* el.style.width = width + 'px';
 }
 ```
 
@@ -1161,11 +1161,11 @@ style and layout, and the warning about "forced reflow." (Reflow is another name
 
 ```js
 // All the reads
-const widths = elements.map(el => el.parentElement.offsetWidth)
+const widths = elements.map(el => el.parentElement.offsetWidth);
 
 // All the writes
 elements.forEach((element, i) => {
-  element.style.width = widths[i] + 'px'
+  element.style.width = widths[i] + 'px';
 })
 ```
 
@@ -1246,7 +1246,8 @@ for (let i = 0; i < 1000; i++) {
 
 For instance, this is a fun one. This is layout thrashing, right? In fact this should be awful, right?
 
-Well actually it's not, because browsers have optimized this.
+Well actually it's not, because browsers have optimized this. Notice that the `1px` never actually changes. (And if you
+think this is unrealistic, I've seen a real-world case like this.)
 
 ---
 
