@@ -1359,12 +1359,10 @@ You kind of just have to know how the browser works, and also do a lot of guessw
 
 .center[![TODO](./images/devtools1.png)]
 
---
 .float-left[
 JavaScript (yellow part)
 ]
 
---
 .float-right[
 Style/Layout (purple part)
 ]
