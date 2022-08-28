@@ -799,8 +799,6 @@ Excessive combinators can cost you. Sibling selectors are also less optimized. A
 Again, I can't provide hard-and-fast rules, and all of this could become outdated tomorrow. But the intuition you should have is that IDs, classes, and tag names will always be fast, and other stuff you should be cautious with. And again, most of this stuff doesn't matter in isolation, but it does matter if you're building a framework or a design system
 where rules might be repeated multiple times on the page.
 
-A good example of an exception to this rule: WebKit and Chromium implemented `:has`, they used a Bloom filter for it with the standard classes, IDs, tags, and attributes, but they also added the pseudo-class `:hover` because they expected people would be using it a lot. And a comment in the WebKit code says they plan to add more pseudo-classes later, so I wouldn't be surprised if they added `:focus` or `:focus-visible` or things like that.
-
 More details (although I quibble with some of the rankings): https://www.sitepoint.com/optimizing-css-id-selectors-and-other-myths/
 
 ---
