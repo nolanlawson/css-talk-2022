@@ -1,6 +1,6 @@
 // 16.9 ratio
 import {drawCenteredSvgText, loadFontsPromise, makeDom} from './utils.js';
-import {rough} from './rough.js';
+import rough from './rough.js';
 import {PASTEL_BLUE, PASTEL_GREEN, PASTEL_RED} from './colors.js';
 import {SEED, STROKE_WIDTH} from './constants.js';
 

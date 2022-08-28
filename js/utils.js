@@ -32,8 +32,14 @@ export const drawCenteredSvgText = ({ x, y, width, height, className, label }) =
   return svg.querySelector('g')
 }
 
+const preloads = [...document.head.querySelectorAll(`link[rel="preload"]`)]
+export const getLinkUrl = (search) => {
+  return preloads.find(_ => _.href.includes(search)).href
+}
+
 export const loadFontsPromise = (async () => {
-  const fontFace = new FontFace('Yahfie', "url('./fonts/yahfie/Yahfie-Heavy.ttf')");
+  const url = getLinkUrl('Yahfie')
+  const fontFace = new FontFace('Yahfie', `url('${url}')`);
   const font = await fontFace.load()
   document.fonts.add(font)
 })()

@@ -1,8 +1,18 @@
 import './remark.min.js'
+import { getLinkUrl } from './utils.js';
+
+let text = await (await fetch(getLinkUrl('markdown'))).text()
+text = text.replace(/\.\/images\/(.*?\.)(png|svg)/g, (match, p1) => {
+  return getLinkUrl(p1)
+})
+
+const modifiedUrl = URL.createObjectURL(new Blob([text], {
+  type: 'text/plain;charset=UTF-8'
+}))
 
 export const slideshow = remark.create({
   ratio: '16:9',
-  sourceUrl: './markdown.md',
+  sourceUrl: modifiedUrl,
   highlightLanguage: 'javascript',
   highlightLines: true,
   highlightStyle: 'solarized-light',
