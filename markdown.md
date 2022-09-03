@@ -167,6 +167,16 @@ Let's focus on the style/layout part
 
 .center[![TODO](./images/pixel-pipeline-style-layout.png)]
 
+???
+
+So let's break down style and layout calculation first. These are two separate steps.
+
+The input of these steps is the state of the DOM – all the CSS rules and DOM nodes.
+
+The output of these steps is the ["layout tree" (or "render tree")](https://browser.engineering/layout.html#the-layout-tree),
+and that's the thing
+that is passed to the paint (green) step that actually lays out pixels on the screen.
+
 --
 - Style
   - Figuring out which CSS rules apply to which elements
@@ -174,16 +184,7 @@ Let's focus on the style/layout part
 --
 - Layout
   - Figuring out how to lay those elements out on the page
-
-???
-
-So let's break down style and layout calculation first. These are two separate steps.
-
-The input of these steps is the state of the DOM – all the CSS rules and DOM nodes.
-
-The output of these steps is the "layout tree" (or "render tree"), and that's the thing
-that is passed to the paint (green) step that actually lays out pixels on the screen.
-
+  
 ---
 
 .center[![TODO](./images/pixel-pipeline-style.png)]
@@ -302,12 +303,6 @@ However, this is a good fact about style calculation to internalize: it's mostly
 
 .center[![TODO](./images/pixel-pipeline-layout.png)]
 
---
-```html
-<h1 style="padding: 5px;" >Hello</h1>
-<h2 style="padding: 10px;">World</h2>
-```
-
 ???
 
 Now let's move on to layout. Note that, with style, at no point were we talking about the geometry of the page.
@@ -317,18 +312,11 @@ calculation.
 So recall we have our h1 and h2 where the browser has figured out that one has 5px padding and the other
 has 10px padding.
 
----
-
-class: contain-vertical
-
-.center[![TODO](./images/helloworld1.png)]
-
-
-???
-
-Now we finally get to the geometry of the page. Layout calculation is where the styles, which have been associated with
-each element, actually get applied. In this case, the browser figures takes the margin, padding, font size, and
-figures out where to actually place things within the given browser window, with text wrapping and all that good stuff.
+--
+```html
+<h1 style="padding: 5px;" >Hello</h1>
+<h2 style="padding: 10px;">World</h2>
+```
 
 ---
 
@@ -336,9 +324,12 @@ class: contain-vertical
 
 .center[![TODO](./images/helloworld2.png)]
 
+
 ???
 
-Again, note that here we're actually talking about the geometry of the page. That's what layout is about.
+Now we finally get to the geometry of the page. Layout calculation is where the styles, which have been associated with
+each element, actually get applied. In this case, the browser figures takes the margin, padding, font size, and
+figures out where to actually place things within the given browser window, with text wrapping and all that good stuff.
 
 ---
 
@@ -363,7 +354,7 @@ Or your DOM is very large. A bigger DOM just means more work for the browser to 
 
 Or you are doing repeated re-renders over time, also called thrashing, which slows down both style and layout.
 
-This is a lot to unpack, so let's go over each of these points.
+This is a lot to unpack, so let's go over each of these points in the rest of the talk.
 
 --
 <pointing-arrow></pointing-arrow>
@@ -954,17 +945,6 @@ selectors we want, and it won't matter much for web performance, even on web app
 
 # Layout performance
 
---
-```css
-h1 {
-* padding: 5px;
-}
-h2 {
-* padding: 10px;
-}
-```
-
-
 ???
 
 OK, so now that I've covered all the bases on style performance, I want to move on to layout performance.
@@ -977,6 +957,16 @@ Going back to our example from earlier, layout performance is the part inside of
 part outside of it.
 
 Now when it comes to layout, I'm going to admit that I'm not a huge expert on this topic, so I'm not going to spend a lot of time on it. But I do have some tricks I can share.
+
+--
+```css
+h1 {
+* padding: 5px;
+}
+h2 {
+* padding: 10px;
+}
+```
 
 ---
 
