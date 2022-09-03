@@ -28,6 +28,44 @@ and now I work on Lightning Web Components at Salesforce, which is our JavaScrip
 
 ---
 
+class: contain-vertical
+
+.center[![TODO](./images/stickshift.jpg)]
+
+???
+
+I'd like to start off with a story. When I was learning to drive as a teenager, my car was a stick shift (manual transmission).
+These are much more common in Europe than in the U.S., but growing up in the Seattle area, this is what I had.
+
+It was really difficult! But one thing I like about manual transmissions is that you feel more in tune with what the car
+is doing. Based on the sounds of the engine and how the car reacted to my actions, I developed a "feel" for when to shift
+from one gear to another, or how to do things like "engine braking," which can
+actually be a [more efficient way to use fuel](https://jalopnik.com/here-is-when-engine-braking-can-save-more-gas-than-coas-1819484925).
+
+[Image source: Flickr](https://www.flickr.com/photos/154073030@N05/28577829138)
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/internal-combustion-engine.jpg)]
+
+???
+
+Now of course, I have no idea how an internal combustion engine actually works. All I know is that it's a hugely complicated thing.
+But I learned how to shift gears or do "engine braking" just based on my observations about how the engine was working.
+
+This is sort of how I feel about web performance and the browser. It's an enormously complicated engine, it's written in languages I'm not really
+handy with (C, C++, Rust), and I don't understand everything about how it works. But through observation of how it responds
+to my inputs, I can try to be a better web developer, and write more efficient web apps.
+
+And of course, if I actually knew how an internal combustion engined worked, I could probably be a better driver! But I wouldn't
+have to know all the little details – I only need to know just enough to improve how I write web sites.
+
+[Image source: Flickr](https://www.flickr.com/photos/ell-r-brown/3824067984/)
+
+---
+
 .center[![TODO](./images/devtools1.png)]
 
 --
@@ -42,20 +80,23 @@ Style/Layout (purple part)
 
 ???
 
-If you're like me, you've spent a lot of time looking at performance traces like this one (in the Chrome DevTools).
+So to take it back to browsers, let's look at a performance trace like this one (from the Chrome DevTools).
+
+If you've worked in performance for a while, you've probably spent a lot of time looking at traces like these.
 
 And there are two main parts here: the yellow (JavaScript) part, and the purple (style/layout) part.
 
-If you've worked in performance for a while, you might look at the JavaScript side of this equation and feel pretty comfortable with it. It has
-function names we recognize. We see our JavaScript framework doing work, we see our state library crunching data, we see the names of methods we wrote ourseles.
-
+If you're an experienced web developer, you might look at the JavaScript side of this equation and feel pretty comfortable with it. It has
+function names we recognize. We see our JavaScript framework doing work, we see our state library crunching data, we see the names of methods we wrote ourselves.
 
 But a lot of us probably look at the purple part and think, "Well, that's just the browser doing browser things." I
-couldn't possibly understand what that's about.
+couldn't possibly understand what that's about. It's like the big complicated engine I showed earlier.
 
-But the thing is, sometimes that purple part is pretty big. And as it turns out, there _are_ ways to understand what's
-going on in there, and even to reduce the time spent. In this talk, I'd like to shed some light about the "purple part," and give you some tools for
-understanding what the browser is doing in there.
+But the thing is, sometimes that purple part is pretty big. So it has a real impact on the performance of our web site.
+And as it turns out, there _are_ ways to understand what's
+going on in there, and even to reduce the time spent. In this talk, I'd like to shed some light about the "purple part," 
+talk a little bit about how the browser works under the hood, and give you some tools for making the browser spend
+less time here.
 
 ---
 
@@ -1333,6 +1374,63 @@ it will show you which CSS rules were invalidated for which elements (in the cas
 needed layout (in "recalculate layout"). This can be really invaluable in debugging high invalidation costs!
 
 ---
+
+class: contain-vertical
+
+.center[![TODO](./images/chrome-tracing.png)]
+
+???
+
+Another tool you can use is `chrome:tracing`. This provides more low-level details into what Chrome is doing,
+albeit it's a bit more inaccessible than the DevTools.
+
+[A good guide on `chrome:tracing`, albeit for V8 debugging](https://v8.dev/docs/rcs))
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/style-chrome-tracing.png)]
+
+
+???
+
+If you take a trace of a website and then find the "update style" slice, you can get lots of information here.
+
+Some of these are very Chromium-specific. "Matched property cache" is a cache Chromium uses of styles that
+are identical between different elements, to save memory.
+
+The really interesting ones are:
+
+- rules fast rejected
+- rules matched
+- rules rejected
+
+This tells us how many CSS rules matched, and how many were rejected using the "fast reject" method (i.e. the Bloom
+filter) and how many were rejected more slowly (using e.g. DOM traversal).
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/blink-debug.png)]
+
+???
+
+To get even more detail, a [cool new feature](https://bugs.chromium.org/p/chromium/issues/detail?id=1316060) was
+added recently in Chromium this year. If you enable `blink.debug` when using Chrome tracing...
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/selector-stats-3.png)]
+
+???
+
+Then you can get this view of the "selector stats." If you sort by elapsed time, you can actually see your
+most expensive CSS rules ranked from most to least expensive. This is a really cool tool, and I hope it makes
+its way into the DevTools eventually! But for now, you can use Chrome tracing.
 
 # Conclusion
 

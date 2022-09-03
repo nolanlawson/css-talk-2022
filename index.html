@@ -106,12 +106,21 @@
         }
         .contain-vertical > p > span.center {
             position: absolute;
-            left: 25px;
-            right: 25px;
-            bottom: 25px;
-            top: 25px;
+            left: 1rem;
+            right: 1rem;
+            bottom: 1rem;
+            top: 1rem;
             margin: 0;
             padding: 0;
+        }
+        .contain-vertical.cover-vertical > p > span.center {
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0;
+        }
+        .contain-vertical.cover-vertical > p > span.center > img {
+            object-fit: cover;
         }
         .contain-vertical > p > span.center > img {
             height: 100%;
