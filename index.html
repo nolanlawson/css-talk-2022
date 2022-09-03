@@ -155,6 +155,22 @@
             text-align: right;
             float: right;
         }
+
+        tr.arrowed {
+            position: relative;
+        }
+
+        tr.arrowed::after {
+            content: '⬅️';
+            width: 20px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            position: absolute;
+            font-size: 3rem;
+            margin-left: 1rem;
+        }
     </style>
   </head>
   <body>

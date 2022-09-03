@@ -336,12 +336,6 @@ class: contain-vertical
 
 .center[![TODO](./images/helloworld2.png)]
 
----
-
-class: contain-vertical
-
-.center[![TODO](./images/helloworld3.png)]
-
 ???
 
 Again, note that here we're actually talking about the geometry of the page. That's what layout is about.
@@ -370,6 +364,18 @@ Or your DOM is very large. A bigger DOM just means more work for the browser to 
 Or you are doing repeated re-renders over time, also called thrashing, which slows down both style and layout.
 
 This is a lot to unpack, so let's go over each of these points.
+
+--
+<pointing-arrow></pointing-arrow>
+
+--
+<pointing-arrow></pointing-arrow>
+
+--
+<pointing-arrow></pointing-arrow>
+
+--
+<pointing-arrow></pointing-arrow>
 
 ---
 
@@ -497,9 +503,6 @@ for (const element of page) {
 }
 ```
 
---
-.center[`O(n * m)`]
-
 ???
 
 To understand style performance, first it's important to note how browsers actually implement their style engines, so you can understand the kinds of optimizations they have in place so that we don't have to worry about style performance most of the time.
@@ -507,6 +510,9 @@ To understand style performance, first it's important to note how browsers actua
 To illustrate, let's imagine we're building a browser. Here is a naive implementation of style calculation that we might have. Raise your hand if you think this is what browsers actually do? 
 
 Of course not, this is an `O(n * m)` operation, where `n` is the number of elements and `m` is the number of CSS rules. On any reasonably-sized page, the browser would slow to a crawl.
+
+--
+.center[`O(n * m)`]
 
 ---
 
@@ -751,6 +757,18 @@ Bloom filter source:
 - https://chromium.googlesource.com/chromium/src/+/refs/tags/107.0.5258.1/third_party/blink/renderer/core/css/selector_filter.cc#43
 - https://phabricator.services.mozilla.com/source/mozilla-central/browse/default/servo/components/style/bloom.rs$114
 
+--
+<pointing-arrow></pointing-arrow>
+<pointing-arrow show-previous="1"></pointing-arrow>
+<pointing-arrow show-previous="2"></pointing-arrow>
+
+--
+<pointing-arrow></pointing-arrow>
+<pointing-arrow show-previous="1"></pointing-arrow>
+
+--
+<pointing-arrow></pointing-arrow>
+
 ---
 
 # Browser style optimizations
@@ -842,6 +860,21 @@ where rules might be repeated multiple times on the page.
 
 More details (although I quibble with some of the rankings): https://www.sitepoint.com/optimizing-css-id-selectors-and-other-myths/
 
+--
+<pointing-arrow></pointing-arrow>
+
+--
+<pointing-arrow></pointing-arrow>
+<pointing-arrow show-previous="1"></pointing-arrow>
+
+--
+<pointing-arrow></pointing-arrow>
+<pointing-arrow show-previous="1"></pointing-arrow>
+<pointing-arrow show-previous="2"></pointing-arrow>
+
+--
+<pointing-arrow></pointing-arrow>
+
 ---
 
 # Use shadow DOM
@@ -916,23 +949,6 @@ it's extremely unlikely to affect performance.
 Firefox is incredibly fast in this chart because of their Stylo engine. If every browser were like Firefox, then I wouldn't have much
 material for this part of the talk! This is what makes me optimistic that, someday, we'll be able to use whatever zany
 selectors we want, and it won't matter much for web performance, even on web apps with tons of CSS.
-
----
-
-# Finding expensive CSS rules
-
-> "In practice, people discover performance problems with CSS and start removing rules one by one until the problem [goes] away. I think that is the right way to go about this, it is easy, and will lead to [the] correct outcome."
-
-.muted.right[– Benjamin Poulain (WebKit), via [CSS Performance Revisited](https://benfrain.com/css-performance-revisited-selectors-bloat-expensive-styles/) by Ben Frain (2014)]
-
-???
-
-Now if you've got high style calculation costs, and you're really stuck trying to figure it out, unfortunately the best
-approach is to remove CSS rules, re-run your perf tests, and see if they made an impact.
-
-I've used this approach a few times. You can optimize it a bit by using a binary search – remove half the CSS, test, remove another half, repeat. It's not pretty, but sometimes this is the only way to figure this kind of thing out. And I wish I could say it's changed since 2014, but this is still a good technique today.
-
-Now, you might be clever and think "I'll just go through all my CSS selectors, run `document.querySelectorAll()`, and time it." But this goes through a slightly different code path in the browser, so I really wouldn't recommend it. It's not going to tell you the same thing as how long style calculation took.
 
 ---
 
@@ -1539,14 +1555,21 @@ spent in each part of the algorithm. So now you can map this back to the declara
 
 class: contain-vertical
 
-.center[![TODO](./images/explain-mockup-2.png)]
+.center[![TODO](./images/car-dashboard.jpg)]
 
 ???
 
 So wouldn't it be cool if browsers could give us the same thing? Something like "invalidation tracking," but with
-even more details.
+even more details. The "selector stats" is a great start, but I'd really like to know everything that's going on
+in the style/layout engine.
 
-This is just a mockup of the kind of thing I would love for browsers to provide.
+Going back to my original metaphor of the stick shift and the car, I'd really like to have a dashboard to give me
+more insights into what the browser is doing. It's great to listen to the engine and rely on intuition, but
+the browser vendors know a lot more than me about how their engine is implemented, so they could provide more details.
+
+A full "SQL EXPLAIN," but for CSS, would be amazing!
+
+[Image source: Flickr](https://www.flickr.com/photos/lex-photographic/26665512361)
 
 ---
 
