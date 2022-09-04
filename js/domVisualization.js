@@ -413,9 +413,11 @@ customElements.define('dom-visualization', class extends HTMLElement {
       }
     }
 
-    const walkNaiveAncestor = async node => {
+    const walkAncestor = async (node, { bloomFilter } = {}) => {
       const [ ancestor, descendant ] = selector.split(' ')
-      const elementsMatchingDescendant = querySelectorAll(node, descendant)
+      const elementsMatchingDescendant = bloomFilter
+        ? querySelectorAll(node, selector)
+        : querySelectorAll(node, descendant)
       for (const element of elementsMatchingDescendant) {
         await walk(element, { bottomToTop: true, stopAtSelector: ancestor })
       }
@@ -430,7 +432,10 @@ customElements.define('dom-visualization', class extends HTMLElement {
         await walkNaiveDescendant(tree)
         break
       case 'naive-ancestor':
-        await walkNaiveAncestor(tree)
+        await walkAncestor(tree, { bloomFilter: false })
+        break
+      case 'bloom-filter':
+        await walkAncestor(tree, { bloomFilter: true })
         break
     }
   }

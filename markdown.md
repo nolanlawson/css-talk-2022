@@ -709,14 +709,16 @@ instantly, because `.foo` is in the Bloom filter.
 
 class: fill-custom
 
-<example-3 show-tags="true" show-bloom-filter="true" animate="true" strategy="instant"></example-3>
+<example-3 show-tags="true" show-bloom-filter="true" animate="true" strategy="bloom-filter"></example-3>
 
 ???
 
-So now we can basically instantly find the `.foo div`s, assuming we don't get false positives in the Bloom filter.
+So now we can quickly filter all the `divs` based on the Bloom filter, "fast rejecting" any
+that couldn't possibly have `.foo` as an ancestor. Note that, because we could have false positives, we still
+need to walk the ancestor chain to check that it really has `.foo` as an ancestor, but we are still eliminating a lot
+of work.
 
-And hey, if we do get false positives, then we just fall back to crawling up the DOM tree. Assuming the Bloom filter is
-tuned correctly, this shouldn't happen too frequently, so it won't dramatically affect page performance.
+Bloom filters can also be tuned to minimize the number of false positives. It's basically a memory vs CPU tradeoff.
 
 ---
 
@@ -866,9 +868,6 @@ More details (although I quibble with some of the rankings): https://www.sitepoi
 <pointing-arrow></pointing-arrow>
 <pointing-arrow show-previous="1"></pointing-arrow>
 <pointing-arrow show-previous="2"></pointing-arrow>
-
---
-<pointing-arrow></pointing-arrow>
 
 ---
 
