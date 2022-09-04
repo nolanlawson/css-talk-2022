@@ -372,16 +372,20 @@ This is a lot to unpack, so let's go over each of these points in the rest of th
 
 # Style vs layout performance
 
-These are not the same!
-
-.center[![TODO](./images/style-layout-1.png)]
-
-.center[![TODO](./images/style-layout-2.png)]
+.center[![TODO](./images/style-layout.png)]
 
 ???
 
 Now first off, when you're looking at a perf trace, it's important to understand whether you primarily have a
 problem with style calculation, layout calculation, or both. Because these two traces are not the same!
+
+---
+
+# Style vs layout performance
+
+.center[![TODO](./images/style-layout-annotated.png)]
+
+???
 
 These two look the same on the surface because they're both purple. But in one trace, we have huge style costs and
 very little layout cost, and in the other, we have small style costs but large layout costs. The causes of slowness
