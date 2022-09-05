@@ -492,7 +492,7 @@ The proof is in the pudding: if you profile your site and you see large style co
 for (const element of page) {
   for (const rule of cssRules) {
     if (rule.matches(element)) {
-      // ...
+      /* ... */
     }
   }
 }
