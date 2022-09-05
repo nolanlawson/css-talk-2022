@@ -179,12 +179,12 @@ that is passed to the paint (green) step that actually lays out pixels on the sc
 
 --
 - Style
-  - Figuring out which CSS rules apply to which elements
+  - Figuring out which CSS rules apply to which elements and computing styles
 
 --
 - Layout
-  - Figuring out how to lay those elements out on the page
-  
+  - Figuring out how to lay those elements out geometrically on the page
+
 ---
 
 .center[![TODO](./images/pixel-pipeline-style.png)]
@@ -491,8 +491,8 @@ The proof is in the pudding: if you profile your site and you see large style co
 ```js
 for (const element of page) {
   for (const rule of cssRules) {
-    if (matches(element, rule)) {
-      applyStyles(element, rule)
+    if (rule.matches(element)) {
+      // ...
     }
   }
 }
@@ -545,13 +545,18 @@ the DOM changes!
 
 ???
 
-So let's look at the first optimization browsers have, which is pretty straightforward. Rather than looking for
-every DOM element that has a class, or an ID, or a given tag name, let's keep a lookup of tag names, IDs, and classes
-to elements.
-
-If you're not familiar with a hashmap, think of it as a Map of strings to some list of DOM elements.
+So let's add a simple optimization to our toy browser. For every tag name, ID, and class, we'll create a hashmap
+mapping those strings to the list of elements that match those tag names, IDs, or classes.
 
 This is pretty reasonable, because tag names for an element never change, and IDs and classes are pretty small and simple most of the time.
+
+(Note this is not what browsers actually do, but it's close enough for our toy browser. This implementation is closest to
+what Firefox does, which is keep hashmaps of tag names, IDs, classes, and attributes to the rules that contain those
+selectors on the right-hand side.)
+
+- [Chromium source](https://chromium.googlesource.com/chromium/src/+/993ea953282d39b23658448d4a3f95ffeff310d3/third_party/blink/renderer/core/css/element_rule_collector.cc#308)
+- [Firefox source](https://hg.mozilla.org/mozilla-central/file/cf3860b3652e0a2105ab963c2c0dec25c033527a/servo/components/style/selector_map.rs#l70)
+- [WebKit source](https://github.com/WebKit/WebKit-http/blob/817c46e152af795d735678386db68805d0aa505e/Source/WebCore/css/SelectorChecker.cpp#L637-L660)
 
 ---
 
