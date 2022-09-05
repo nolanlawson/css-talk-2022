@@ -82,12 +82,6 @@ function names we recognize. We see our JavaScript framework doing work, we see 
 But a lot of us probably look at the purple part and think, "Well, that's just the browser doing browser things." I
 couldn't possibly understand what that's about. It's like the big complicated engine I showed earlier.
 
-But the thing is, sometimes that purple part is pretty big. So it has a real impact on the performance of our web site.
-And as it turns out, there _are_ ways to understand what's
-going on in there, and even to reduce the time spent. In this talk, I'd like to shed some light about the "purple part," 
-talk a little bit about how the browser works under the hood, and give you some tools for making the browser spend
-less time here.
-
 --
 .float-left[
 JavaScript (yellow part)
@@ -97,6 +91,40 @@ JavaScript (yellow part)
 .float-right[
 Style/Layout (purple part)
 ]
+
+---
+<h1 class="smaller">Three news sites</h1>
+
+.center[![TODO](./images/news-sites-3.png)]
+
+???
+
+But the thing is, sometimes that purple part is pretty big. So it has a real impact on the performance of our web site.
+
+Just to prove that style/layout can be important, I ran WebPageTest (simulated Moto G4, 4G) on three major news websites.
+Then I used Chrome DevTools to categorize the time spent on the main thread as Loading (network), Scripting (JS),
+Rendering (Style/Layout), or Paint.
+
+As you can see, the purple part is not the most important part, but it can be quite big. For the third site in particular,
+it's worth looking into.
+
+---
+
+<h1 class="smaller">Three news sites</h1>
+
+.center[![TODO](./images/news-sites-2.png)]
+
+???
+
+Now if we break apart the Rendering into Style/Layout, you can see that sometimes Style is more expensive than Layout,
+sometimes it's about the same, and sometimes Layout is more expensive than Style. Keep this in mind for later.
+
+And as it turns out, there _are_ ways to understand what's
+going on in the browser's style/layout engine, and even to reduce the time spent.
+
+In this talk, I'd like to shed some light about the "purple part,"
+talk a little bit about how the browser works under the hood, and give you some tools for making the browser spend
+less time here.
 
 ---
 
@@ -483,6 +511,7 @@ The proof is in the pudding: if you profile your site and you see large style co
 - https://calendar.perfplanet.com/2011/css-selector-performance-has-changed-for-the-better/
 - https://calibreapp.com/blog/css-performance
 - https://ecss.benfrain.com/appendix2.html
+- https://meiert.com/en/blog/performance-of-css-selectors-2/
 
 ---
 
