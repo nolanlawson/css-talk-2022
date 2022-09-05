@@ -68,16 +68,6 @@ have to know all the little details – I only need to know just enough to impro
 
 .center[![TODO](./images/devtools1.png)]
 
---
-.float-left[
-JavaScript (yellow part)
-]
-
---
-.float-right[
-Style/Layout (purple part)
-]
-
 ???
 
 So to take it back to browsers, let's look at a performance trace like this one (from the Chrome DevTools).
@@ -98,21 +88,19 @@ going on in there, and even to reduce the time spent. In this talk, I'd like to 
 talk a little bit about how the browser works under the hood, and give you some tools for making the browser spend
 less time here.
 
+--
+.float-left[
+JavaScript (yellow part)
+]
+
+--
+.float-right[
+Style/Layout (purple part)
+]
+
 ---
 
 # Target audience
-
---
-- Performance engineers
-
---
-- Framework authors
-
---
-- Folks working on large web apps
-
---
-- Anyone interested in how browsers work
 
 ???
 
@@ -128,6 +116,18 @@ I'm also speaking to people working on large web apps – static content sites
 usually don't have performance problems with style/layout, but big web apps often do.
 
 I'm also speaking to anyone interested in how browsers work. Some of this stuff is just plain interesting!
+
+--
+- Performance engineers
+
+--
+- Framework authors
+
+--
+- Folks working on large web apps
+
+--
+- Anyone interested in how browsers work
 
 ---
 
@@ -669,21 +669,15 @@ descendants than ancestors, just due to the shape of the tree. So how can we sol
 
 # Style optimization 3: Bloom filter
 
-> "We stole the Bloom filter from [WebKit]. The idea is to optimize cases where the page author writes a descendant combinator and the thing to the [right-hand side] matches a lot, e.g. `.foo div`."
-
-.muted.right[– Boris Zbarsky (Mozilla), via [Servo meeting notes](https://github.com/servo/servo/wiki/Css-selector-matching-meeting-2013-07-19) (2013)] 
+.center[![TODO](./images/bloom-filter.svg)]
 
 ???
 
 Enter the Bloom filter. WebKit came up with the optimization first, and now it exists in all browsers.
 
----
-
-# Bloom filter
-
-.center[![TODO](./images/bloom-filter.svg)]
-
-???
+> "We stole the Bloom filter from [WebKit]. The idea is to optimize cases where the page author writes a descendant combinator and the thing to the [right-hand side] matches a lot, e.g. `.foo div`."
+ 
+– Boris Zbarsky (Mozilla), via [Servo meeting notes](https://github.com/servo/servo/wiki/Css-selector-matching-meeting-2013-07-19) (2013)
 
 So how does the Bloom filter work? Basically, you can think of it as a Hash Set that may give false positives, but never gives false negatives. The main thing is, it's very fast with low memory overhead, so it can be used widely.
 
@@ -789,9 +783,6 @@ My goal in telling you all this is not to tell you to use this CSS selector or t
 My goal instead is to give you an appreciation for all the work a browser has to do to do style calculation. So when you see high style
 calculation costs, you understand that a browser is doing some non-trivial work.
 
-So now, knowing a bit more about how browsers work under the hood, what can we as web developers do if we see high style
-calculation costs?
-
 Notes:
 
 - [WebKit CSS JIT Compiler](https://webkit.org/blog/3271/webkit-css-selector-jit-compiler/)
@@ -799,6 +790,15 @@ Notes:
 - [Webkit `has()` pseudo-class](https://webkit.org/blog/13096/css-has-pseudo-class/)
 - [WebKit `has()` optimization](https://github.com/WebKit/WebKit/commit/596fdf7c2cec599f8c826787363c54c4b008a7fe)
 - [Chromium `:has()` optimization](https://bugs.chromium.org/p/chromium/issues/detail?id=1341893)
+
+---
+
+# Improving style calculation
+
+???
+
+So now, knowing a bit more about how browsers work under the hood, what can we as web developers do if we see high style
+calculation costs?
 
 ---
 
