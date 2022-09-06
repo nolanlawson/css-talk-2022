@@ -585,7 +585,7 @@ selectors on the right-hand side.)
 
 - [Chromium source](https://chromium.googlesource.com/chromium/src/+/993ea953282d39b23658448d4a3f95ffeff310d3/third_party/blink/renderer/core/css/element_rule_collector.cc#308)
 - [Firefox source](https://hg.mozilla.org/mozilla-central/file/cf3860b3652e0a2105ab963c2c0dec25c033527a/servo/components/style/selector_map.rs#l70)
-- [WebKit source](https://github.com/WebKit/WebKit-http/blob/817c46e152af795d735678386db68805d0aa505e/Source/WebCore/css/SelectorChecker.cpp#L637-L660)
+- [WebKit source](https://github.com/WebKit/WebKit/blob/7384255396ccd97db7ad12e77963ee283ced2955/Source/WebCore/style/ElementRuleCollector.cpp#L179-L214)
 
 ---
 
@@ -890,6 +890,9 @@ Again, I can't provide hard-and-fast rules, and all of this could become outdate
 where rules might be repeated multiple times on the page.
 
 More details (although I quibble with some of the rankings): https://www.sitepoint.com/optimizing-css-id-selectors-and-other-myths/
+
+Note WebKit [optimized attributes recently](https://github.com/WebKit/WebKit/commit/c27218b87632ef954d3e431abe4b585a030e23b2) and
+[so did Firefox](https://bugzil.la/1728851).
 
 --
 <pointing-arrow></pointing-arrow>
