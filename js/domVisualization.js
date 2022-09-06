@@ -1,23 +1,26 @@
 import rough from './rough.js'
 import {slideshow} from './slideshow.js';
 import {drawCenteredSvgText, hashCode, loadFontsPromise, makeDom, uniq} from './utils.js';
-import {DARK_RED, DARK_YELLOW, LIGHT_YELLOW} from './colors.js';
+import {GREEN, DARK_RED, DARK_YELLOW, LIGHT_YELLOW, DARK_GREEN} from './colors.js';
 import {HEIGHT, WIDTH, STROKE_WIDTH} from './constants.js';
 
 const CIRCLE_WIDTH_RELATIVE = 0.6
 const CIRCLE_HEIGHT_RELATIVE = 0.75
 
 const ANIMATION_DELAY = 250
+const ANIMATION_DELAY_SLOW = 1000
 
 const rafPromise = () => new Promise(resolve => requestAnimationFrame(resolve))
 
 const timeoutPromise = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 const generateLabel = (element, showTags) => {
-  let label = (element.className && ('.' + element.className))
-  if (!label && showTags && element.tagName) {
-    label = element.tagName.toLowerCase()
+  let label = ''
+  if (showTags && element.tagName && element.tagName !== 'X-X') {
+    label += element.tagName.toLowerCase()
   }
+  label += (element.className && ('.' + element.className))
+  label += (element.id && ('#' + element.id))
   return label
 }
 
@@ -220,6 +223,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
         left: 20px;
         top: 20px;
         font-size: 36px;
+        line-height: 1.1em;
       }
       .selector-text {
         font-family: 'Ubuntu Mono', monospace;
@@ -233,13 +237,33 @@ customElements.define('dom-visualization', class extends HTMLElement {
       .fade.fade-out {
         opacity: 0;
       }
+      .selector-container {
+        display: flex;
+        flex-direction: column;
+      }
+      .sub-selector {
+        box-sizing: border-box;
+        will-change: border-color;
+        border-style: solid;
+        border-width: 4px;
+        border-color: white;
+        transition: 0.2s border-color linear;
+        flex: 0;
+      }
+      .sub-selector.touched {
+        border-color: ${DARK_YELLOW}
+      }
     </style>
     <slot></slot>
-    <span class="selector"><span class="selector-text"></span></span>
+    <span class="selector"><div class="selector-container"></div></span>
     `
     this.shadowRoot.onslotchange = this._onSlotChange
     this._slot = this.shadowRoot.querySelector('slot')
-    this._selectorText = this.shadowRoot.querySelector('.selector-text')
+    this._selectorContainer = this.shadowRoot.querySelector('.selector-container')
+    this._slow = this.getAttribute('slow') === 'true'
+    this._selectors = this.getAttribute('selectors') && this.getAttribute('selectors').split('|')
+    this._animationDelay = this._slow ? ANIMATION_DELAY_SLOW : ANIMATION_DELAY
+    this._animationCount = 0
 
     this._draw()
   }
@@ -259,12 +283,12 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
     if (isVisible && animate) {
       await this._draw() // redraw to refresh canvas
-      await this._animate()
+      await this._animate(++this._animationCount)
     }
   }
 
   _draw = async () => {
-    const { _slot: slot, _selectorText: selectorText } = this
+    const { _slot: slot } = this
 
     const template = slot.assignedElements()[0]
 
@@ -289,23 +313,51 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
     drawTree(tree, roughSvg)
 
-    selectorText.textContent = this.getAttribute('selector')
+    this._setSelector()
     this._tree = tree
     this._roughSvg = roughSvg
   }
 
-  _animate = async () => {
+  _setSelector() {
+    const { _selectorContainer: selectorContainer } = this
+    const selector = this.getAttribute('selector')
+    const selectors = this._selectors
+
+
+    if (selector) {
+      selectorContainer.innerHTML = `<span class="selector-text">${selector}</span>`
+    } else {
+      selectorContainer.innerHTML = selectors.map(sel => `
+        <span class="sub-selector selector-text">
+          ${sel}
+        </span>`
+      ).join('')
+    }
+  }
+
+  _animate = async (animationCount) => {
     await rafPromise()
-    const { _roughSvg: roughSvg, _tree: tree } = this
+    const {
+      _roughSvg: roughSvg,
+      _tree: tree,
+      _selectors: selectors,
+      _animationDelay : animationDelay,
+      _selectorContainer: selectorContainer,
+      _slow: slow
+    } = this
+
+    const selectorElements = [...selectorContainer.querySelectorAll('span')]
+    selectorElements.forEach(_ => _.classList.remove('touched')) // reset
+
     const selector = this.getAttribute('selector')
     const strategy = this.getAttribute('strategy')
 
-    const instant = strategy === 'instant'
+    const canceled = () => this._animationCount !== animationCount
 
     const touchedNodes = new Set()
     const matchedNodes = new Set()
 
-    const matches = (element, sel = selector) => element.matches && element.matches(sel)
+    const matches = (element, sel = selector) => sel && element.matches && element.matches(sel)
 
     const drawingQueue = []
 
@@ -341,21 +393,59 @@ customElements.define('dom-visualization', class extends HTMLElement {
         roughSvg.svg.appendChild(animatedBorder)
       }
 
-      if (!instant || match) {
-        drawTouchedNode()
-      }
-      if (match) {
-        const drawMatch = () => {
-          if (!matchedNodes.has(node)) {
-            const matchBorder = roughSvg.ellipse(circleX, circleY, circleWidth, circleHeight, {
-              strokeWidth: STROKE_WIDTH * 4,
-              stroke: DARK_RED,
-            })
-            matchBorder.classList.add('matched')
-            roughSvg.svg.appendChild(matchBorder)
-            matchedNodes.add(node)
+      const drawTouchedAndMatchedSelectors = async () => {
+
+        let selectorsAndElements = Array(selectors.length).fill().map((_, i) => {
+          const sel = selectors[i]
+          const selElement = selectorElements[i]
+          return {
+            sel,
+            selElement
+          }
+        })
+
+        if (!slow) {
+          selectorsAndElements = selectorsAndElements.filter(({ sel }) => matches(element, sel))
+        }
+
+        const selectorAnimationDelay = animationDelay / selectorsAndElements.length
+
+        for (const { sel, selElement } of selectorsAndElements) {
+          selElement.addEventListener('transitionend', () => {
+            selElement.classList.remove('touched')
+          }, { once: true })
+          selElement.classList.add('touched')
+
+          if (matches(element, sel)) {
+            drawText({ roughSvg, label: `✅ ${sel}`, circleX, circleY, circleWidth, circleHeight, subText: true })
+            drawMatch()
+          }
+
+          await timeoutPromise(selectorAnimationDelay)
+          if (canceled()) {
+            break
           }
         }
+      }
+
+      const drawMatch = () => {
+        if (!matchedNodes.has(node)) {
+          const matchBorder = roughSvg.ellipse(circleX, circleY, circleWidth + 10, circleHeight + 10, {
+            strokeWidth: STROKE_WIDTH * 6,
+            stroke: DARK_GREEN,
+          })
+          matchBorder.classList.add('matched')
+          roughSvg.svg.appendChild(matchBorder)
+          matchedNodes.add(node)
+        }
+      }
+
+      drawTouchedNode()
+      let multipleSelectorsPromise = Promise.resolve()
+      if (!selector) { // multiple selectors
+        multipleSelectorsPromise = drawTouchedAndMatchedSelectors(element, match)
+      }
+      if (match) {
         if (bottomToTop) {
           drawingQueue.push(drawMatch)
         } else {
@@ -365,11 +455,12 @@ customElements.define('dom-visualization', class extends HTMLElement {
     }
 
     const walk = async (node, { bottomToTop, stopAtSelector } = { bottomToTop: false }) => {
-      if (!instant || node === tree) {
-        await timeoutPromise(ANIMATION_DELAY)
-        await rafPromise()
-      }
+      await rafPromise()
       await checkNode(node, { bottomToTop })
+      await timeoutPromise(animationDelay)
+      if (canceled()) {
+        return
+      }
 
       if (bottomToTop) {
         if (node.parent) {
@@ -425,7 +516,6 @@ customElements.define('dom-visualization', class extends HTMLElement {
 
     switch (strategy) {
       case 'naive':
-      case 'instant':
         await walk(tree)
         break
       case 'naive-descendant':

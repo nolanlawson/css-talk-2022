@@ -531,9 +531,10 @@ for (const element of page) {
 
 To understand style performance, first it's important to note how browsers actually implement their style engines, so you can understand the kinds of optimizations they have in place so that we don't have to worry about style performance most of the time.
 
-To illustrate, let's imagine we're building a browser. Here is a naive implementation of style calculation that we might have. Raise your hand if you think this is what browsers actually do? 
+To illustrate, let's imagine we're building a browser. Here is a naive implementation of style calculation that we might have.
 
-Of course not, this is an `O(n * m)` operation, where `n` is the number of elements and `m` is the number of CSS rules. On any reasonably-sized page, the browser would slow to a crawl.
+Unfortunately this naive implementation has a big problem: this is an `O(n * m)` operation, where `n` is the number of elements and `m` is the number of CSS rules. On any reasonably-sized page, the browser would slow to a crawl. So browsers try to avoid this naive case
+wherever possible.
 
 --
 .center[`O(n * m)`]
@@ -546,42 +547,48 @@ class: fill-custom
 
 ???
 
-For example, let's look at a simple DOM tree. In this case, the selector is `.foo` and we want to find all the nodes
-whose class is `foo`.
+For example, let's look at a simple DOM tree. In this case, we have multiple selectors in our stylesheet, and we
+need to match them with DOM nodes.
 
 ---
 
 
 class: fill-custom
 
-<example-1 animate="true"></example-1>
+<example-1 animate="true" slow="true"></example-1>
 
 ???
 
 
-If we were doing the naive approach, then the browser would have to walk through the entire DOM just to find the `foo` nodes.
+If we were doing the naive approach, then the browser would have to walk through the entire DOM, plus every selector
+for every DOM.
 
-You can see how this would be inefficient, especially given it has to be run for every rule on the page, and every time
-the DOM changes!
+You can see how this would be inefficient, especially if it runs every time the DOM changes!
 
 ---
 
 # Style optimization 1: hash maps
+```js
+// Tag names
+{ "span": ["span"], "a": ["a.baz"] }
+```
 
-- Tag name (`div`, `button`)
-- ID (`#foo`, `#bar`)
-- Class (`.foo`, `.bar`)
+```js
+// IDs
+{ "bar": ["#bar"] }
+```
+
+```js
+// Classes
+{ "foo": [".foo"], "baz": ["a.baz"] }
+```
 
 ???
 
 So let's add a simple optimization to our toy browser. For every tag name, ID, and class, we'll create a hashmap
-mapping those strings to the list of elements that match those tag names, IDs, or classes.
+mapping those strings to the list of selectors for that string.
 
 This is pretty reasonable, because tag names for an element never change, and IDs and classes are pretty small and simple most of the time.
-
-(Note this is not what browsers actually do, but it's close enough for our toy browser. This implementation is closest to
-what Firefox does, which is keep hashmaps of tag names, IDs, classes, and attributes to the rules that contain those
-selectors on the right-hand side.)
 
 - [Chromium source](https://chromium.googlesource.com/chromium/src/+/993ea953282d39b23658448d4a3f95ffeff310d3/third_party/blink/renderer/core/css/element_rule_collector.cc#308)
 - [Firefox source](https://hg.mozilla.org/mozilla-central/file/cf3860b3652e0a2105ab963c2c0dec25c033527a/servo/components/style/selector_map.rs#l70)
@@ -591,12 +598,12 @@ selectors on the right-hand side.)
 
 class: fill-custom
 
-<example-1 animate="true" strategy="instant"></example-1>
+<example-1 animate="true"></example-1>
 
 ???
 
-As you can see, this has a big impact of the efficiency of our algorithm. Rather than checking all nodes, we can
-find the two `foo` nodes in constant time, thanks to the hashmap.
+As you can see, this has a big impact of the efficiency of our algorithm. Rather than checking all selectors, we can
+short-circuit to only those selectors that could possibly match
 
 ---
 
@@ -606,8 +613,8 @@ class: fill-custom
 
 ???
 
-Now, there's still a problem with our algorithm. What about descendant selectors? In this case, we can find `.foo` instantly,
-but that doesn't help us much with `.bar`, because what we care about is the relationship between the two nodes.
+Now, there's still a problem with our algorithm. What about descendant selectors? In this case, we need to find all
+`.bar` elements inside of a `.foo`.
 
 ---
 
@@ -798,7 +805,7 @@ Bloom filter source:
 
 # Browser style optimizations
 
-- WebKit CSS JIT Compiler (2014)
+- WebKit CSS JIT (2014)
 - Firefox Stylo (2017)
 - WebKit `:has` (2022)
 - etc.
@@ -820,6 +827,7 @@ calculation costs, you understand that a browser is doing some non-trivial work.
 Notes:
 
 - [WebKit CSS JIT Compiler](https://webkit.org/blog/3271/webkit-css-selector-jit-compiler/)
+- [More on WebKit JIT](https://speakerdeck.com/constellation/css-jit-just-in-time-compiled-css-selectors-in-webkit)
 - [Firefox Stylo](https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/)
 - [Webkit `has()` pseudo-class](https://webkit.org/blog/13096/css-has-pseudo-class/)
 - [WebKit `has()` optimization](https://github.com/WebKit/WebKit/commit/596fdf7c2cec599f8c826787363c54c4b008a7fe)

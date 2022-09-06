@@ -5,29 +5,31 @@ customElements.define('example-1', class extends HTMLElement {
     super()
     this.innerHTML = `
 <dom-visualization 
-  selector=".foo" 
+  selectors="span|.foo|#bar|a.baz" 
+  show-tags="true"
   animate="${this.getAttribute('animate') ?? false}"
-  strategy="${this.getAttribute('strategy') ?? 'naive'}"
+  strategy="naive"
+  slow="${this.getAttribute('slow') ?? false}"
 >
   <template>
     <div>
+      <x-x class="baz">
+        <x-x class="foo">
+          <x-x id="bar"></x-x>
+        </x-x>
+      </x-x>
       <div>
-        <div>
-          <div></div>
-        </div>
-      </div>
-      <div>
-        <div class="foo"></div>
+        <span></span>
       </div>
     </div>
     <div>
-      <div>
-        <div class="foo">
-        </div>
+      <x-x class="foo">
+        <a class="baz">
+        </a>
         <div>
-          <div></div>
+          <span></span>
         </div>
-      </div>
+      </x-x>
     </div>
   </template>
 </dom-visualization>    
@@ -45,10 +47,10 @@ customElements.define('example-2', class extends HTMLElement {
   strategy="${this.getAttribute('strategy') ?? 'naive'}"
 >
   <template>
-    <div class="foo">
+    <x-x class="foo">
       <div>
         <div>
-          <div class="bar"></div>
+          <x-x class="bar"></x-x>
         </div>
       </div>
       <div>
@@ -56,11 +58,11 @@ customElements.define('example-2', class extends HTMLElement {
           <div></div>
         </div>
       </div>
-    </div>
+    </x-x>
     <div>
-      <div class="foo">
+      <x-x class="foo">
         <div>
-          <div class="bar"></div>
+          <x-x class="bar"></x-x>
         </div>
         <div>
           <div></div>
@@ -68,7 +70,7 @@ customElements.define('example-2', class extends HTMLElement {
         <div>
           <div></div>
         </div>
-      </div>
+      </x-x>
     </div>
   </template>
 </dom-visualization>    
@@ -89,11 +91,11 @@ customElements.define('example-3', class extends HTMLElement {
 >
   <template>
     <div>
-      <div class="foo">
+      <x-x class="foo">
         <div>
           <div></div>
         </div>
-      </div>
+      </x-x>
       <div>
         <div>
           <div></div>
@@ -105,9 +107,9 @@ customElements.define('example-3', class extends HTMLElement {
         <div>
           <div></div>
         </div>
-        <div class="foo">
+        <x-x class="foo">
           <div></div>
-        </div>
+        </x-x>
         <div>
           <div></div>
         </div>

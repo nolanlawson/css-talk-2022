@@ -23,3 +23,6 @@ export const PASTEL_GREEN = '#c3d88b'
 export const PASTEL_BLUE = '#95b7e8'
 
 export const DARK_GRAY = '#666666'
+
+export const GREEN = '#77b255'
+export const DARK_GREEN = '#5d983d'
