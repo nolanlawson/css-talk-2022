@@ -101,7 +101,7 @@ couldn't possibly understand what that's about. It's like the big complicated en
 ---
 <h1 class="smaller">Three news sites</h1>
 
-.center[![TODO](./images/news-sites-3.png)]
+.center[![TODO](./images/news-sites-overview.png)]
 
 ???
 
@@ -323,7 +323,11 @@ So in a sense, it's almost as if the browser is taking this page, and turning it
 Conceptually, this is what style calculation is: it's giving us the same page we would have had if we had used
 inline styles.
 
+It's also computing the `em`s, `rem`s, etc. and turning them into `px`s, but this has less of an impact on perf in my experience.
+
 ---
+
+exclude: true
 
 # Inline styles == no style cost?
 
