@@ -619,6 +619,17 @@ This is pretty reasonable, because tag names for an element never change, and ID
 
 class: fill-custom
 
+<example-1></example-1>
+
+???
+
+As you can see, this has a big impact of the efficiency of our algorithm. Rather than checking all selectors, we can
+short-circuit to only those selectors that could possibly match
+
+---
+
+class: fill-custom
+
 <example-1 animate="true"></example-1>
 
 ???
@@ -1325,19 +1336,50 @@ style and layout, and the warning about "forced reflow." (Reflow is another name
 # Solving layout thrashing
 
 ```js
-// All the reads
 const widths = elements.map(el => el.parentElement.offsetWidth);
 
-// All the writes
-elements.forEach((element, i) => {
-  element.style.width = widths[i] + 'px';
-})
+elements.forEach((el, i) => {
+  el.style.width = widths[i] + 'px';
+});
 ```
 
 ???
 
-In these cases, it's better to batch your reads and writes together, so that you do all the reads at once, followed
-by all the writes. This ensures you only at most pay for style calculation twice – once during the reads, and again during
+In these cases, it's better to batch your reads and writes together.
+
+---
+
+# Solving layout thrashing
+
+```js
+*const widths = elements.map(el => el.parentElement.offsetWidth);
+
+elements.forEach((el, i) => {
+  el.style.width = widths[i] + 'px';
+});
+```
+
+???
+
+So that you do all the reads at once...
+
+---
+
+# Solving layout thrashing
+
+```js
+const widths = elements.map(el => el.parentElement.offsetWidth);
+
+*elements.forEach((el, i) => {
+* el.style.width = widths[i] + 'px';
+*});
+```
+
+???
+
+...followed by all the writes.
+
+This ensures you only at most pay for style calculation twice – once during the reads, and again during
 the writes.
 
 ---
