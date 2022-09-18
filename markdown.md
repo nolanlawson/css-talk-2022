@@ -1063,7 +1063,7 @@ selectors we want, and it won't matter much for web performance, even on web app
 
 <h1 class="smaller">Concatenate stylesheets (Chromium-only)</h1>
 
-.center-contain-vertical[![TODO](./images/chrome-stylesheets-2.png)]
+.center-contain-vertical[![TODO](./images/chrome-stylesheets-3.png)]
 
 ???
 
