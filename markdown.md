@@ -11,11 +11,13 @@ class: center, middle
 Hi, my name is Nolan Lawson and today I'd like to talk to you about CSS runtime performance.
 
 ---
+.left-column-66[![TODO](./images/20150424081933-cropped-2.jpg)]
+.right-column-33[
 
-class: contain-vertical
-
-.center[![TODO](./images/nolanlawson.png)]
-
+- `nolanlawson.com`
+- Microsoft Edge 2016-2018
+- Salesforce 2018-
+]
 ???
 
 First off, who am I?
@@ -76,21 +78,25 @@ If you've worked in performance for a while, you've probably spent a lot of time
 
 And there are two main parts here: the yellow (JavaScript) part, and the purple (style/layout) part.
 
-If you're an experienced web developer, you might look at the JavaScript side of this equation and feel pretty comfortable with it. It has
-function names we recognize. We see our JavaScript framework doing work, we see our state library crunching data, we see the names of methods we wrote ourselves.
-
-But a lot of us probably look at the purple part and think, "Well, that's just the browser doing browser things." I
-couldn't possibly understand what that's about. It's like the big complicated engine I showed earlier.
-
 --
 .float-left[
 JavaScript (yellow part)
 ]
 
+???
+
+If you're an experienced web developer, you might look at the JavaScript side of this equation and feel pretty comfortable with it. It has
+function names we recognize. We see our JavaScript framework doing work, we see our state library crunching data, we see the names of methods we wrote ourselves.
+
 --
 .float-right[
 Style/Layout (purple part)
 ]
+
+???
+
+But a lot of us probably look at the purple part and think, "Well, that's just the browser doing browser things." I
+couldn't possibly understand what that's about. It's like the big complicated engine I showed earlier.
 
 ---
 <h1 class="smaller">Three news sites</h1>
@@ -106,9 +112,12 @@ Then I used Chrome DevTools to categorize the time spent on the main thread as L
 Rendering (Style/Layout), or Paint.
 
 As you can see, the purple part is not the most important part, but it can be quite big. For the third site in particular,
-it's worth looking into.
+it's worth looking into. And even for the other ones, if you manage to find a quick win, then there are 2.6s and 3.5s
+(respectively) that can be improved!
 
 ---
+
+exclude: true
 
 <h1 class="smaller">Three news sites</h1>
 
@@ -135,27 +144,35 @@ less time here.
 Now first off, I should mention who this talk is for. I'm going to go into a lot of details, and these details aren't
 going to be relevant to everyone. For your average website, the "purple part" is just not usually the biggest bottleneck – I will readily admit that.
 
-What I'm going to cover is mostly going to be interesting to people who really focus on performance, so they're interested in everything that can impact it, including somewhat unusual things like style/layout.
-
-I'm also targeting authors of frameworks and design systems, since their decisions may be multiplied several times, so
-it's important to get all the details right.
-
-I'm also speaking to people working on large web apps – static content sites
-usually don't have performance problems with style/layout, but big web apps often do.
-
-I'm also speaking to anyone interested in how browsers work. Some of this stuff is just plain interesting!
-
 --
 - Performance engineers
+
+???
+
+What I'm going to cover is mostly going to be interesting to people who really focus on performance, so they're interested in everything that can impact it, including somewhat unusual things like style/layout.
 
 --
 - Framework authors
 
+???
+
+I'm also targeting authors of frameworks and design systems, since their decisions may be multiplied several times, so
+it's important to get all the details right.
+
 --
 - Folks working on large web apps
 
+???
+
+I'm also speaking to people working on large web apps – static content sites
+usually don't have performance problems with style/layout, but big web apps often do.
+
 --
 - Anyone interested in how browsers work
+
+???
+
+I'm also speaking to anyone interested in how browsers work. Some of this stuff is just plain interesting!
 
 ---
 
@@ -199,19 +216,25 @@ Let's focus on the style/layout part
 
 So let's break down style and layout calculation first. These are two separate steps.
 
-The input of these steps is the state of the DOM – all the CSS rules and DOM nodes.
+--
+.float-left[![TODO](./images/style.png)]
+
+???
+
+With style, we're figuring out which CSS rules apply to which elements and computing styles.
+
+--
+.float-right[![TODO](./images/layout.png)]
+
+<footer class="muted">Illustrations by <a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/">Lin Clark</a></footer>
+
+???
+
+With layout, we're figuring out how to place those elements geometrically on the page
 
 The output of these steps is the ["layout tree" (or "render tree")](https://browser.engineering/layout.html#the-layout-tree),
 and that's the thing
 that is passed to the paint (green) step that actually lays out pixels on the screen.
-
---
-- Style
-  - Figuring out which CSS rules apply to which elements and computing styles
-
---
-- Layout
-  - Figuring out how to lay those elements out geometrically on the page
 
 ---
 
@@ -363,38 +386,46 @@ figures out where to actually place things within the given browser window, with
 
 # What slows down style/layout
 
-|                                 | Style | Layout |
-|---------------------------------|:-----:|:------:|
-| Complexity of CSS selectors     |   ✅   |   ❌    |
-| Complexity of layout            |   ❌   |   ✅    |
-| Size/depth of DOM               |   ✅   |   ✅    |
+|                       | Style | Layout |
+|-----------------------|:-----:|:------:|
+| Complexity of CSS selectors |   ✅   |   ❌    |
+| Size of CSS           |   ✅   |   ❌    |
+| Complexity of layout  |   ❌   |   ✅    |
+| Size/depth of DOM     |   ✅   |   ✅    |
 | Repeated re-renders (thrashing) |   ✅   |   ✅    |
 
 ???
 
-At a high level, if you're seeing a large amount of time spent in style or layout, it usually comes down to one of these four things.
+At a high level, if you're seeing a large amount of time spent in style or layout, it usually comes down to one of these things.
+
+--
+<pointing-arrow></pointing-arrow>
+<pointing-arrow show-previous="1"></pointing-arrow>
+
+???
 
 Either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation. Note this has no effect on layout calculation.
 
+--
+<pointing-arrow></pointing-arrow>
+
+???
+
 Or your layout itself, i.e. the geometry of the page, is very large or complex, which slows down layout calculation. Note this has no effect on style calculation.
+
+--
+<pointing-arrow></pointing-arrow>
+
+???
 
 Or your DOM is very large. A bigger DOM just means more work for the browser to do. This affects both style and layout.
 
+--
+<pointing-arrow></pointing-arrow>
+
+???
+
 Or you are doing repeated re-renders over time, also called thrashing, which slows down both style and layout.
-
-This is a lot to unpack, so let's go over each of these points in the rest of the talk.
-
---
-<pointing-arrow></pointing-arrow>
-
---
-<pointing-arrow></pointing-arrow>
-
---
-<pointing-arrow></pointing-arrow>
-
---
-<pointing-arrow></pointing-arrow>
 
 ---
 
@@ -568,20 +599,10 @@ You can see how this would be inefficient, especially if it runs every time the 
 ---
 
 # Style optimization 1: hash maps
-```js
-// Tag names
-{ "span": ["span"], "a": ["a.baz"] }
-```
 
-```js
-// IDs
-{ "bar": ["#bar"] }
-```
-
-```js
-// Classes
-{ "foo": [".foo"], "baz": ["a.baz"] }
-```
+- `span` → `span`, `a` → `a.baz`
+- `bar` → `#bar`
+- `foo` → `.foo`, `baz` → `a.baz`
 
 ???
 
@@ -624,9 +645,9 @@ class: fill-custom
 
 ???
 
-So we still have to traverse the descendants of `.foo` to try to find all the `.bar` elements.
+So we have to traverse the descendants of `.foo` to try to find all the `.bar` elements.
 
-Thanks to the hashmap, we can instantly find the `.foo` elements, but this is still pretty inefficient. We're walking a
+Thanks to the hashmap, we can quickly find the `.foo` elements, but this is still pretty inefficient. We're walking a
 lot of DOM nodes just to find the `.bar` elements.
 
 ---
@@ -634,13 +655,19 @@ lot of DOM nodes just to find the `.bar` elements.
 # Style optimization 2: right-to-left
 
 ```css
-.foo .bar {}
+.foo .bar
 ```
+
+<span class="big">
+⬅️
+</span>
 
 ???
 
 So here's another optimization we can do. How about instead of walking from the left to the right, we evaluate the
 selector from _right to left_?
+
+So instead of going `foo` then `bar`, we would go `bar` then `foo`.
 
 ---
 
@@ -672,7 +699,7 @@ works out really well for most DOM trees.
 # Problem: generic descendants
 
 ```css
-.foo div {}
+.foo div
 ```
 
 ???
@@ -770,18 +797,40 @@ Bloom filters can also be tuned to minimize the number of false positives. It's 
 
 ???
 
-So what's in the Bloom filter? Well, originally it was only IDs, classes, and tags. In 2018 WebKit added attributes, and
+So what's in the Bloom filter?
+
+--
+<pointing-arrow></pointing-arrow>
+<pointing-arrow show-previous="1"></pointing-arrow>
+<pointing-arrow show-previous="2"></pointing-arrow>
+
+???
+
+Originally it was only IDs, classes, and tags.
+
+--
+<pointing-arrow></pointing-arrow>
+<pointing-arrow show-previous="1"></pointing-arrow>
+
+???
+
+In 2018 WebKit added attributes, and
 Firefox and Chrome added them in 2021 when I filed bugs on them (you're welcome). Note that the attribute optimization
 only applies to attribute names, not values, but attribute value selectors can kind of piggyback off of them because
 the browser will quickly check if any ancestors even have the attribute name, before checking the value.
 
-Other stuff could be optimized in theory, but as far as I know no browsers have expanded the Bloom filter to anything else.
+--
+<pointing-arrow></pointing-arrow>
+
+???
+
+Other stuff could be optimized in theory, but last I checked (late 2022), no browsers have expanded the Bloom filter to anything else.
+
+Bugs adding attributes:
 
 - https://trac.webkit.org/changeset/229090/webkit
 - https://bugs.chromium.org/p/chromium/issues/detail?id=1196474
 - https://bugzilla.mozilla.org/show_bug.cgi?id=1704551
-
-Source:
 
 Bloom filter source:
 
@@ -789,33 +838,35 @@ Bloom filter source:
 - https://chromium.googlesource.com/chromium/src/+/refs/tags/107.0.5258.1/third_party/blink/renderer/core/css/selector_filter.cc#43
 - https://phabricator.services.mozilla.com/source/mozilla-central/browse/default/servo/components/style/bloom.rs$114
 
---
-<pointing-arrow></pointing-arrow>
-<pointing-arrow show-previous="1"></pointing-arrow>
-<pointing-arrow show-previous="2"></pointing-arrow>
-
---
-<pointing-arrow></pointing-arrow>
-<pointing-arrow show-previous="1"></pointing-arrow>
-
---
-<pointing-arrow></pointing-arrow>
 
 ---
 
 # Browser style optimizations
 
-- WebKit CSS JIT (2014)
-- Firefox Stylo (2017)
-- WebKit `:has` (2022)
-- etc.
-
 ???
 
 Now, there are many more browser style optimizations than what I've mentioned here. Here are a few more.
 
-WebKit has an interesting post from a few years ago about how they compile their selector matchers. Firefox brought their Stylo
-engine over from Servo, which is a very fast multithreaded style calculation engine. And recently both Webkit and Chromium
+--
+- WebKit CSS JIT (2014)
+
+???
+WebKit has a JIT where they actually compile some selectors directly to assembly. Pretty impressive!
+
+--
+- Firefox Stylo (2017)
+
+???
+
+Firefox brought their Stylo  engine over from Servo, which is a very fast multithreaded style calculation engine and
+also has some other clever optimizations like the "Rule Tree."
+
+--
+- WebKit `:has` (2022)
+
+???
+
+And recently both Webkit and Chromium
 implemented `:has()`, which can be thought of as an ancestor selector. (How did they make this fast? You guessed it... another
 Bloom filter. Like the other one, this one has classes, IDs, tags, and attributes, but it also adds `:hover`, and they hint
 that they may add other pseudo classes later.)
@@ -1088,10 +1139,10 @@ you most of the performance wins. But you can try this one out too.
 
 # Encapsulation
 
-|           | Encapsulates |
-|-----------------|-----------------|
-| Shadow DOM      | Style           |
-| CSS containment | Layout          |
+|           | Encapsulates | Improves first calc? |
+|-----------------|-----------------|----------------------|
+| Shadow DOM      | Style           | Yes                  |
+| CSS containment | Layout          | No                   |
 
 ???
 
@@ -1101,6 +1152,11 @@ calculation. And then this is CSS containment, which encapsulates your _layout_ 
 
 So if you have high style costs, don't go thinking that CSS containment will help you! And if you have high layout costs,
 shadow DOM won't help there either.
+
+Another thing to be aware of is that CSS containment can only make _subsequent_ layouts faster. Some browsers like Firefox
+have experimented with doing layouts in parallel, but since no browser actually implements parallel layout, CSS
+containment cannot speed up the first layout pass. Whereas for style calculation, shadow DOM can actually improve
+style performance for the first style calculation.
 
 ---
 
@@ -1329,21 +1385,57 @@ the browser's rendering loop. The total time spent is the same. So this DevTools
 
 ---
 
-# Invalidation optimizations
+# Beware excessive rAFs
+
+```js
+requestAnimationFrame(() => {
+  
+})
+```
 
 ???
 
-Invalidation is another area where it's good to be aware of browser optimizations. Imagine if, every time a single
-element were invalidated, the browser had to recalculate all the styles and layout for the entire DOM! Building a complex
-web app would be impossible.
+Sometimes invalidation can be really tricky to debug. For instance, 
+would you expect this empty rAF callback to trigger a style invalidation?
 
-So browsers take lots of shortcuts. We already mentioned some ways we can help give the browser shortcuts, such as
-shadow DOM and CSS containment, but there are some other ones to be aware of.
+---
 
+class: contain-vertical
+
+.center[![TODO](./images/style-battery-drain.png)]
+
+???
+
+As it turns out, it does, and I have a [repro](http://bl.ocks.org/nolanlawson/raw/3139d2e2d609531e1ca55b6542ef9705/)
+that reproduces this in all 3 engines. (See also [Chrome bug](https://bugs.chromium.org/p/chromium/issues/detail?id=997274).)
+
+This can be a big problem because some people like to use rAF to measure stuff, or check the layout of the page,
+so they may be calling rAF on every frame. If you do this, then you may end up just paying constant style calculation
+costs and causing a battery drain on your page.
+
+And by the way, you might write a rAF timer with no problem, and then someone adds a certain CSS rule that
+happens to trigger hte browser to decide it needs to invalidate on every rAF, so this can be really tricky to debug.
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/empty-raf-trace.png)]
+
+???
+
+Sadly, the Chrome DevTools (or any browser DevTools) do not actually tell you what caused the invalidation.
+It just says "Schedule Style Calculation." So you just have to know.
 ---
 
 # Invalidation optimizations
 
+???
+
+Now that said, there are also cases where it seems like an invalidation _should_ happen, but it doesn't, because
+browsers have tons of optimizations to try to avoid doing unnecessary work.
+
+--
 ```js
 for (let i = 0; i < 1000; i++) {
   el.style.width = '1px'
@@ -1550,7 +1642,7 @@ And the browser Dev Tools, in all three browsers, are frankly not very good at d
 
 ```sql
 
-SELECT Order.id, Customer.name, Order.date
+SELECT Order.date, Customer.name
 FROM Order
 INNER JOIN Customer ON Order.customerId = Customer.id;
 ```
@@ -1567,7 +1659,7 @@ have no idea how exactly the SQL engine does an `INNER JOIN`.
 
 ```sql
 EXPLAIN
-SELECT Order.id, Customer.name, Order.date
+SELECT Order.date, Customer.name
 FROM Order
 INNER JOIN Customer ON Order.customerId = Customer.id;
 ```
@@ -1580,14 +1672,14 @@ But it can tell you, with `EXPLAIN`.
 
 class: contain-vertical
 
-.center[![TODO](./images/sql-explain.png)]
+.center[![TODO](./images/sql-explain-2.png)]
 
 ???
 
 If you ask Postgres to explain itself, it'll tell you exactly what algorithm it implemented, and how much time it
 spent in each part of the algorithm. So now you can map this back to the declarative query you wrote.
 
-(Image courtesy of [StackOverflow](https://stackoverflow.com/questions/42459572/how-to-export-explain-data-output-from-pgadmin-4).)
+[Image source](https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-explain/)
 
 ---
 
@@ -1605,9 +1697,27 @@ Going back to my original metaphor of the stick shift and the car, I'd really li
 more insights into what the browser is doing. It's great to listen to the engine and rely on intuition, but
 the browser vendors know a lot more than me about how their engine is implemented, so they could provide more details.
 
-A full "SQL EXPLAIN," but for CSS, would be amazing!
-
 [Image source: Flickr](https://www.flickr.com/photos/lex-photographic/26665512361)
+
+---
+
+| Task                                                                                                     | ms  |
+|:---------------------------------------------------------------------------------------------------------|-----|
+| **Style**                                                                                                | 400 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;Bloom filter misses                                                           | 200 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;:has() selectors                                                              | 130 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;Class selectors                                                               | 50  |
+| &nbsp;&nbsp;└──&nbsp;&nbsp;Custom properties                                                             | 20  |
+|                                                                                                          |     |
+| **Layout**                                                                                               | 600 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;`<nav>` (grid)                                                                | 300 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;`.sidebar` (flexbox)                                                          | 200 |
+| &nbsp;&nbsp;└──&nbsp;&nbsp;`<main>` (normal flow)                                                                    | 100 |
+
+
+???
+
+A full "SQL EXPLAIN," but for CSS, would be amazing! Here is a mockup.
 
 ---
 
@@ -1616,6 +1726,11 @@ A full "SQL EXPLAIN," but for CSS, would be amazing!
 ## 📃 nolanlawson.github.io/style-talk-2022
 
 ## 🌎 nolanlawson.com
+
+<footer class="muted">
+  Thanks to Emilio Cobos Álvarez, Manuel Rego Casasnovas, and Daniel Libby for help with research for this talk.
+  <br/>Also thanks to Rune Lillesveen and Steinar H Gunderson for answering my Blink style bug questions.
+</footer>
 
 ???
 

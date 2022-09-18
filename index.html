@@ -148,12 +148,14 @@
             display: block;
             text-align: left;
             float: left;
+            width: 50%;
         }
 
         .remark-slide-content .float-right {
             display: block;
             text-align: right;
             float: right;
+            width: 50%;
         }
 
         tr.arrowed {
@@ -171,6 +173,29 @@
             position: absolute;
             font-size: 3rem;
             margin-left: 1rem;
+        }
+
+        span.big {
+            font-size: 3em;
+        }
+
+        /* Two-column layouts */
+        .left-column  { width: 49%; float: left; }
+        .right-column { width: 49%; float: right; }
+
+        .left-column-33  { width: 33%; float: left; }
+        .right-column-66 { width: 66%; float: right; }
+
+        .left-column-66  { width: 66%; float: left; }
+        .right-column-33 { width: 33%; float: right; }
+
+        .left-column-66 img {
+            width: 100%;
+            object-fit: contain;
+        }
+        .remark-slide-content .float-left img, .remark-slide-content .float-right img {
+            width: 100%;
+            object-fit: contain;
         }
     </style>
   </head>
