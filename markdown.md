@@ -117,26 +117,6 @@ it's worth looking into. And even for the other ones, if you manage to find a qu
 
 ---
 
-exclude: true
-
-<h1 class="smaller">Three news sites</h1>
-
-.center[![TODO](./images/news-sites-2.png)]
-
-???
-
-Now if we break apart the Rendering into Style/Layout, you can see that sometimes Style is more expensive than Layout,
-sometimes it's about the same, and sometimes Layout is more expensive than Style. Keep this in mind for later.
-
-And as it turns out, there _are_ ways to understand what's
-going on in the browser's style/layout engine, and even to reduce the time spent.
-
-In this talk, I'd like to shed some light about the "purple part,"
-talk a little bit about how the browser works under the hood, and give you some tools for making the browser spend
-less time here.
-
----
-
 # Target audience
 
 ???
@@ -547,6 +527,18 @@ The proof is in the pudding: if you profile your site and you see large style co
 - https://calibreapp.com/blog/css-performance
 - https://ecss.benfrain.com/appendix2.html
 - https://meiert.com/en/blog/performance-of-css-selectors-2/
+
+---
+
+<h1 class="smaller">Three news sites</h1>
+
+.center[![TODO](./images/news-sites-style-layout.png)]
+
+???
+
+So for instance, if we take our three news sites from earlier, and if I split their style/layout performance into
+style and layout, we can see that style is occasionally pretty big. In fact, for the first site, it's spending
+slightly more time in style than in layout.
 
 ---
 
@@ -1040,8 +1032,6 @@ And in case you're wondering, yes, if a selector has both a fast (e.g. class) an
 browser will use the fast selector to fast-reject before moving on to the slow selector.
 
 ---
-
-exclude: true
 
 .center[![TODO](./images/shadow-dom-6.png)]
 
