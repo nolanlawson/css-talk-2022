@@ -1007,6 +1007,8 @@ for elements outside of it.
 If you recall our naive algorithm from earlier, where we check every DOM element against every CSS rule, this effectively
 cuts down the number of elements and rules that need to be checked against each other.
 
+[Blog post with details](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/)
+
 ---
 
 # Use scoped styles
@@ -1039,6 +1041,8 @@ browser will use the fast selector to fast-reject before moving on to the slow s
 
 ---
 
+exclude: true
+
 .center[![TODO](./images/shadow-dom-6.png)]
 
 ???
@@ -1054,6 +1058,21 @@ it's extremely unlikely to affect performance.
 Firefox is incredibly fast in this chart because of their Stylo engine. If every browser were like Firefox, then I wouldn't have much
 material for this part of the talk! This is what makes me optimistic that, someday, we'll be able to use whatever zany
 selectors we want, and it won't matter much for web performance, even on web apps with tons of CSS.
+
+---
+
+<h1 class="smaller">Concatenate stylesheets (Chromium-only)</h1>
+
+.center-contain-vertical[![TODO](./images/chrome-stylesheets-2.png)]
+
+???
+
+This optimization only applies to Chromium.
+
+It turns out that in Chromium, [one big stylesheet is faster for style calculation than multiple small stylesheets](https://bugs.chromium.org/p/chromium/issues/detail?id=1337599). This may change tomorrow, and it has no impact on Safari or Firefox, but it's something to be aware of.
+
+So the advice would be to concatenate stylesheets as much as possible, similar to how we do concatenation and chunking
+for JavaScript modules. Obviously there are implications for cache performance here as well, so don't over-concatenate.
 
 ---
 
