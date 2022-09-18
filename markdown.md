@@ -1509,14 +1509,6 @@ you'll see a very curious thing. We pay the cost of the `getBoundingClientRect`s
 cost, not purple cost. Style and layout is only calculated once. We're just paying the cost of creating the rectangle
 objects – the browser has optimized everything else.
 
----
-
-class: fill-custom
-
-<layout-example-1></layout-example-1>
-
-???
-
 Now imagine applying that to the entire page. And think of all the ways that a browser might have optimized to make
 sure that it doesn't redo work that it's already done. If something changes in one small part of the page,
 the browser wants to avoid having to redo work elsewhere.
