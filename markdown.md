@@ -212,9 +212,8 @@ With style, we're figuring out which CSS rules apply to which elements and compu
 
 With layout, we're figuring out how to place those elements geometrically on the page
 
-The output of these steps is the ["layout tree" (or "render tree")](https://browser.engineering/layout.html#the-layout-tree),
-and that's the thing
-that is passed to the paint (green) step that actually lays out pixels on the screen.
+The output of these steps is the calculated layout of the page, which is
+passed to the paint (green) step that actually lays out pixels on the screen.
 
 ---
 
@@ -236,9 +235,10 @@ h2 {
 
 ???
 
-So style calculation is about figuring out which elements have which CSS rules. So let's take a simple example.
+So style calculation is about figuring out which elements have which CSS rules. The output of this
+is called the ["layout tree" (or "render tree")](https://browser.engineering/layout.html#the-layout-tree).
 
-In this case, we have a 5px-padding h1 and a 10px-padding h2. So style calculation is the process of figuring out that
+Let's take a simple example. In this case, we have a 5px-padding h1 and a 10px-padding h2. So style calculation is the process of figuring out that
 
 ---
 
@@ -370,12 +370,11 @@ figures out where to actually place things within the given browser window, with
 
 # What slows down style/layout
 
-|                       | Style | Layout |
-|-----------------------|:-----:|:------:|
-| Complexity of CSS selectors |   ✅   |   ❌    |
-| Size of CSS           |   ✅   |   ❌    |
-| Complexity of layout  |   ❌   |   ✅    |
-| Size/depth of DOM     |   ✅   |   ✅    |
+|                                 | Style | Layout |
+|---------------------------------|:-----:|:------:|
+| Size/complexity of CSS          |   ✅   |   ❌    |
+| Complexity of layout            |   ❌   |   ✅    |
+| Size/depth of DOM               |   ✅   |   ✅    |
 | Repeated re-renders (thrashing) |   ✅   |   ✅    |
 
 ???
@@ -384,11 +383,10 @@ At a high level, if you're seeing a large amount of time spent in style or layou
 
 --
 <pointing-arrow></pointing-arrow>
-<pointing-arrow show-previous="1"></pointing-arrow>
 
 ???
 
-Either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation. Note this has no effect on layout calculation.
+Either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation. Computations like `calc`s and custom properties can also play a role here. Note this has no effect on layout calculation.
 
 --
 <pointing-arrow></pointing-arrow>
@@ -1617,7 +1615,7 @@ added recently in Chromium this year. If you enable `blink.debug` when using Chr
 
 class: contain-vertical
 
-.center[![TODO](./images/selector-stats-3.png)]
+.center[![TODO](./images/selector-stats-2.png)]
 
 ???
 
