@@ -921,7 +921,7 @@ So trim that unused CSS!
 # Avoid excessive complexity in selectors
 
 ```css
-:not([foo^="bar"]) div:nth-of-type(2n) :nth-child(3) > * ~ * {}
+[class~="foo"] :nth-child(3) > * ~ * {}
 ```
 
 ???
@@ -974,6 +974,31 @@ Note WebKit [optimized attributes recently](https://github.com/WebKit/WebKit/com
 
 ---
 
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/blink-debug.png)]
+
+???
+
+To actually understand which selectors are slow, there actually is [a new tool](https://bugs.chromium.org/p/chromium/issues/detail?id=1316060)
+released this year for Chromium browsers was added recently in Chromium this year. If you enable `blink.debug` when using Chrome tracing...
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/selector-stats-2.png)]
+
+???
+
+Then you can get this view of the "selector stats." If you sort by elapsed time, you can actually see your
+most expensive CSS rules ranked from most to least expensive. Note that this may actually be an underestimate,
+because of how selectors play into invalidation, which I'll discuss later.
+
+---
+
 # Use shadow DOM
 
 ```html
@@ -1009,10 +1034,7 @@ cuts down the number of elements and rules that need to be checked against each 
 /* Input */
 :nth-child(2) div
 
-/* Vue */
-:nth-child(2) div[xxx]
-
-/* Svelte */
+/* Svelte output */
 .xxx:nth-child(2) div.xxx
 ```
 
@@ -1033,7 +1055,7 @@ browser will use the fast selector to fast-reject before moving on to the slow s
 
 ---
 
-.center[![TODO](./images/shadow-dom-6.png)]
+.center[![TODO](./images/shadow-dom-stats.png)]
 
 ???
 
@@ -1601,29 +1623,6 @@ The really interesting ones are:
 
 This tells us how many CSS rules matched, and how many were rejected using the "fast reject" method (i.e. the Bloom
 filter) and how many were rejected more slowly (using e.g. DOM traversal).
-
----
-
-class: contain-vertical
-
-.center[![TODO](./images/blink-debug.png)]
-
-???
-
-To get even more detail, a [cool new feature](https://bugs.chromium.org/p/chromium/issues/detail?id=1316060) was
-added recently in Chromium this year. If you enable `blink.debug` when using Chrome tracing...
-
----
-
-class: contain-vertical
-
-.center[![TODO](./images/selector-stats-2.png)]
-
-???
-
-Then you can get this view of the "selector stats." If you sort by elapsed time, you can actually see your
-most expensive CSS rules ranked from most to least expensive. This is a really cool tool, and I hope it makes
-its way into the DevTools eventually! But for now, you can use Chrome tracing.
 
 # Conclusion
 
