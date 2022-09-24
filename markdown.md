@@ -22,8 +22,8 @@ Hi, my name is Nolan Lawson and today I'd like to talk to you about CSS runtime 
 
 First off, who am I?
 
-Most likely if you've seen me on the internet, it's from [my blog](https://nolanlawson.com) where I talk about performance, accessibility, and
-various web development topics.
+Most likely if you've seen me on the internet, it's from [my blog](https://nolanlawson.com) where I talk about performance, 
+accessibility, web components, and various web development topics.
 
 I was on the Microsoft Edge performance team for a couple years, then moved to the performance team at Salesforce,
 and now I work on Lightning Web Components at Salesforce, which is our JavaScript framework.
@@ -39,12 +39,12 @@ class: contain-vertical
 I'd like to start off with a story. When I was learning to drive as a teenager, my car was a stick shift (manual transmission).
 These are much more common in Europe than in the U.S., but growing up in the Seattle area, this is what I had.
 
-It was really difficult! But one thing I like about manual transmissions is that you feel more in tune with what the car
-is doing. Based on the sounds of the engine and how the car reacted to my actions, I developed a "feel" for when to shift
-from one gear to another, or how to do things like "engine braking," which can
-actually be a [more efficient way to use fuel](https://jalopnik.com/here-is-when-engine-braking-can-save-more-gas-than-coas-1819484925).
+It was really difficult! But one thing I like about stick shifts is that you feel more in tune with what the car
+is doing. By listening to the sounds of the engine, I developed a feel for when to shift
+from one gear to another, or how to do things like "engine braking," which is
+actually [an efficient use of fuel](https://jalopnik.com/here-is-when-engine-braking-can-save-more-gas-than-coas-1819484925).
 
-[Image source: Flickr](https://www.flickr.com/photos/154073030@N05/28577829138)
+[Image source](https://www.flickr.com/photos/154073030@N05/28577829138)
 
 ---
 
@@ -54,17 +54,16 @@ class: contain-vertical
 
 ???
 
-Now of course, I have no idea how an internal combustion engine actually works. All I know is that it's a hugely complicated thing.
-But I learned how to shift gears or do "engine braking" just based on my observations about how the engine was working.
+Of course, I have no idea how an internal combustion engine actually works. It's a hugely complex thing. But by listening
+to the engine and seeing how it reacted to my actions, I learned a lot about how to use an engine efficiently.
 
-This is sort of how I feel about web performance and the browser. It's an enormously complicated engine, it's written in languages I'm not really
-handy with (C, C++, Rust), and I don't understand everything about how it works. But through observation of how it responds
-to my inputs, I can try to be a better web developer, and write more efficient web apps.
+This is sort of how I feel about web performance. A browser engine is an enormously complicated thing, and I'm not a C/C++/Rust developer.
 
-And of course, if I actually knew how an internal combustion engined worked, I could probably be a better driver! But I wouldn't
-have to know all the little details – I only need to know just enough to improve how I write web sites.
+But through observation of how it responds to my inputs, I can try to be a better web developer, and write more efficient web apps.
 
-[Image source: Flickr](https://www.flickr.com/photos/ell-r-brown/3824067984/)
+I also think that if you know _just a bit_ about how the engine works, you can be an even better web developer.
+
+[Image source](https://www.flickr.com/photos/ell-r-brown/3824067984/)
 
 ---
 
@@ -74,7 +73,7 @@ have to know all the little details – I only need to know just enough to impro
 
 So to take it back to browsers, let's look at a performance trace like this one (from the Chrome DevTools).
 
-If you've worked in performance for a while, you've probably spent a lot of time looking at traces like these.
+If you've worked in performance for a while, you've probably spent a lot of time with these.
 
 And there are two main parts here: the yellow (JavaScript) part, and the purple (style/layout) part.
 
@@ -85,8 +84,8 @@ JavaScript (yellow part)
 
 ???
 
-If you're an experienced web developer, you might look at the JavaScript side of this equation and feel pretty comfortable with it. It has
-function names we recognize. We see our JavaScript framework doing work, we see our state library crunching data, we see the names of methods we wrote ourselves.
+If you're an experienced web dev, you might look at the JavaScript side and feel pretty comfortable with it. It has
+function names we recognize. We see our frameworks and libraries doing work, and our own code doing work.
 
 --
 .float-right[
@@ -95,8 +94,8 @@ Style/Layout (purple part)
 
 ???
 
-But a lot of us probably look at the purple part and think, "Well, that's just the browser doing browser things." I
-couldn't possibly understand what that's about. It's like the big complicated engine I showed earlier.
+But a lot of folks look at the purple part, and it's kind of a black box. They think, "That's just the browser doing browser things. I
+couldn't possibly understand that." So we shrug our shoulders and don't try to optimize it as much as the yellow part.
 
 ---
 <h1 class="smaller">Three news sites</h1>
@@ -105,15 +104,15 @@ couldn't possibly understand what that's about. It's like the big complicated en
 
 ???
 
-But the thing is, sometimes that purple part is pretty big. So it has a real impact on the performance of our web site.
+But the thing is, sometimes that purple part is pretty big. It can have a real impact on web performance.
 
-Just to prove that style/layout can be important, I ran WebPageTest (simulated Moto G4, 4G) on three major news websites.
-Then I used Chrome DevTools to categorize the time spent on the main thread as Loading (network), Scripting (JS),
+To prove my point, I ran WebPageTest (simulated Moto G4, 4G) on three major news websites that I chose at random.
+Then I categorized the time spent on the main thread in the trace as Loading (network), Scripting (JS),
 Rendering (Style/Layout), or Paint.
 
 As you can see, the purple part is not the most important part, but it can be quite big. For the third site in particular,
 it's worth looking into. And even for the other ones, if you manage to find a quick win, then there are 2.6s and 3.5s
-(respectively) that can be improved!
+(respectively) that can be improved! Finding that time in a large JavaScript app can be hard.
 
 ---
 
@@ -121,31 +120,31 @@ it's worth looking into. And even for the other ones, if you manage to find a qu
 
 ???
 
-Now first off, I should mention who this talk is for. I'm going to go into a lot of details, and these details aren't
-going to be relevant to everyone. For your average website, the "purple part" is just not usually the biggest bottleneck – I will readily admit that.
+I should mention who I designed this talk for. A few groups of people:
 
 --
 - Performance engineers
 
 ???
 
-What I'm going to cover is mostly going to be interesting to people who really focus on performance, so they're interested in everything that can impact it, including somewhat unusual things like style/layout.
+Perf folks are going to be interested in every part of the performance equation, including style/layout, even if it's
+not the #1 most important thing all of the time.
 
 --
 - Framework authors
 
 ???
 
-I'm also targeting authors of frameworks and design systems, since their decisions may be multiplied several times, so
-it's important to get all the details right.
+If you're building a JavaScript framework or design system, then really small decisions you make about how to architect
+your CSS or HTML can have large cascading effects downstream.
 
 --
 - Folks working on large web apps
 
 ???
 
-I'm also speaking to people working on large web apps – static content sites
-usually don't have performance problems with style/layout, but big web apps often do.
+Large web apps (e.g. SPAs) usually tend to have bigger problems with style/layout than static content sites. Although
+as you saw with the 3 news sites, this isn't always the case.
 
 --
 - Anyone interested in how browsers work
@@ -168,15 +167,16 @@ To understand the purple part, we first need to start with how browsers render c
 
 This graphic is taken from [a blog post on web dot dev](https://web.dev/rendering-performance/#the-pixel-pipeline) where they call it "the pixel pipeline."
 
-You can see that the main steps described here are JavaScript, style/layout, and paint/composite. Helpfully, these
+The main steps here are JavaScript, style/layout, and paint/composite. Helpfully, these
 are color-coded in the same way they would be in the Chrome DevTools.
 
 The first step, JavaScript, is where we run some JavaScript that modifies the DOM. Typically this will be your JavaScript
 framework rendering, such as React doing its virtual DOM diffing and then eventually putting elements into the DOM.
 
-The next two steps, style and layout, involve applying your CSS to those DOM elements.This is the main thing I want to focus on in this talk.
+The next two steps, style and layout, involve applying your CSS to those DOM elements and then laying them out on the page. This is my focus.
 
-The last two steps, paint and composite, are about actually writing pixels to the screen and doing animations. I don't want to focus much on these steps (the green part), but I will mention them briefly just to separate them from the purple part.
+The last two steps, paint and composite, are about actually writing pixels to the screen and doing animations. This part is largely
+out of scope for this talk.
 
 ---
 
@@ -186,7 +186,7 @@ The last two steps, paint and composite, are about actually writing pixels to th
 
 ???
 
-Let's focus on the style/layout part
+Let's focus on the style/layout part.
 
 ---
 
@@ -210,7 +210,7 @@ With style, we're figuring out which CSS rules apply to which elements and compu
 
 ???
 
-With layout, we're figuring out how to place those elements geometrically on the page
+With layout, we're figuring out how to place those elements geometrically on the page.
 
 The output of these steps is the calculated layout of the page, which is
 passed to the paint (green) step that actually lays out pixels on the screen.
@@ -303,7 +303,8 @@ So in a sense, it's almost as if the browser is taking this page, and turning it
 Conceptually, this is what style calculation is: it's giving us the same page we would have had if we had used
 inline styles.
 
-It's also computing the `em`s, `rem`s, etc. and turning them into `px`s, but this has less of an impact on perf in my experience.
+It's also computing the `em`s, `rem`s, etc. and turning them into `px`s, as well as resolving custom properties, `calc`s, etc, 
+but this has less of an impact on perf in my experience.
 
 ---
 
@@ -428,9 +429,8 @@ problem with style calculation, layout calculation, or both. Because these two t
 
 ???
 
-These two look the same on the surface because they're both purple. But in one trace, we have huge style costs and
-very little layout cost, and in the other, we have small style costs but large layout costs. The causes of slowness
-in these two cases is very different, and if you confuse them, then you can very easily go down the wrong track.
+These two look similar because they're both purple. But in one trace, we have huge style costs, and in the other, 
+we have huge layout costs. The causes of slowness in these two cases is very different!
 
 If you don't remember anything else from my talk, please remember this: style and layout are not the same thing! And you
 can actually reason about why one is expensive versus the other.
@@ -468,7 +468,7 @@ versus the other?
 
 ???
 
-Well, speaking in generalities, we can say that style calculation is about the part outside of the braces (i.e. selectors that locate elements on the page)
+Well, speaking in generalities, we can say that style calculation is about the part outside of the braces (i.e. selectors that locate elements on the page).
 
 ---
 
@@ -519,7 +519,9 @@ Now first off, I want to clear a bit of a misunderstanding. There's a very commo
 
 Now to be clear, this is probably true for most sites. However, sometimes you have a large webapp with a lot of CSS, or sometimes your framework or design system may have a flaw that repeats some unperformant CSS selectors all over the place.
 
-The proof is in the pudding: if you profile your site and you see large style costs, like in the trace I showed above, then you have a CSS selector problem, full stop. So sure, don't prematurely overoptimize, but if you recognize you have a problem, then it's time to solve it.
+The proof is in the pudding: if you profile your site and you see large style costs, like in the trace I showed above, 
+then you very likely have a CSS selector problem, full stop. So sure, don't prematurely overoptimize, 
+but if you recognize you have a problem, then it's time to solve it.
 
 - https://calendar.perfplanet.com/2011/css-selector-performance-has-changed-for-the-better/
 - https://calibreapp.com/blog/css-performance
@@ -536,7 +538,7 @@ The proof is in the pudding: if you profile your site and you see large style co
 
 So for instance, if we take our three news sites from earlier, and if I split their style/layout performance into
 style and layout, we can see that style is occasionally pretty big. In fact, for the first site, it's spending
-slightly more time in style than in layout.
+slightly more time in style than in layout. I've also seen traces where style is almost 100% of the style/layout cost.
 
 ---
 
