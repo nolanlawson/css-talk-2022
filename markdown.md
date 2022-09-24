@@ -974,8 +974,6 @@ Note WebKit [optimized attributes recently](https://github.com/WebKit/WebKit/com
 
 ---
 
----
-
 class: contain-vertical
 
 .center[![TODO](./images/blink-debug.png)]
@@ -1033,7 +1031,9 @@ cuts down the number of elements and rules that need to be checked against each 
 ```css
 /* Input */
 :nth-child(2) div
+```
 
+```css
 /* Svelte output */
 .xxx:nth-child(2) div.xxx
 ```
