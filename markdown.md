@@ -517,11 +517,10 @@ is the part outside of the braces.
 
 Now first off, I want to clear a bit of a misunderstanding. There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote from my colleague Greg Whitworth, but there are others.
 
-Now to be clear, this is probably true for most sites. However, sometimes you have a large webapp with a lot of CSS, or sometimes your framework or design system may have a flaw that repeats some unperformant CSS selectors all over the place.
+Now to be clear, this is probably true for most sites. However, sometimes you have a large webapp with a lot of CSS, or sometimes your framework or design system may have a flaw that repeats some unperformant CSS selectors all over the place. So I think this may be true at the micro level, but not at the macro level.
 
-The proof is in the pudding: if you profile your site and you see large style costs, like in the trace I showed above, 
-then you very likely have a CSS selector problem, full stop. So sure, don't prematurely overoptimize, 
-but if you recognize you have a problem, then it's time to solve it.
+Also the proof is in the pudding: if you have high style calculation costs, then it is probably worth looking into selector performance,
+since that's the main cost in style calculation.
 
 - https://calendar.perfplanet.com/2011/css-selector-performance-has-changed-for-the-better/
 - https://calibreapp.com/blog/css-performance
@@ -542,7 +541,7 @@ slightly more time in style than in layout. I've also seen traces where style is
 
 ---
 
-# Style performance
+# Naïve style calculation
 
 ```js
 for (const element of page) {
@@ -596,9 +595,9 @@ You can see how this would be inefficient, especially if it runs every time the 
 
 # Style optimization 1: hash maps
 
-- `span` → `span`, `a` → `a.baz`
-- `bar` → `#bar`
-- `foo` → `.foo`, `baz` → `a.baz`
+- Tags: `span` → `span`, `a` → `a.baz`
+- IDs: `bar` → `#bar`
+- Classes: `foo` → `.foo`, `baz` → `a.baz`
 
 ???
 
@@ -659,15 +658,11 @@ lot of DOM nodes just to find the `.bar` elements.
 
 ---
 
+class: contain-vertical-no-fill
+
 # Style optimization 2: right-to-left
 
-```css
-.foo .bar
-```
-
-<span class="big">
-⬅️
-</span>
+.center[![TODO](./images/foo-and-bar.png)]
 
 ???
 
@@ -921,7 +916,7 @@ So trim that unused CSS!
 # Avoid excessive complexity in selectors
 
 ```css
-[class*="foo"] :nth-child(3) > * ~ * {}
+[class*="foo"] :nth-child(2) > * ~ * {}
 ```
 
 ???
@@ -935,6 +930,8 @@ One or two
 of these will probably not wreck your page's performance, but in aggregate, these can do a lot of damage.
 
 ---
+
+exclude: true
 
 <h1 class="smaller">Rough selector cost estimate</h1>
 
@@ -961,13 +958,16 @@ Note WebKit [optimized attributes recently](https://github.com/WebKit/WebKit/com
 [so did Firefox](https://bugzil.la/1728851).
 
 --
+exclude: true
 <pointing-arrow></pointing-arrow>
 
 --
+exclude: true
 <pointing-arrow></pointing-arrow>
 <pointing-arrow show-previous="1"></pointing-arrow>
 
 --
+exclude: true
 <pointing-arrow></pointing-arrow>
 <pointing-arrow show-previous="1"></pointing-arrow>
 <pointing-arrow show-previous="2"></pointing-arrow>
@@ -981,7 +981,7 @@ class: contain-vertical
 ???
 
 To actually understand which selectors are slow, there actually is [a new tool](https://bugs.chromium.org/p/chromium/issues/detail?id=1316060)
-released this year for Chromium browsers was added recently in Chromium this year. If you enable `blink.debug` when using Chrome tracing...
+released in Chromium earlier this year. If you enable `blink.debug` when using Chrome tracing...
 
 ---
 
@@ -994,6 +994,14 @@ class: contain-vertical
 Then you can get this view of the "selector stats." If you sort by elapsed time, you can actually see your
 most expensive CSS rules ranked from most to least expensive. Note that this may actually be an underestimate,
 because of how selectors play into invalidation, which I'll discuss later.
+
+I also want to draw your attention to the elapsed time on the left. It's in nanoseconds, so those first two selectors
+are each taking up more than 2 milliseconds. This was taken on a fast MacBook Pro for a real website.
+That's a lot of time for two lines of CSS!
+
+I also want to emphasize that this kind of analysis is more useful at the macro level than the micro level. For instance,
+this tool helped me find [a bug](https://github.com/salesforce/lwc/issues/3051) 
+in our CSS scoping logic that was creating overly-generic selectors.
 
 ---
 
@@ -1039,7 +1047,7 @@ These provide some of the same benefits as shadow DOM, although some systems are
 
 --
 ```css
-.xyz:nth-child(2) .xyz  /* Svelte */
+.xyz:nth-child(2) .xyz     /* Svelte */
 ```
 
 ???
@@ -1049,7 +1057,7 @@ selector. This means that this selector can take advantage of both the hashmap a
 
 --
 ```css
-:nth-child(2) *[xyz]    /* Vue */
+:nth-child(2) *[xyz]       /* Vue */
 ```
 
 ???
@@ -1061,7 +1069,7 @@ than attributes, although this has been changing with some optimizations from Fi
 
 --
 ```css
-my-tag :nth-child(2) *  /* Enhance */
+my-tag :nth-child(2) *     /* Enhance */
 ```
 
 ???
@@ -1074,27 +1082,34 @@ browser will use the fast selector to fast-reject before moving on to the slow s
 
 ---
 
-.center[![TODO](./images/shadow-dom-stats.png)]
+.center[![TODO](./images/benchmark-chart-1.png)]
 
 ???
 
-I have [a whole blog post](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/)
-going into the details on this. Basically you should just observe that shadow DOM (the yellow one)
-is always much smaller than the other ones. Although scoping with classes is quite good too.
+I was actually curious about which kind of scoping strategy is fastest, so I wrote [a benchmark](https://nolanlawson.github.io/shadow-selector-benchmark/)
+to test.
 
-Now of course, it's easier said than done to say "just convert your entire app to use shadow DOM." But it is an interesting
-fact that shadow DOM gives us this kind of style encapsulation. Effectively, you can use whatever selectors you want, and
-it's extremely unlikely to affect performance.
+In this chart "RHS only" means "right-hand-side only," i.e. only scope the right-hand-most selector. "Full" means
+scope every part of the selector. "Tag name prefix" means just put the component tag name as a prefix.
 
-Firefox is incredibly fast in this chart because of their Stylo engine. If every browser were like Firefox, then I wouldn't have much
-material for this part of the talk! This is what makes me optimistic that, someday, we'll be able to use whatever zany
-selectors we want, and it won't matter much for web performance, even on web apps with tons of CSS.
+Some takeaways:
+
+- Classes are faster than attributes (although note Safari added [an optimization](https://bugs.webkit.org/show_bug.cgi?id=242058) for attribute selectors in Safari 16, not tested here
+- Shadow DOM is consistently fast, although not always the absolute fastest
+- Firefox is very fast overall
+- Surprisingly scoping with the RHS only is slightly faster than full scoping in Chrome, although that's not true for attributes in Safari
+
+So my main takeaway would be to either 1) use shadow DOM, or 2) scope things as Svelte does it, although maybe you can get away with just scoping the RHS.
+
+[Blog post with details and benchmark](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/)
 
 ---
 
+class: contain-vertical-no-fill
+
 <h1 class="smaller">Concatenate stylesheets (Chromium-only)</h1>
 
-.center-contain-vertical[![TODO](./images/chrome-stylesheets-3.png)]
+.center[![TODO](./images/benchmark-chart-3.png)]
 
 ???
 
@@ -1204,10 +1219,10 @@ you most of the performance wins. But you can try this one out too.
 
 # Encapsulation
 
-|           | Encapsulates | Improves first calc? |
-|-----------------|-----------------|----------------------|
-| Shadow DOM      | Style           | Yes                  |
-| CSS containment | Layout          | No                   |
+|                      | Shadow DOM | CSS containment |
+|----------------------|------------|-----------------|
+| Encapsulates         | Style      | Layout          |
+| Improves first calc? | Yes        | No              |
 
 ???
 
@@ -1505,12 +1520,9 @@ class: contain-vertical
 As it turns out, it does, and I have a [repro](http://bl.ocks.org/nolanlawson/raw/3139d2e2d609531e1ca55b6542ef9705/)
 that reproduces this in all 3 engines. (See also [Chrome bug](https://bugs.chromium.org/p/chromium/issues/detail?id=997274).)
 
-This can be a big problem because some people like to use rAF to measure stuff, or check the layout of the page,
+This can be a big problem because some people like to use rAF to measure stuff, or check the status of the page,
 so they may be calling rAF on every frame. If you do this, then you may end up just paying constant style calculation
 costs and causing a battery drain on your page.
-
-And by the way, you might write a rAF timer with no problem, and then someone adds a certain CSS rule that
-happens to trigger hte browser to decide it needs to invalidate on every rAF, so this can be really tricky to debug.
 
 ---
 
@@ -1642,6 +1654,8 @@ The really interesting ones are:
 
 This tells us how many CSS rules matched, and how many were rejected using the "fast reject" method (i.e. the Bloom
 filter) and how many were rejected more slowly (using e.g. DOM traversal).
+
+---
 
 # Conclusion
 
