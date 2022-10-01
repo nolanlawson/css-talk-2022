@@ -1109,7 +1109,7 @@ class: contain-vertical-no-fill
 
 <h1 class="smaller">Concatenate stylesheets (Chromium-only)</h1>
 
-.center[![TODO](./images/benchmark-chart-3.png)]
+.center[![TODO](./images/benchmark-chart-5.png)]
 
 ???
 
