@@ -1286,7 +1286,20 @@ This process is called "invalidation."
 
 Basically it means we are going from one layout state to another state.
 
-This can happen for two different reasons: either 1) the DOM changed, and/or 2) the CSS rules changed.
+This can typically happen for two different reasons: either 1) the DOM changed, and/or 2) the CSS rules changed.
+
+---
+
+# Invalidation
+
+
+```js
+element.style.width = '200px';
+```
+
+???
+
+Invalidation could be as simple as this – changing the margin on an element.
 
 ---
 
@@ -1297,8 +1310,8 @@ This can happen for two different reasons: either 1) the DOM changed, and/or 2) 
 ???
 
 When the browser
-detects this, it will automatically redraw the new layout during the next style/layout pass, which typically happens
-one frame later.
+detects this, it will automatically redraw the new layout during the next style/layout pass, which happens
+on the next frame.
 
 That's why, when you call `requestAnimationFrame`, you get the point in time right before the next
 style/layout operation.
@@ -1309,7 +1322,7 @@ style/layout operation.
 
 
 ```js
-element.style.margin = '20px';   // Invalidate
+element.style.width = '200px';   // Invalidate
 
 element.getBoundingClientRect(); // Force style/layout
 ```
@@ -1686,9 +1699,9 @@ CSS has been getting a lot of new features recently. Here are some new and draft
 Layout has been getting new features too.
 
 All of this is cool, and you should be using it. I don't want anyone to take away from my talk that they shouldn't
-be using CSS or layout features. These are all really cool! They should be used!
+be using CSS or layout features. These are all really cool! They should be used! Odds are, the more work you do in the purple part and the less in the yellow part, the more performant your page will be.
 
-But the more complex that CSS and layout becomes, and the bigger and more ambitious apps we're trying to build, the
+But the more complex that CSS and layout becomes, and the bigger and more ambitious apps we're trying to build, I believe the
 more likely we are to run into high style and layout calculation costs. And right now, it's really hard to debug.
 You kind of just have to know how the browser works, and also do a lot of guesswork.
 
