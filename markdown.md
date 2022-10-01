@@ -1037,7 +1037,7 @@ cuts down the number of elements and rules that need to be checked against each 
 # Use scoped styles
 
 ```css
-:nth-child(2) *
+:nth-child(2) *            /* Input */
 ```
 
 ???
