@@ -90,7 +90,7 @@ customElements.define('layout-visualization', class extends HTMLElement {
           y: drawY,
           width: drawWidth,
           height: drawHeight,
-          label: 'contain: content'
+          label: 'contain: strict'
         })
       )
     }

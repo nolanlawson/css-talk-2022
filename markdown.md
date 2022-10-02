@@ -1193,7 +1193,7 @@ class: fill-custom
 
 ???
 
-If we apply the CSS `contain: content` to each of these boxes, then the browser can calculate their sizes independently
+If we apply the CSS `contain: strict` to each of these boxes, then the browser can calculate their sizes independently
 of each other. This has the potential to speed up layout performance.
 
 Now, this has some downsides. If there's a dropdown or something that might peek out of one box and into the other one,
@@ -1208,12 +1208,28 @@ then it'll get cut off because we promised the browser that one box wouldn't ble
 
 ???
 
-My recommendation would be to try applying `contain: content` to logically separate parts of your page
+Now there are two (major) values: `content` and `strict`. `content` is a little laxer than `strict`, and is easier
+to apply more broadly, but it doesn't size itself independently of its descendants. So `strict` is a bit harder to pull off.
+
+My recommendation would be to try applying these to logically separate parts of your page
 (sidebars, modals, individual items in a list, etc.), and then measure
 and see if it improves layout performance.
 
-There is also `contain: strict`, but it's a bit more aggressive and in my experience `contain: content` already gets
-you most of the performance wins. But you can try this one out too.
+---
+
+.center[![TODO](./images/css-contain-benchmark-1.png)]
+
+???
+
+It's a bit hard to predict what optimizations a browser will apply, but here is [a benchmark](https://github.com/nolanlawson/css-containment-benchmark) I put together based on one built by Manuel Rego Casasnovas. It renders
+100 items, changes the text 100 times, and measures the result. (Median of 25 iterations.)
+
+As you can see, in Chrome you get most of the benefit with `contain: content` and don't need to go as far as
+`contain: strict`. With Firefox, the benefit only comes with `contain: strict`. In Safari there isn't any effect.
+
+Keep in mind that browsers may implement multiple different optimizations for CSS containment, or none at all. The spec
+doesn't require that a browser implement any optimizations – only that the observable effects of containment apply.
+Also note that this is just one benchmark, and you may see different results in your own page.
 
 ---
 
@@ -1226,17 +1242,22 @@ you most of the performance wins. But you can try this one out too.
 
 ???
 
-So, just to make a point of clarification here: there are two ways you can use encapsulation to improve style/layout
-performance. There's shadow DOM, which we already mentioned, which encapsulates your _styles_ and improves style
-calculation. And then this is CSS containment, which encapsulates your _layout_ and improves layout performance.
+Now, CSS containment is a form of encapsulation. You might recall I also referred to shadow DOM as a form of encapsulation.
+What's the difference?
 
-So if you have high style costs, don't go thinking that CSS containment will help you! And if you have high layout costs,
-shadow DOM won't help there either.
+Well, shadow DOM encapsulates your _styles_ and improves style
+calculation. Whereas CSS containment encapsulates your _layout_ and improves layout performance.
 
-Another thing to be aware of is that CSS containment can only make _subsequent_ layouts faster. Some browsers like Firefox
-have experimented with doing layouts in parallel, but since no browser actually implements parallel layout, CSS
+So if you have high style costs, CSS containment can't help you. And if you have high layout costs,
+shadow DOM can't help.
+
+Also note that CSS containment can only make _subsequent_ layouts faster. It provides a hint that if one part of the DOM
+changed, then another part doesn't need to be invalidated.
+
+Some browsers like Firefox have experimented with doing layouts in parallel, but since no browser actually implements parallel layout, CSS
 containment cannot speed up the first layout pass. Whereas for style calculation, shadow DOM can actually improve
-style performance for the first style calculation.
+style performance for the first style calculation because it's just about reducing the `n` and `m` in that `O(n*m)`
+algorithm I mentioned.
 
 ---
 
