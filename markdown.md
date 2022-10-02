@@ -1217,6 +1217,8 @@ and see if it improves layout performance.
 
 ---
 
+class: contain-vertical
+
 .center[![TODO](./images/css-contain-benchmark-1.png)]
 
 ???
