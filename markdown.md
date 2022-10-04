@@ -57,13 +57,23 @@ class: contain-vertical
 Of course, I have no idea how an internal combustion engine actually works. It's a hugely complex thing. But by listening
 to the engine and seeing how it reacted to my actions, I learned a lot about how to use an engine efficiently.
 
+[Image source](https://www.flickr.com/photos/ell-r-brown/3824067984/)
+
+---
+
+class: contain-vertical
+
+.center[![TODO](./images/browser.png)]
+
+???
+
 This is sort of how I feel about web performance. A browser engine is an enormously complicated thing, and I'm not a C/C++/Rust developer.
 
-But through observation of how it responds to my inputs, I can try to be a better web developer, and write more efficient web apps.
+But through observation of how the engine responds to my inputs, I can try to be a better web developer, and write more efficient web apps.
 
 I also think that if you know _just a bit_ about how the engine works, you can be an even better web developer.
 
-[Image source](https://www.flickr.com/photos/ell-r-brown/3824067984/)
+[Browser logos source](https://github.com/alrra/browser-logos)
 
 ---
 
