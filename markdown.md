@@ -605,7 +605,7 @@ You can see how this would be inefficient, especially if it runs every time the 
 
 # Style optimization 1: hash maps
 
-- Tags: `span` → `span`
+- Tags: `span` → `span`, `a` → `a:last-child`
 - IDs: `bar` → `#bar`
 - Classes: `foo` → `.foo`
 

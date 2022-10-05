@@ -220,7 +220,7 @@ customElements.define('dom-visualization', class extends HTMLElement {
       }
       .selector {
         position: absolute;
-        left: 20px;
+        left: -40px;
         top: 20px;
         font-size: 36px;
         line-height: 1.1em;
@@ -405,7 +405,8 @@ customElements.define('dom-visualization', class extends HTMLElement {
         })
 
         if (!slow) {
-          selectorsAndElements = selectorsAndElements.filter(({ sel }) => matches(element, sel))
+          selectorsAndElements = selectorsAndElements
+            .filter(({ sel }) => matches(element, sel.replace(/:[^:]+$/, ''))) // ignore pseudos for touched selectors
         }
 
         const selectorAnimationDelay = animationDelay / selectorsAndElements.length
