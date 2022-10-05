@@ -5,7 +5,7 @@ customElements.define('example-1', class extends HTMLElement {
     super()
     this.innerHTML = `
 <dom-visualization 
-  selectors="span|.foo|#bar|a.baz" 
+  selectors="span|.foo|#bar"
   show-tags="true"
   animate="${this.getAttribute('animate') ?? false}"
   strategy="naive"
@@ -13,19 +13,18 @@ customElements.define('example-1', class extends HTMLElement {
 >
   <template>
     <x-x>
-      <x-x class="baz">
-        <x-x class="foo">
-          <x-x id="bar"></x-x>
+      <x-x class="foo">
+        <x-x id="bar">
+          <span></span>
         </x-x>
       </x-x>
       <x-x>
-        <span></span>
+        <x-x class="foo"></x-x>
       </x-x>
     </x-x>
     <x-x>
       <x-x class="foo">
-        <a class="baz">
-        </a>
+        <span></span>
         <x-x>
           <span></span>
         </x-x>

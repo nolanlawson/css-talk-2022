@@ -605,9 +605,9 @@ You can see how this would be inefficient, especially if it runs every time the 
 
 # Style optimization 1: hash maps
 
-- Tags: `span` → `span`, `a` → `a.baz`
+- Tags: `span` → `span`
 - IDs: `bar` → `#bar`
-- Classes: `foo` → `.foo`, `baz` → `a.baz`
+- Classes: `foo` → `.foo`
 
 ???
 
@@ -1062,7 +1062,7 @@ These provide some of the same benefits as shadow DOM.
 
 ???
 
-Vue uses attributes to the right-hand-side selector= So it can take advantage of the
+Vue uses attributes to the right-hand-side selector. So it can take advantage of the
 hashmap but not the Bloom filter optimization. (Also, my 
 [benchmarks](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/)  show that classes tend to be slightly faster
 than attributes, although this has been changing with some optimizations from [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1728851)
