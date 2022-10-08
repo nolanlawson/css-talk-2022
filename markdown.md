@@ -926,7 +926,7 @@ So trim that unused CSS!
 # Avoid excessive complexity in selectors
 
 ```css
-[class*="foo"] :nth-child(2) > * ~ * {}
+[class*="foo"] :nth-child(2) > * ~ *
 ```
 
 ???
@@ -1059,9 +1059,9 @@ my-tag :nth-child(2) *     /* Enhance */
 An alternative to shadow DOM is to use style scoping from frameworks like Vue, Svelte, or CSS Modules. In a sense,
 these "polyfill" shadow DOM style scoping by modifying the selectors with unique classes, tags, or attributes.
 
-There are different ways to do style scoping. But knowing what you know about how browsers do
+There are different ways to do style scoping. But knowing what you know now about how browsers do
 style calculation, you can see how this effectively can turn unperformant selectors (like the first one)
-into a more performant selector that leans into the hash map and/or Bloom filter optimizations.
+into a more performant selectors that leverage the hash map and/or Bloom filter optimizations.
 
 ---
 
