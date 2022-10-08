@@ -1,5 +1,5 @@
 // 16.9 ratio
-import {drawCenteredSvgText, loadFontsPromise, makeDom} from './utils.js';
+import {drawCenteredSvgText, makeDom} from './utils.js';
 import rough from './rough.js';
 import {PASTEL_BLUE, PASTEL_GREEN, PASTEL_RED} from './colors.js';
 import {SEED, STROKE_WIDTH} from './constants.js';
@@ -7,107 +7,104 @@ import {SEED, STROKE_WIDTH} from './constants.js';
 const WIDTH = 1920
 const HEIGHT = 1080
 
-const MARGIN = 40
-
 customElements.define('layout-visualization', class extends HTMLElement {
   constructor() {
     super()
 
-    const svg = makeDom(`<svg viewBox="0 0 ${WIDTH} ${HEIGHT}"></svg>`)
     this.attachShadow({mode: 'open'}).innerHTML = `
       <style>
-        svg text {
-          font-size: 2em;
-          font-family: Yahfie;
-          fill: #000;
+        .container { 
+          position: relative;
+          width: 100%;
+          height: 100%;
+          display: grid;
+          grid-template-areas: "nav     nav"
+                               "sidebar main";
+          grid-template-columns: 1fr 2fr;
+          grid-template-rows: 1fr 5fr;
+        }
+        .nav {
+          grid-area: nav
+        }
+        .sidebar {
+          grid-area: sidebar
+        }
+        .main {
+          grid-area: main
+        }
+        svg {
+          position: absolute;
+          left: 0;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          z-index; 1;
         }
       </style>
+      <div class="container">
+         <div class="nav"></div>
+         <div class="sidebar"></div>
+         <div class="main"></div>
+      </div>
     `
 
-    this.shadowRoot.appendChild(svg)
+    const svg = makeDom(`<svg viewBox="0 0 ${WIDTH} ${HEIGHT}"></svg>`)
+    this.shadowRoot.querySelector('.container').appendChild(svg)
 
-    this._draw()
+    requestAnimationFrame(() => {
+      const boxes = this.shadowRoot.querySelectorAll('.container *')
+      const rects = boxes.map(_ => _.getBoundingClientRect())
+      const containerRect = this.shadowRoot.querySelector('.container').getBoundingClientRect()
+      const relativeRects = rects.map(({ width, height, x, y }) => ({
+        width,
+        height,
+        x: x - containerRect.x,
+        y: y - containerRect.y
+      }))
+      this._drawRough(relativeRects, svg)
+    })
   }
 
-  async _draw () {
-
-    await loadFontsPromise
-
+  async _drawRough (rects, svg) {
     const version = parseInt(this.getAttribute('version') || '1', 10)
     const bigStroke = this.getAttribute('big-stroke') === 'true'
 
     const strokeWidth = bigStroke ? (STROKE_WIDTH * 8) : (STROKE_WIDTH * 2)
 
-    const svg = this.shadowRoot.querySelector('svg')
     const roughSvg = rough.svg(svg)
 
-    const calculateDrawSizes = ({ x, y, width, height}) => {
-      const doubleMargin = MARGIN * 2
-      const actualWidth = WIDTH - doubleMargin
-      const actualHeight = HEIGHT - doubleMargin
+    const drawRect = ({x, y, width, height, stroke}) => {
 
-      const drawX = (x * actualWidth) + MARGIN + (x === 0 ? 0 : (MARGIN / 2))
-      const drawY = (y * actualHeight) + MARGIN + (y === 0 ? 0 : (MARGIN / 2))
-      const drawWidth = (width * actualWidth) - (width === 1 ? 0 : (MARGIN / 2))
-      const drawHeight = (height * actualHeight)- (height === 1 ? 0 : (MARGIN / 2))
-
-      return {
-        drawX,
-        drawY,
-        drawWidth,
-        drawHeight
-      }
-    }
-
-    const drawRect = (x, y, width, height, stroke) => {
-
-      const {
-        drawX,
-        drawY,
-        drawWidth,
-        drawHeight
-      } = calculateDrawSizes({ x, y, width, height })
-
-      roughSvg.svg.appendChild(roughSvg.rectangle(drawX, drawY, drawWidth, drawHeight, {
+      roughSvg.svg.appendChild(roughSvg.rectangle(x, y, width, height, {
         stroke,
         fill: stroke + '33',
         strokeWidth,
         seed: SEED
       }))
     }
+    //
+    // const drawText = (x, y, width, height) => {
+    //   const {
+    //     drawX,
+    //     drawY,
+    //     drawWidth,
+    //     drawHeight
+    //   } = calculateDrawSizes({ x, y, width, height })
+    //
+    //   roughSvg.svg.appendChild(
+    //     drawCenteredSvgText({
+    //       x: drawX,
+    //       y: drawY,
+    //       width: drawWidth,
+    //       height: drawHeight,
+    //       label: 'contain: strict'
+    //     })
+    //   )
+    // }
 
-    const drawText = (x, y, width, height) => {
-      const {
-        drawX,
-        drawY,
-        drawWidth,
-        drawHeight
-      } = calculateDrawSizes({ x, y, width, height })
-
-      roughSvg.svg.appendChild(
-        drawCenteredSvgText({
-          x: drawX,
-          y: drawY,
-          width: drawWidth,
-          height: drawHeight,
-          label: 'contain: strict'
-        })
-      )
-    }
-
-    const sidebarWidth = version === 2 ? 0.15 : 0.4
-
-    const rects = [
-      [0, 0, 1, 0.2, PASTEL_RED],
-      [0, 0.2, sidebarWidth, 0.8, PASTEL_GREEN],
-      [sidebarWidth, 0.2, 1 - sidebarWidth, 0.8, PASTEL_BLUE]
-    ]
 
     for (const rect of rects) {
-      drawRect(...rect)
-      if (version === 3) {
-        drawText(...rect)
-      }
+      drawRect({...rect, stroke: strokeWidth})
     }
 
   }
