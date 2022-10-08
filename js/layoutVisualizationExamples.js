@@ -4,7 +4,10 @@ customElements.define('layout-example-1', class extends HTMLElement {
   constructor() {
     super()
     this.attachShadow({ mode: 'open' }).innerHTML = `
-      <layout-visualization version="${this.getAttribute('version') || '1'}"></layout-visualization>
+      <layout-visualization 
+        version="${this.getAttribute('version') || '1'}"
+        draw-text="${this.getAttribute('draw-text') || 'false'}"
+      ></layout-visualization>
     `
   }
 })
@@ -19,6 +22,8 @@ customElements.define('layout-example-2', class extends HTMLElement {
           flex-direction: row;
           align-items: center;
           justify-content: center;
+          height: 300px;
+          width: 100%;
         }
         span {
           font-size: 3em;

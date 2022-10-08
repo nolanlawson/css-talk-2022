@@ -1178,7 +1178,7 @@ CSS containment.
 
 class: fill-custom
 
-<layout-example-1 version="3"></layout-example-1>
+<layout-example-1 version="1" draw-text="true"></layout-example-1>
 
 ???
 
