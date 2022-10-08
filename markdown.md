@@ -1027,18 +1027,12 @@ in our CSS scoping logic that was creating overly-generic selectors.
 
 ???
 
-Shadow DOM is interesting because it encapsulates styles. They don't bleed in and out of the shadow root.
+Shadow DOM is interesting because it encapsulates styles. They don't bleed in and out of this component.
 
-If you're not familiar with Shadow DOM, it works very similarly to "scoped styles" you may have used in frameworks like Vue or Svelte, or with systems like CSS modules. Shadow DOM can be recursively nested, so there isn't just "the" shadow DOM – you can have shadow within shadows, one for each component.
+Because of this scoping, this reduces both the `n` and the `m` in our `O (n*m)` algorithm earlier. The browser
+doesn't need to check as many rules against as many elements – it's clear which ones can apply to each other.
 
-So this actually means that any expensive selectors you may have outside of this component don't need to be calculated for
-elements inside of the shadow root. And any expensive selectors _inside_ of this component also don't need to be calculated
-for elements outside of it.
-
-If you recall our naive algorithm from earlier, where we check every DOM element against every CSS rule, this effectively
-cuts down the number of elements and rules that need to be checked against each other.
-
-[Blog post with details](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/)
+This has some style calc benefits I'll mention later.
 
 ---
 
@@ -1062,16 +1056,12 @@ my-tag :nth-child(2) *     /* Enhance */
 
 ???
 
-An alternative to shadow DOM is to use style scoping from frameworks like Vue, Svelte, or CSS Modules.
-These provide some of the same benefits as shadow DOM.
+An alternative to shadow DOM is to use style scoping from frameworks like Vue, Svelte, or CSS Modules. In a sense,
+these "polyfill" shadow DOM style scoping by modifying the selectors with unique classes, tags, or attributes.
 
-There are different ways to do style scoping, e.g. with attributes or classes, with prefixes or modifying
-selectors on the right-hand-side of a descendant combinator.
-
-I have 
-[a blog post](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/) where I compare
-these techniques, although thanks to some recent work from [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1728851)
-and [WebKit](https://bugs.webkit.org/show_bug.cgi?id=242058) there isn't a huge difference between them.
+There are different ways to do style scoping. But knowing what you know about how browsers do
+style calculation, you can see how this effectively can turn unperformant selectors (like the first one)
+into a more performant selector that leans into the hash map and/or Bloom filter optimizations.
 
 ---
 
@@ -1081,20 +1071,19 @@ class: contain-vertical
 
 ???
 
-This chart runs my benchmark, median of 25 iterations, on a 2014 Mac Mini.
+This chart runs my benchmark, median of 25 iterations, on a 2014 Mac Mini. The benchmark generates some random
+CSS, and compares running it through various scoping algorithms vs using shadow DOM vs just leaving the styles unscoped.
+It uses 1,000 generated "components," with 10 styles per component.
 
 In this chart "RHS only" means "right-hand-side only," i.e. only scope the right-hand-most selector. "Full" means
-scope every part of the selector. "Tag name prefix" means just put the component tag name as a prefix.
+scope every part of the selector. "Tag prefix" means just put the component tag name as a prefix.
 
-Some takeaways:
+Note though that this is a microbenchmark, and this is not exactly comparing apples-to-apples (the scoping strategies
+match slightly different elements, and the unscoped styles match many more elements on the page).
+But the point is to show that scoped styles do have a perf impact.
 
-- Classes are faster than attributes, although not so much in Safari
-- Shadow DOM is consistently fast, although not always the absolute fastest
-- Firefox is very fast overall
-- RHS vs "full" is not a huge difference
-
-Note though that this is a microbenchmark, and some of the selectors used for "unscoped" are a bit elaborate and
-unrealistic. But the point is to show that scoping strategies do have a perf impact.
+If you're writing a framework yourself, you may be interested in the differences between the scoping strategies,
+but overall they're all pretty good.
 
 [Blog post with details and benchmark](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/)
 
@@ -1108,15 +1097,17 @@ class: contain-vertical-no-fill
 
 ???
 
-This optimization only applies to Chromium.
+I hesitated to mention this one, because it only applies to Chromium, but it's a big optimization.
 
-It turns out that in Chromium, [concatenating stylesheet is faster for style calculation than multiple small stylesheets](https://bugs.chromium.org/p/chromium/issues/detail?id=1337599). This may change tomorrow, and it has no impact on Safari or Firefox, but it's something to be aware of.
+It turns out that in Chromium, [one big stylesheet is faster than multiple small stylesheets](https://bugs.chromium.org/p/chromium/issues/detail?id=1337599) for style calculation. It has no impact on Safari or Firefox, and the Chromium devs may fix it eventually, but it's something to be aware of.
 
 In [this benchmark](https://gist.github.com/nolanlawson/214f22ddf5b26ab3e218a9c65faf90fa), this is median of 35 iterations. The styles are exactly the same; it's just the number of
 individual `<style>`s that's different. The fastest is to concatenate everything into one big stylesheet.
 
-So the advice would be to concatenate stylesheets as much as possible, similar to how we do concatenation and chunking
-for JavaScript modules. Obviously there are implications for cache performance here as well, so don't over-concatenate.
+So the advice would be to concatenate stylesheets as much as possible across pages, similar to how we do concatenation and chunking
+for JavaScript modules in bundlers like Webpack. There are implications for cache performance here as well, though, so don't over-concatenate.
+Also try to avoid modifying the stylesheets after inserting them; if you do modify them, it's better to keep them separate according to the
+Chromium devs.
 
 ---
 
