@@ -12,26 +12,42 @@ customElements.define('layout-visualization', class extends HTMLElement {
     this._version = parseInt(this.getAttribute('version') || '1', 10)
     this._drawText = this.getAttribute('draw-text')
     this._drawMoreBoxes = this.getAttribute('draw-more-boxes') === 'true'
+    this._drawMoreBoxesText = this.getAttribute('draw-more-boxes-text') === 'true'
     this._textVersion = parseInt(this.getAttribute('text-version') || '1', 10)
+    this._drawDropdown = this.getAttribute('draw-dropdown') === 'true'
+    this._truncateDropdown = this.getAttribute('truncate-dropdown') === 'true'
 
     const {
       _version: version,
       _drawText: drawText,
       _drawMoreBoxes: drawMoreBoxes,
-      _textVersion: textVersion
+      _drawMoreBoxesText: drawMoreBoxesText,
+      _textVersion: textVersion,
+      _drawDropdown: drawDropdown,
+      _truncateDropdown: truncateDropdown
     } = this
 
     const drawTexts = drawText ? drawText.split('|') : Array(3).fill().map(() => '')
 
-    const navInner = drawMoreBoxes
+    const navDropdown = `<div class="dropdown ${truncateDropdown ? 'truncated' : ''}">${truncateDropdown ? '' : '☰'}</div>`
+    const navInner = (drawMoreBoxes
       ? Array(6).fill().map(() => `<div></div>`).join('')
-      : drawTexts[0]
+      : drawTexts[0]) + (drawDropdown ? navDropdown : '')
+
 
     const sidebarInner = drawMoreBoxes
       ? Array(12).fill().map(() => `<div></div>`).join('')
       : drawTexts[1]
 
-    const mainTextBoxes = textVersion === 1
+    const mainTextBoxes = !drawMoreBoxesText
+    ?  `
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      `
+      : (textVersion === 1
       ? `
         <div>lorem</div>
         <div>ipsum</div>
@@ -45,7 +61,7 @@ customElements.define('layout-visualization', class extends HTMLElement {
         <div>dolor</div>
         <div>sit</div>
         <div>amet</div>
-      `
+      `)
 
     const mainInner = drawMoreBoxes ? mainTextBoxes : drawTexts[2]
 
@@ -147,6 +163,24 @@ customElements.define('layout-visualization', class extends HTMLElement {
         svg {
           z-index: 1
         }
+        .nav {
+          position: relative;
+        }
+        .dropdown {
+          z-index: 1;
+          position: absolute;
+          top: 100%;
+          right: 2.5%;
+          width: 7.5%;
+          height: 125%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 2em;
+        }
+        .dropdown.truncated {
+          height: 20px;
+        }
         ${moreStyles}
       </style>
       <div class="container">
@@ -183,6 +217,7 @@ customElements.define('layout-visualization', class extends HTMLElement {
       const boxes = this.shadowRoot.querySelectorAll('.container :not(.hidden)')
       const rects = boxes.map(_ => _.getBoundingClientRect())
       const colors = boxes.map(_ => getComputedStyle(_).getPropertyValue('--color'))
+      const zIndexes = boxes.map(_ => parseInt(getComputedStyle(_).zIndex, 10) || 0)
       const containerRect = this.shadowRoot.querySelector('.container').getBoundingClientRect()
       const relativeRects = rects.map(({ width, height, x, y }, i) => {
         return {
@@ -190,9 +225,10 @@ customElements.define('layout-visualization', class extends HTMLElement {
           height: height / containerRect.height,
           x: (x - containerRect.x) / containerRect.width,
           y: (y - containerRect.y) / containerRect.height,
-          stroke: colors[i]
+          stroke: colors[i],
+          zIndex: zIndexes[i]
         }
-      })
+      }).sort((a, b) => (a.zIndex < b.zIndex ? -1 : a.zIndex === b.zIndex ? 0 : 1))
       const svg = makeDom(`<svg viewBox="0 0 ${containerRect.width} ${containerRect.height}"></svg>`)
       this.shadowRoot.appendChild(svg)
       this._drawRough(relativeRects, svg, containerRect.width, containerRect.height)

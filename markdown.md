@@ -1153,7 +1153,7 @@ a matter of laying them out.
 
 class: fill-custom
 
-<layout-example-1 draw-more-boxes="true"></layout-example-1>
+<layout-example-1 draw-more-boxes="true" draw-more-boxes-text="true"></layout-example-1>
 
 ???
 
@@ -1184,14 +1184,24 @@ But let's say our main content suddenly takes up a bit more space, so now the si
 
 class: fill-custom
 
-<layout-example-1 version="2" draw-more-boxes="true" text-version="2"></layout-example-1>
+<layout-example-1 version="2" draw-more-boxes="true"></layout-example-1>
+
+???
+
+So now the browser has to recalculate the geometry of all these boxes
+
+---
+
+class: fill-custom
+
+<layout-example-1 version="2" draw-more-boxes="true" draw-more-boxes-text="true" text-version="2"></layout-example-1>
 
 ???
 
 Why might this happen? Well maybe we ended up with some super long text that pushed the size of the box out. 
 If that happens, then the browser might have to recalculate the layout for everything inside the sidebar.
 
-Now as the author of the page, you might know this is never reasonably going to happen. And if it did, you'd
+Now as the author of the page, you might know this is never going to happen. And even if it did, you'd
 want to clip the text or something anyway. But is there some simpler way we can reassure the browser that
 these boxes are never going to change size?
 
@@ -1215,8 +1225,31 @@ class: fill-custom
 If we apply the CSS `contain: strict` to each of these boxes, then the browser can calculate their sizes independently
 of each other. This has the potential to speed up layout performance.
 
-Now, this has some downsides. If there's a dropdown or something that might peek out of one box and into the other one,
-then it'll get cut off because we promised the browser that one box wouldn't bleed into another.
+---
+
+class: fill-custom
+
+<layout-example-1 
+  version="1" 
+  draw-dropdown="true"></layout-example-1>
+
+???
+
+Now, this has some downsides. If there's a dropdown or something that you want to peek out of one box and into another one...
+
+---
+
+class: fill-custom
+
+<layout-example-1
+version="1"
+draw-text="contain:strict||"
+truncate-dropdown="true"
+draw-dropdown="true"></layout-example-1>
+
+???
+
+...then it'll get cut off if we use CSS containment, because we promised the browser that one box wouldn't bleed into another.
 
 ---
 

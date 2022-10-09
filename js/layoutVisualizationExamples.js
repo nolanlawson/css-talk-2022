@@ -17,7 +17,10 @@ customElements.define('layout-example-1', class extends HTMLElement {
         version="${this.getAttribute('version') || '1'}"
         draw-text="${this.getAttribute('draw-text') || ''}"
         draw-more-boxes="${this.getAttribute('draw-more-boxes') || ''}"
+        draw-more-boxes-text="${this.getAttribute('draw-more-boxes-text') || ''}"
         text-version="${this.getAttribute('text-version') || ''}"
+        draw-dropdown="${this.getAttribute('draw-dropdown') || ''}"
+        truncate-dropdown="${this.getAttribute('truncate-dropdown') || ''}"
       ></layout-visualization>
     `
   }
