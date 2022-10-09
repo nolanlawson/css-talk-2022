@@ -4,9 +4,20 @@ customElements.define('layout-example-1', class extends HTMLElement {
   constructor() {
     super()
     this.attachShadow({ mode: 'open' }).innerHTML = `
+      <style>
+        :host {
+          position: absolute;
+          left: 2em;
+          right: 2em;
+          top: 0.5em;
+          bottom: 0.5em;
+        }
+      </style>
       <layout-visualization 
         version="${this.getAttribute('version') || '1'}"
-        draw-text="${this.getAttribute('draw-text') || 'false'}"
+        draw-text="${this.getAttribute('draw-text') || ''}"
+        draw-more-boxes="${this.getAttribute('draw-more-boxes') || ''}"
+        text-version="${this.getAttribute('text-version') || ''}"
       ></layout-visualization>
     `
   }

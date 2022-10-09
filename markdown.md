@@ -670,7 +670,7 @@ lot of DOM nodes just to find the `.bar` elements.
 
 class: contain-vertical-no-fill
 
-# Style optimization 2: right-to-left
+<h1 class="smaller">Style optimization 2: right-to-left</h1>
 
 .center[![TODO](./images/foo-and-bar.png)]
 
@@ -1147,8 +1147,28 @@ class: fill-custom
 So let's say we have a simple layout like this. We've got a header, a sidebar, and the main content.
 
 Each of these boxes contains other boxes, but the browser already knows which elements have which styles, so it's just
-a matter of laying them out. This can get very complicated, because some of these boxes may have absolute/relative positioning,
+a matter of laying them out.
+
+---
+
+class: fill-custom
+
+<layout-example-1 draw-more-boxes="true"></layout-example-1>
+
+???
+
+This can get very complicated, because some of these boxes may have absolute/relative positioning,
 others may use flexbox, others may use grid, etc.
+
+---
+
+class: fill-custom
+
+<layout-example-1></layout-example-1>
+
+???
+
+So we have our simple layout.
 
 ---
 
@@ -1158,12 +1178,22 @@ class: fill-custom
 
 ???
 
-But let's say our main content suddenly takes up a bit more space, so now the sidebar has to shrink. If that happens,
-then the browser might have to recalculate the layout for everything inside the sidebar.
+But let's say our main content suddenly takes up a bit more space, so now the sidebar has to shrink.
 
-Now sometimes, this can never actually happen in our layout. For instance, we never have text that will overflow inside
-of the main content. But the _browser_ doesn't know that in advance. So it has to assume that changes to the blue box
-may affect the green box, and vice versa.
+---
+
+class: fill-custom
+
+<layout-example-1 version="2" draw-more-boxes="true" text-version="2"></layout-example-1>
+
+???
+
+Why might this happen? Well maybe we ended up with some super long text that pushed the size of the box out. 
+If that happens, then the browser might have to recalculate the layout for everything inside the sidebar.
+
+Now as the author of the page, you might know this is never reasonably going to happen. And if it did, you'd
+want to clip the text or something anyway. But is there some simpler way we can reassure the browser that
+these boxes are never going to change size?
 
 ---
 
@@ -1178,7 +1208,7 @@ CSS containment.
 
 class: fill-custom
 
-<layout-example-1 version="1" draw-text="true"></layout-example-1>
+<layout-example-1 version="1" draw-text="contain:strict|contain:strict|contain:strict"></layout-example-1>
 
 ???
 

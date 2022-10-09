@@ -10,9 +10,91 @@ customElements.define('layout-visualization', class extends HTMLElement {
     super()
 
     this._version = parseInt(this.getAttribute('version') || '1', 10)
-    this._drawText = this.getAttribute('draw-text') === 'true'
+    this._drawText = this.getAttribute('draw-text')
+    this._drawMoreBoxes = this.getAttribute('draw-more-boxes') === 'true'
+    this._textVersion = parseInt(this.getAttribute('text-version') || '1', 10)
 
-    const { _version: version, _drawText: drawText } = this
+    const {
+      _version: version,
+      _drawText: drawText,
+      _drawMoreBoxes: drawMoreBoxes,
+      _textVersion: textVersion
+    } = this
+
+    const drawTexts = drawText ? drawText.split('|') : Array(3).fill().map(() => '')
+
+    const navInner = drawMoreBoxes
+      ? Array(6).fill().map(() => `<div></div>`).join('')
+      : drawTexts[0]
+
+    const sidebarInner = drawMoreBoxes
+      ? Array(12).fill().map(() => `<div></div>`).join('')
+      : drawTexts[1]
+
+    const mainTextBoxes = textVersion === 1
+      ? `
+        <div>lorem</div>
+        <div>ipsum</div>
+        <div>dolor</div>
+        <div>sit</div>
+        <div>amet</div>
+      `
+      : `
+        <div><div class="long hidden">loremipsumdolorsitametconsecteturadipiscingelitseddoeiusmodtemporincididuntutlaboreetdoloremagnaaliquautenimadminimveniamquisnostrudexercitationullamcolaborisnisiutaliquipexeacommodoconsequatduisauteiruredolorinreprehenderitinvoluptatevelitessecillumdoloreeufugiatnullapariaturexcepteursintoccaecatcupidatatnonproidentsuntinculpaquiofficiadeseruntmollitanimidestlaborum</div></div>
+        <div>ipsum</div>
+        <div>dolor</div>
+        <div>sit</div>
+        <div>amet</div>
+      `
+
+    const mainInner = drawMoreBoxes ? mainTextBoxes : drawTexts[2]
+
+    const moreStyles = drawMoreBoxes ?  `
+      .main {
+        display: flex;
+        flex-direction: column;
+      }
+      .main > * {
+        flex: 1;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow-x: hidden;
+      }
+      .long {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        text-overflow: ellipsis;
+        width: 0;
+        max-width: 100%;
+        word-wrap: break-word;
+        white-space: nowrap;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 0 20px;
+      }
+      .nav {
+        display: flex;
+      }
+      .nav > * {
+        flex: 1;
+        height: 100%;
+      }
+      .sidebar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+      .sidebar > * {
+        width: 100%;
+        height: 100%;
+      }
+    ` : ''
 
     this.attachShadow({mode: 'open'}).innerHTML = `
       <style>
@@ -53,7 +135,7 @@ customElements.define('layout-visualization', class extends HTMLElement {
         }
         .main {
           grid-area: main;
-          --color: ${PASTEL_BLUE};
+          --color: ${PASTEL_BLUE}; 
         }
         .nav, .sidebar, .main {
           display: flex;
@@ -65,11 +147,12 @@ customElements.define('layout-visualization', class extends HTMLElement {
         svg {
           z-index: 1
         }
+        ${moreStyles}
       </style>
       <div class="container">
-         <div class="nav">${drawText ? 'contain: strict' : ''}</div>
-         <div class="sidebar">${drawText ? 'contain: strict' : ''}</div>
-         <div class="main">${drawText ? 'contain: strict' : ''}</div>
+         <div class="nav">${navInner}</div>
+         <div class="sidebar">${sidebarInner}</div>
+         <div class="main">${mainInner}</div>
       </div>
     `
   }
@@ -97,7 +180,7 @@ customElements.define('layout-visualization', class extends HTMLElement {
       svg.remove()
     }
     requestAnimationFrame(() => {
-      const boxes = this.shadowRoot.querySelectorAll('.container *')
+      const boxes = this.shadowRoot.querySelectorAll('.container :not(.hidden)')
       const rects = boxes.map(_ => _.getBoundingClientRect())
       const colors = boxes.map(_ => getComputedStyle(_).getPropertyValue('--color'))
       const containerRect = this.shadowRoot.querySelector('.container').getBoundingClientRect()
