@@ -107,6 +107,12 @@ Style/Layout (purple part)
 But a lot of folks look at the purple part, and it's kind of a black box. They think, "That's just the browser doing browser things. I
 couldn't possibly understand that." So we shrug our shoulders and don't try to optimize it as much as the yellow part.
 
+Some people also say "well, that purple part doesn't matter." But I think this is kind of a learned helplessness – we don't
+understand what's going on in there or what to do about it, so we try to convince ourselves it doesn't matter.
+
+But the thing is, sometimes that purple part is pretty big. It can have a real impact on web performance. In this talk,
+I want to try to demystify some of that "purple part" so that it's less of a black box.
+
 ---
 <h1 class="smaller">Three news sites</h1>
 
@@ -114,9 +120,9 @@ couldn't possibly understand that." So we shrug our shoulders and don't try to o
 
 ???
 
-But the thing is, sometimes that purple part is pretty big. It can have a real impact on web performance.
+Style/layout performance can be important.
 
-To prove my point, I ran WebPageTest (simulated Moto G4, 4G) on three major news websites that I chose at random.
+To prove my point, I ran WebPageTest (simulated Moto G4, 4G) on three major news websites that I chose basically at random.
 Then I categorized the time spent on the main thread in the trace as Loading (network), Scripting (JS),
 Rendering (Style/Layout), or Paint.
 
@@ -133,7 +139,7 @@ it's worth looking into. And even for the other ones, if you manage to find a qu
 I should mention who I designed this talk for. A few groups of people:
 
 --
-- Performance engineers
+- ⚡ Performance engineers
 
 ???
 
@@ -141,27 +147,27 @@ Perf folks are going to be interested in every part of the performance equation,
 not the #1 most important thing all of the time.
 
 --
-- Framework authors
+- 🛠️ Framework authors
 
 ???
 
-If you're building a JavaScript framework or design system, then really small decisions you make about how to architect
-your CSS or HTML can have large cascading effects downstream.
+If you're building a JavaScript framework or design system, then small decisions in your CSS
+can have large cascading effects downstream.
 
 --
-- Folks working on large web apps
+- 🌍 Complex webapp authors
 
 ???
 
-Large web apps (e.g. SPAs) usually tend to have bigger problems with style/layout than static content sites. Although
-as you saw with the 3 news sites, this isn't always the case.
+Large web apps (e.g. SPAs) tend to have more problems with style/layout than static content sites. (Although
+as you saw with the 3 news sites, they can have high style/layout costs too.)
 
 --
-- Anyone interested in how browsers work
+- 🙋 Anyone interested in how browsers work
 
 ???
 
-I'm also speaking to anyone interested in how browsers work. Some of this stuff is just plain interesting!
+I'm also speaking to anyone interested in how browsers work. This stuff is just plain interesting!
 
 ---
 
@@ -1299,11 +1305,23 @@ Also note that this is just one benchmark, and you may see different results in 
 Now, CSS containment is a form of encapsulation. You might recall I also referred to shadow DOM as a form of encapsulation.
 What's the difference?
 
+--
+
+<pointing-arrow></pointing-arrow>
+
+???
+
 Well, shadow DOM encapsulates your _styles_ and improves style
 calculation. Whereas CSS containment encapsulates your _layout_ and improves layout performance.
 
 So if you have high style costs, CSS containment can't help you. And if you have high layout costs,
 shadow DOM can't help.
+
+--
+
+<pointing-arrow></pointing-arrow>
+
+???
 
 Also note that CSS containment can only make _subsequent_ layouts faster. It provides a hint that if one part of the DOM
 changed, then another part doesn't need to be invalidated.
@@ -1385,7 +1403,7 @@ Invalidation could be as simple as this – changing the margin on an element.
 ???
 
 When the browser
-detects this, it will automatically redraw the new layout during the next style/layout pass, which happens
+detects this, it will automatically re-render during the next style/layout pass, which happens
 on the next frame.
 
 That's why, when you call `requestAnimationFrame`, you get the point in time right before the next
@@ -1408,8 +1426,34 @@ element.getBoundingClientRect(); // Force style/layout
 Now, normally this is fine. But it gets dangerous if you're explicitly telling the browser that you want style
 and layout to be calculated immediately, rather than waiting for the next frame.
 
-In the example above, we're _invalidating_ by setting the margin on the element to 20px. This doesn't actually
+---
+
+# Forcing style/layout calculation
+
+
+```js
+*element.style.width = '200px';   // Invalidate
+
+element.getBoundingClientRect(); // Force style/layout
+```
+
+???
+
+Here we're _invalidating_ by setting the margin on the element to 20px. This doesn't actually
 cause the browser to do any style/layout work yet. Normally it would happen in the next frame.
+
+---
+
+# Forcing style/layout calculation
+
+
+```js
+element.style.width = '200px';   // Invalidate
+
+*element.getBoundingClientRect(); // Force style/layout
+```
+
+???
 
 But instead, we immediately call `element.getBoundingClientRect()`. This forces the browser to immediately
 and synchronously calculate both style and layout.
@@ -1426,10 +1470,11 @@ and synchronously calculate both style and layout.
 
 ???
 
-Now if you're interested in the full list of browser APIs that force style/layout recalculation, Paul Irish has 
-[a complete list]((https://gist.github.com/paulirish/5d52fb081b3570c81e3a)
-that is very useful. It contains some APIs that seem obvious (like `getBoundingClientRect`) and others that
-are a bit suprising (like `innerText`). Some force style _and_ layout, whereas others only force style.
+Paul Irish has [a complete list]((https://gist.github.com/paulirish/5d52fb081b3570c81e3a) of APIs that force
+style/layout recalc.
+
+Some APIs are a bit suprising (like `innerText`). Some force style _and_ layout, whereas others only force style (e.g.
+`getComputedStyle`).
 
 ---
 
@@ -1444,10 +1489,10 @@ for (const el of elements) {
 
 ???
 
-This leads us to another important topic, which is layout thrashing.
+This leads us to layout thrashing.
 
-Layout thrashing is a situation where, in a loop, you're both reading from the DOM's style and writing to the DOM's styles. This
-forces the browser to re-run style and layout repeatedly.
+Layout thrashing is a situation where, in a loop, you're both writing to the DOM (invalidating) 
+and writing to the DOM (forcing style/layout). This forces the browser to re-run style and layout repeatedly.
 
 ---
 
@@ -1485,8 +1530,8 @@ And here we are writing to the DOM
 
 ???
 
-The telltale sign that this is happening is this kind of thing in the Dev Tools. Note the repeated sections of purple
-style and layout, and the warning about "forced reflow." (Reflow is another name for layout.)
+The telltale sign of layout thrashing is these repeated sections of purple
+in the DevTools, and the warning about "forced reflow." (Reflow is another name for layout.)
 
 ---
 
@@ -1536,7 +1581,7 @@ const widths = elements.map(el => el.parentElement.offsetWidth);
 
 ...followed by all the writes.
 
-This ensures you only at most pay for style calculation twice – once during the reads, and again during
+This ensures you only at most pay for style calculation at most twice – once during the reads, and again during
 the writes.
 
 ---
@@ -1550,8 +1595,6 @@ the writes.
 If you do this correctly, then you should see one big style/layout cost (or at most two) rather than multiple. This allows
 the browser to be more efficient because it's doing all the calculations at once rather than piece by piece.
 
-Or in many cases, you should probably do your layout in CSS rather than JavaScript! This will avoid this cost entirely.
-
 [Demo](https://bl.ocks.org/nolanlawson/raw/6a4e514d16331594bef2d4b9ee91f150/)
 
 ---
@@ -1562,9 +1605,9 @@ Or in many cases, you should probably do your layout in CSS rather than JavaScri
 
 ???
 
-Now note that the DevTools can be misleading. They warn you about "forced reflow" _anytime_ you use one of [the APIs that force style/layout](https://gist.github.com/paulirish/5d52fb081b3570c81e3a), such as `getBoundingClientRect` or `offsetWidth`. But if you're only reading from the DOM once,
-then it's almost useless to eliminate that call; you're just moving the costs later to when the browser would normally
-run its style/layout loop.
+Note that the DevTools can be misleading. They warn you about "forced reflow" _anytime_ you use one of [the APIs that force style/layout](https://gist.github.com/paulirish/5d52fb081b3570c81e3a), such as `getBoundingClientRect` or `offsetWidth`.
+
+But if you're only reading from the DOM once, then it's useless to eliminate that call; you're just moving the cost around.
 
 ---
 
@@ -1574,11 +1617,11 @@ run its style/layout loop.
 
 ???
 
-See look, here we've gone through a lot of effort to remove that `getBoundingClientRect` call. And the Chrome DevTools
+Here we've gone through a lot of effort to remove that `getBoundingClientRect` call. And the Chrome DevTools
 have rewarded us! Our "Recalculate style" doesn't have a little red triangle with a warning anymore.
 
-But the result is exactly the same. All we did was move the style/layout costs from the `getBoundingClientRect` to
-the browser's rendering loop. The total time spent is the same. So this DevTools warning can be very misleading.
+But the result is the same. All we did was move the style/layout costs from the `getBoundingClientRect` to
+the next style/layout calc on the next frame. The total time spent is the same. So this DevTools warning can be very misleading.
 
 [Demo](https://nolanlawson.github.io/measure-style-and-layout/)
 
@@ -1643,8 +1686,7 @@ for (let i = 0; i < 1000; i++) {
 
 For instance, this is a fun one. This is layout thrashing, right? In fact this should be awful, right?
 
-Well actually it's not, because browsers have optimized this. Notice that the `1px` never actually changes. (And if you
-think this is unrealistic, I've seen a real-world case like this.)
+Well actually it's not, because browsers have optimized this. Notice that the `1px` never actually changes.
 
 ---
 
@@ -1657,15 +1699,18 @@ think this is unrealistic, I've seen a real-world case like this.)
 If you look at [a demo](https://gist.github.com/nolanlawson/2d70b4f01d1d77ca47f069ad51177ff4) of this code and trace it,
 you'll see a very curious thing. We pay the cost of the `getBoundingClientRect`s, sure, but we're only paying yellow
 cost, not purple cost. Style and layout is only calculated once. We're just paying the cost of creating the rectangle
-objects – the browser has optimized everything else.
+objects in JS .
 
-Now imagine applying that to the entire page. And think of all the ways that a browser might have optimized to make
-sure that it doesn't redo work that it's already done. If something changes in one small part of the page,
-the browser wants to avoid having to redo work elsewhere.
+This is a simple expression of a more basic principle: browsers try to avoid doing a full style/layout recalc
+when something changes. So if a class changes, it will try to avoid recalculating all styles – only styles related to
+that class. Or if the layout changes on one part of the page, it will try to avoid doing layout elsewhere on the
+page (although CSS containment helps when these heuristics fail).
 
-The browser has heuristics to skip both style calculation and layout calculation. In Chromium this is called
-[invalidation sets](https://chromium.googlesource.com/chromium/src/+/HEAD/third_party/blink/renderer/core/css/style-invalidation.md)
-if you want to read up on it.
+More on this topic:
+
+- [Invalidation sets (Chromium)](https://chromium.googlesource.com/chromium/src/+/HEAD/third_party/blink/renderer/core/css/style-invalidation.md)
+- [Rule Tree (Firefox)](https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/)
+- [LayoutNG and over-invalidation (Chromium)](https://developer.chrome.com/articles/layoutng/#over-invalidation-and-performance)
 
 ---
 
@@ -1689,10 +1734,9 @@ class: contain-vertical
 
 ???
 
-One tool you can use to inspect this is "invalidation tracking" in the Chrome DevTools. This is an experimental
-feature, so use at your own risk!
+One tool you can use to inspect this is "invalidation tracking" in the Chrome DevTools.
 
-Also note that this only really works for Chrome – other browsers have different
+Note that this only really works for Chrome – other browsers have different
 heuristics and different performance characteristics when it comes to invalidation.
 
 ---
@@ -1706,6 +1750,9 @@ class: contain-vertical
 If you do this, and then you click on the "Recalculate style" or "Recalculate Layout" slice in Dev Tools, then
 it will show you which CSS rules were invalidated for which elements (in the case of style recalc), or which elements
 needed layout (in "recalculate layout"). This can be really invaluable in debugging high invalidation costs!
+
+For instance, you might use this to find out that you have an expensive animation that you're paying for,
+even though it's off-screen or otherwise invisible in the DOM.
 
 ---
 
@@ -1773,8 +1820,8 @@ CSS has been getting a lot of new features recently. Here are some new and draft
 
 Layout has been getting new features too.
 
-All of this is cool, and you should be using it. I don't want anyone to take away from my talk that they shouldn't
-be using CSS or layout features. These are all really cool! They should be used! Odds are, the more work you do in the purple part and the less in the yellow part, the more performant your page will be.
+All of these features are cool, and you should be using them. CSS is great. 
+The more work you do in the purple part and the less in the yellow part, the more performant your page will tend to be.
 
 But the more complex that CSS and layout becomes, and the bigger and more ambitious apps we're trying to build, I believe the
 more likely we are to run into high style and layout calculation costs. And right now, it's really hard to debug.
@@ -1797,7 +1844,7 @@ Style/Layout (purple part)
 Going back to the performance trace I showed at the beginning, I think part of the reason it can be so much
 harder to understand the "purple part" than the yellow part is that JavaScript is imperative, whereas CSS is declarative.
 With JavaScript, we procedurally tell the browser exactly what to do, and the performance trace is a one-to-one
-mapping of what we wrote.
+mapping of the algorithm we wrote.
 
 With CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm. And every
 browser does it differently. So when something goes wrong, it's really hard to tell what we did to cause the problem.
@@ -1817,8 +1864,7 @@ INNER JOIN Customer ON Order.customerId = Customer.id;
 ???
 
 You know, another declarative language with performance considerations is SQL. But one thing I like about SQL is that
-most databases have a way to ask the database why your query is slow. After all, you implemented this thing, but you
-have no idea how exactly the SQL engine does an `INNER JOIN`.
+most databases have a way to ask the database why your query is slow.
 
 ---
 
@@ -1833,7 +1879,7 @@ INNER JOIN Customer ON Order.customerId = Customer.id;
 
 ???
 
-But it can tell you, with `EXPLAIN`.
+You can use `EXPLAIN`.
 
 ---
 
@@ -1856,35 +1902,33 @@ class: contain-vertical
 
 ???
 
-So wouldn't it be cool if browsers could give us the same thing? Something like "invalidation tracking," but with
-even more details. The "selector stats" is a great start, but I'd really like to know everything that's going on
-in the style/layout engine.
+So wouldn't it be cool if browsers could give us the same thing? A `CSS EXPLAIN`?
 
 Going back to my original metaphor of the stick shift and the car, I'd really like to have a dashboard to give me
 more insights into what the browser is doing. It's great to listen to the engine and rely on intuition, but
-the browser vendors know a lot more than me about how their engine is implemented, so they could provide more details.
+the browser vendors could provide more details so I didn't have to guess.
 
 [Image source: Flickr](https://www.flickr.com/photos/lex-photographic/26665512361)
 
 ---
 
-| Task                                                                                                     | ms  |
-|:---------------------------------------------------------------------------------------------------------|-----|
-| **Style**                                                                                                | 400 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;Bloom filter misses                                                           | 200 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;:has() selectors                                                              | 130 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;Class selectors                                                               | 50  |
-| &nbsp;&nbsp;└──&nbsp;&nbsp;Custom properties                                                             | 20  |
-|                                                                                                          |     |
-| **Layout**                                                                                               | 600 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;`<nav>` (grid)                                                                | 300 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;`.sidebar` (flexbox)                                                          | 200 |
-| &nbsp;&nbsp;└──&nbsp;&nbsp;`<main>` (normal flow)                                                                    | 100 |
+| Task                                              | ms  |
+|:--------------------------------------------------|-----|
+| **Style**                                         | 400 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;Bloom filter misses    | 200 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;:has() selectors       | 130 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;`calc()`s              | 50  |
+| &nbsp;&nbsp;└──&nbsp;&nbsp;Custom properties      | 20  |
+|                                                   |     |
+| **Layout**                                        | 600 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;`<nav>` (grid)         | 300 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;`.sidebar` (flexbox)   | 200 |
+| &nbsp;&nbsp;└──&nbsp;&nbsp;`<main>` (normal flow) | 100 |
 
 
 ???
 
-A full "SQL EXPLAIN," but for CSS, would be amazing! Here is a mockup.
+A `SQL EXPLAIN`, but for CSS, would be amazing! Here is a mockup.
 
 ---
 
