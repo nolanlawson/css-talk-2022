@@ -1916,9 +1916,9 @@ the browser vendors could provide more details so I didn't have to guess.
 |:--------------------------------------------------|-----|
 | **Style**                                         | 400 |
 | &nbsp;&nbsp;├──&nbsp;&nbsp;Bloom filter misses    | 200 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;:has() selectors       | 130 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;`calc()`s              | 50  |
-| &nbsp;&nbsp;└──&nbsp;&nbsp;Custom properties      | 20  |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;Pseudo selectors       | 130 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;Custom properties      | 50  |
+| &nbsp;&nbsp;└──&nbsp;&nbsp;`calc()`s              | 20  |
 |                                                   |     |
 | **Layout**                                        | 600 |
 | &nbsp;&nbsp;├──&nbsp;&nbsp;`<nav>` (grid)         | 300 |
