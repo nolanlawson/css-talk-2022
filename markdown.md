@@ -932,7 +932,7 @@ So trim that unused CSS!
 # Avoid excessive complexity in selectors
 
 ```css
-[class*="foo"] :nth-child(2) > * ~ *
+[class*="foo"] :nth-child(2) > * + *
 ```
 
 ???
