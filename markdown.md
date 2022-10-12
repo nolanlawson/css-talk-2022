@@ -1124,7 +1124,7 @@ but overall they're all pretty good.
 
 class: contain-vertical-no-fill
 
-<h1 class="smaller">Concatenate stylesheets (Chromium-only)</h1>
+<h1 class="smaller less-margin">Concatenate stylesheets (Chromium-only)</h1>
 
 .center[![TODO](./images/concat-benchmark-3.png)]
 
