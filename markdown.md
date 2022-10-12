@@ -525,13 +525,22 @@ is the part outside of the braces.
 
 # Style performance
 
+???
+
+So let's talk about style performance.
+
+--
+
 > "For most websites I would posit that selector performance is not the best area to spend your time trying to find performance optimizations."
 
 .muted.right[– Greg Whitworth, via [Enduring CSS](https://ecss.benfrain.com/) by Ben Frain (2016)] 
 
 ???
 
-Now first off, I want to clear a bit of a misunderstanding. There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote from my colleague Greg Whitworth, but there are others.
+Now first off, I want to clear a bit of a misunderstanding. When we talk about style performance, we're mostly going to be talking
+about selector performance.
+
+There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote from my colleague Greg Whitworth, but there are others.
 
 Now to be clear, this is probably true for most sites. However, sometimes you have a large webapp with a lot of CSS, or sometimes your framework or design system may have a flaw that repeats some unperformant CSS selectors all over the place. So I think this may be true at the micro level, but not at the macro level.
 
@@ -947,46 +956,59 @@ of these will probably not wreck your page's performance, but in aggregate, thes
 
 ---
 
-exclude: true
-
 <h1 class="smaller">Rough selector cost estimate</h1>
 
-| ~Cost | Type            | Example                                    |
+| ~Cost | Type       | Examples                                 |
 |--|-----------------|--------------------------------------------|
-| ✅ | ID, class, tag  | `#id`, `.cls`, `a`                         |
-| ⚠️| Descendant      | `.foo .bar`, `.foo > .bar`                 |
-| ⚠️| Attribute       | `[foo]`                      |
-| 🌶️️| Attribute value | `[foo="bar"]`, `[foo~="bar"]`              |
-| 🌶️ | Sibling         | `.foo ~ bar`, `.foo + .bar`                |
-| 🌶️ | Pseudo-class    | `:nth-of-type()`, `:not()`, `:nth-child()` |
+| ✅ | ID, class, tag  | `#id`&nbsp;&nbsp;&nbsp;`.cls`&nbsp;&nbsp;&nbsp;`a`                         |
+| ⚠️| Descendant      | `.foo .bar`&nbsp;&nbsp;&nbsp;`.foo > .bar`                 |
+| ⚠️| Attribute name  | `[foo]`                      |
+| 🌶️️| Attribute value | `[foo="bar"]`&nbsp;&nbsp;&nbsp;`[foo~="bar"]`              |
+| 🌶️ | Sibling         | `.foo ~ bar`&nbsp;&nbsp;&nbsp;`.foo + .bar`                |
+| 🌶️ | Pseudo-class    | `:nth-of-type()`&nbsp;&nbsp;&nbsp;`:not()`&nbsp;&nbsp;&nbsp;`:nth-child()` |
 
 ???
 
-In general, browsers have optimized for things like tag names, IDs, and classes. Attributes are also fairly optimized, although less so.
-Excessive combinators can cost you. Sibling selectors are also less optimized. And fancier stuff like `:nth-child()` and `:nth-of-type()` is less optimized.
-
-Again, I can't provide hard-and-fast rules, and all of this could become outdated tomorrow. But the intuition you should have is that IDs, classes, and tag names will always be fast, and other stuff you should be cautious with. And again, most of this stuff doesn't matter in isolation, but it does matter if you're building a framework or a design system
-where rules might be repeated multiple times on the page.
-
-More details (although I quibble with some of the rankings): https://www.sitepoint.com/optimizing-css-id-selectors-and-other-myths/
-
-Note WebKit [optimized attributes recently](https://github.com/WebKit/WebKit/commit/c27218b87632ef954d3e431abe4b585a030e23b2) and
-[so did Firefox](https://bugzil.la/1728851).
+This is my extremely rough estimate of selector costs. Again, this doesn't really matter at the micro level, but it
+might matter in aggregate. And it could change tomorrow or vary from browser to browser. But this is just based
+on what I've seen from perf traces and perf regressions.
 
 --
-exclude: true
 <pointing-arrow></pointing-arrow>
 
+???
+
+In general, browsers have heavily optimized for things like tag names, IDs, and classes.
+
 --
-exclude: true
 <pointing-arrow></pointing-arrow>
 <pointing-arrow show-previous="1"></pointing-arrow>
 
+???
+
+Attribute names are also fairly optimized, although a bit less so historically. As I mentioned, descendant selectors
+have the Bloom filter optimization, but it doesn't always work depending on what's in the ancestor position, and it
+can still be slow if the right-hand side is very generic.
+
+Note recent attribute optimizations though:
+
+- [WebKit](https://github.com/WebKit/WebKit/commit/c27218b87632ef954d3e431abe4b585a030e23b2)
+- [Firefox](https://bugzil.la/1728851)
+
 --
-exclude: true
 <pointing-arrow></pointing-arrow>
 <pointing-arrow show-previous="1"></pointing-arrow>
 <pointing-arrow show-previous="2"></pointing-arrow>
+
+???
+
+Attribute values tend to be less optimized than attribute names, because attribute names go in things like the hashmap
+optimization and Bloom filter but attribute values don't. This is especially true for selectors that search through
+an attribute value – this is going to require a slow string search.
+
+Sibling selectors also tend to be less optimized.
+
+Pseudos like `:nth-child()` and `:nth-of-type()` tend to be less optimized, although browsers tend to have specific optimizations for common ones like `:hover`.
 
 ---
 
@@ -1048,18 +1070,6 @@ This has some style calc benefits I'll mention later.
 :nth-child(2) *            /* Input */
 ```
 
-```css
-:nth-child(2) *[xyz]       /* Vue */
-```
-
-```css
-.xyz:nth-child(2) .xyz     /* Svelte */
-```
-
-```css
-my-tag :nth-child(2) *     /* Enhance */
-```
-
 ???
 
 An alternative to shadow DOM is to use style scoping from frameworks like Vue, Svelte, or CSS Modules. In a sense,
@@ -1068,6 +1078,24 @@ these "polyfill" shadow DOM style scoping by modifying the selectors with unique
 There are different ways to do style scoping. But knowing what you know now about how browsers do
 style calculation, you can see how this effectively can turn unperformant selectors (like the first one)
 into a more performant selectors that leverage the hash map and/or Bloom filter optimizations.
+
+--
+
+```css
+:nth-child(2) *[xyz]       /* Vue */
+```
+
+--
+
+```css
+.xyz:nth-child(2) .xyz     /* Svelte */
+```
+
+--
+
+```css
+my-tag :nth-child(2) *     /* Enhance */
+```
 
 ---
 
@@ -1335,19 +1363,33 @@ algorithm I mentioned.
 
 # Principles of layout performance
 
+???
+
+Other than CSS containment, I can only share a few general tips on improving layout performance.
+
+--
+
 - Explicit is better than implicit
-- Use fewer DOM nodes (e.g. virtualization)
-- Use `display:none` and `content-visibility`
 
 ???
 
-Other than CSS containment, I can only share a few general tips on improving layout performance. First off, explicitly
+First off, explicitly
 telling the browser the sizes of things will always be less work than asking it to run its layout algorithm. If you
 know the exact width/height of something, you can set the explicit size rather than letting the browser calculate it.
 Absolute/relative positioninng is always fast.
 
+--
+- Use fewer DOM nodes (e.g. virtualization)
+
+???
+
 Also, of course, use fewer DOM nodes. If you have an infinite-scrolling list, use virtualization so that you're not
 rendering a bunch of DOM nodes that are off-screen.
+
+--
+- Use `display:none` and `content-visibility`
+
+???
 
 If you use something like `display:none`, it will also avoid paying the layout cost for everything that is currently being hidden.
 
