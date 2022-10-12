@@ -1193,6 +1193,8 @@ class: fill-custom
 This can get very complicated, because some of these boxes may have absolute/relative positioning,
 others may use flexbox, others may use grid, etc.
 
+And the browser has to calculate all the boxes for these things relative to each other.
+
 ---
 
 class: fill-custom
