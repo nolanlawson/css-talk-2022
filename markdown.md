@@ -970,8 +970,7 @@ of these will probably not wreck your page's performance, but in aggregate, thes
 ???
 
 This is my extremely rough estimate of selector costs. Again, this doesn't really matter at the micro level, but it
-might matter in aggregate. And it could change tomorrow or vary from browser to browser. But this is just based
-on what I've seen from perf traces and perf regressions.
+might matter in aggregate. And it could change tomorrow or vary from browser to browser. But this is just based on my experience.
 
 --
 <pointing-arrow></pointing-arrow>
