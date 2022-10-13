@@ -453,6 +453,18 @@ can actually reason about why one is expensive versus the other.
 
 ---
 
+<h1 class="smaller">Three news sites</h1>
+
+.center[![TODO](./images/news-sites-style-layout.png)]
+
+???
+
+Just to give an idea of what the style vs layout breakdown might look like, here are those three news sites
+from earlier. Layout is usually the biggest part, but style is occasionally pretty big. In fact, for the first site, it's spending
+slightly more time in style than in layout. I've also seen traces where style is almost 100% of the style/layout cost.
+
+---
+
 # Style vs layout performance
 
 ```css
@@ -525,12 +537,6 @@ is the part outside of the braces.
 
 # Style performance
 
-???
-
-So let's talk about style performance.
-
---
-
 > "For most websites I would posit that selector performance is not the best area to spend your time trying to find performance optimizations."
 
 .muted.right[– Greg Whitworth, via [Enduring CSS](https://ecss.benfrain.com/) by Ben Frain (2016)] 
@@ -540,29 +546,18 @@ So let's talk about style performance.
 Now first off, I want to clear a bit of a misunderstanding. When we talk about style performance, we're mostly going to be talking
 about selector performance.
 
-There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote from my colleague Greg Whitworth, but there are others.
+There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote from my colleague Greg Whitworth (whom I respect greatly), but there are others.
 
-Now to be clear, this is probably true for most sites. However, sometimes you have a large webapp with a lot of CSS, or sometimes your framework or design system may have a flaw that repeats some unperformant CSS selectors all over the place. So I think this may be true at the micro level, but not at the macro level.
+Now to be clear, this is probably true for most sites. If you micro-optimize your CSS selectors, it's probably premature optimization.
 
-Also the proof is in the pudding: if you have high style calculation costs, then it is probably worth looking into selector performance,
-since that's the main cost in style calculation.
+However, sometimes you have a large webapp with a lot of CSS, or sometimes your framework or design system that repeats some unperformant CSS selectors multiple times. So this may be true at the micro level, but not at the macro level.
+
+And the proof is in the pudding: if you have high style calculation costs, then it is worth looking into selector performance.
 
 - https://calendar.perfplanet.com/2011/css-selector-performance-has-changed-for-the-better/
 - https://calibreapp.com/blog/css-performance
 - https://ecss.benfrain.com/appendix2.html
 - https://meiert.com/en/blog/performance-of-css-selectors-2/
-
----
-
-<h1 class="smaller">Three news sites</h1>
-
-.center[![TODO](./images/news-sites-style-layout.png)]
-
-???
-
-So for instance, if we take our three news sites from earlier, and if I split their style/layout performance into
-style and layout, we can see that style is occasionally pretty big. In fact, for the first site, it's spending
-slightly more time in style than in layout. I've also seen traces where style is almost 100% of the style/layout cost.
 
 ---
 
@@ -580,7 +575,8 @@ for (const element of page) {
 
 ???
 
-To understand style performance, first it's important to note how browsers actually implement their style engines, so you can understand the kinds of optimizations they have in place so that we don't have to worry about style performance most of the time.
+To understand style performance, first it's important to note how browsers actually implement their style engines, and what they've
+already optimized.
 
 To illustrate, let's imagine we're building a browser. Here is a naive implementation of style calculation that we might have.
 
