@@ -957,7 +957,7 @@ of these will probably not wreck your page's performance, but in aggregate, thes
 | ~Cost | Type       | Examples                                 |
 |--|-----------------|--------------------------------------------|
 | ✅ | ID, class, tag  | `#id`&nbsp;&nbsp;&nbsp;`.cls`&nbsp;&nbsp;&nbsp;`a`                         |
-| ⚠️| Descendant      | `.foo .bar`&nbsp;&nbsp;&nbsp;`.foo > .bar`                 |
+| ⚠️| Descendant      | `.foo *`&nbsp;&nbsp;&nbsp;`.foo > *`                 |
 | ⚠️| Attribute name  | `[foo]`                      |
 | 🌶️️| Attribute value | `[foo="bar"]`&nbsp;&nbsp;&nbsp;`[foo~="bar"]`              |
 | 🌶️ | Sibling         | `.foo ~ bar`&nbsp;&nbsp;&nbsp;`.foo + .bar`                |
@@ -1705,6 +1705,7 @@ class: contain-vertical
 Sadly, the Chrome DevTools (or any browser DevTools) do not actually tell you what caused the invalidation.
 It just says "Schedule Style Calculation." So you just have to know.
 ---
+exclude: true
 
 # Invalidation optimizations
 
@@ -1714,6 +1715,7 @@ Now that said, there are also cases where it seems like an invalidation _should_
 browsers have tons of optimizations to try to avoid doing unnecessary work.
 
 --
+exclude: true
 ```js
 for (let i = 0; i < 1000; i++) {
   el.style.width = '1px'
@@ -1728,7 +1730,7 @@ For instance, this is a fun one. This is layout thrashing, right? In fact this s
 Well actually it's not, because browsers have optimized this. Notice that the `1px` never actually changes.
 
 ---
-
+exclude: true
 # Invalidation optimizations
 
 .center[![TODO](./images/browser-optimization-demo.png)]
@@ -1746,6 +1748,29 @@ that class. Or if the layout changes on one part of the page, it will try to avo
 page (although CSS containment helps when these heuristics fail).
 
 More on this topic:
+
+- [Invalidation sets (Chromium)](https://chromium.googlesource.com/chromium/src/+/HEAD/third_party/blink/renderer/core/css/style-invalidation.md)
+- [Rule Tree (Firefox)](https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/)
+- [LayoutNG and over-invalidation (Chromium)](https://developer.chrome.com/articles/layoutng/#over-invalidation-and-performance)
+
+---
+
+# Invalidation optimizations
+
+- Invalidation sets (Chromium)
+- Rule Tree (Firefox)
+- LayoutNG (Chromium)
+- Etc.
+
+???
+
+Now most of the time, browsers have a lot of optimizations for invalidation. They try
+to avoid doing any unnecessary work. You change a class, and they try to only
+check rules related to that class. You change one part of the DOM, and they try to
+only redo layout for that part of the DOM (although containment can help).
+
+Here is a partial list of some reading material on the kinds of optimizations browsers
+do for both style and layout.
 
 - [Invalidation sets (Chromium)](https://chromium.googlesource.com/chromium/src/+/HEAD/third_party/blink/renderer/core/css/style-invalidation.md)
 - [Rule Tree (Firefox)](https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/)
@@ -1794,7 +1819,7 @@ For instance, you might use this to find out that you have an expensive animatio
 even though it's off-screen or otherwise invisible in the DOM.
 
 ---
-
+exclude: true
 class: contain-vertical
 
 .center[![TODO](./images/chrome-tracing.png)]
@@ -1807,6 +1832,7 @@ albeit it's a bit more inaccessible than the DevTools.
 [A good guide on `chrome:tracing`, albeit for V8 debugging](https://v8.dev/docs/rcs))
 
 ---
+exclude: true
 
 class: contain-vertical
 
