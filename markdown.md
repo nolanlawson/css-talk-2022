@@ -2004,8 +2004,11 @@ A `SQL EXPLAIN`, but for CSS, would be amazing! Here is a mockup.
 ## 🌎 nolanlawson.com
 
 <footer class="muted">
+  <p>
   Thanks to Emilio Cobos Álvarez, Manuel Rego Casasnovas, and Daniel Libby for help with research for this talk.
-  <br/>Also thanks to Rune Lillesveen and Steinar H Gunderson for answering my Blink style bug questions.
+  </p><p>Also thanks to Rune Lillesveen and Steinar H Gunderson for answering my Blink style bug questions.
+  </p><p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-sa/3.0/)">Creative Commons Attribution Share-Alike License v3.0</a>.
+  </p>
 </footer>
 
 ???
