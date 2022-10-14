@@ -1999,7 +1999,7 @@ A `SQL EXPLAIN`, but for CSS, would be amazing! Here is a mockup.
 
 <h1 class="center">Thank you</h1>
 
-## 📃 nolanlawson.github.io/style-talk-2022
+## 📃 nolanlawson.github.io/css-talk-2022
 
 ## 🌎 nolanlawson.com
 
