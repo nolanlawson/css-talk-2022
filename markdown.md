@@ -131,7 +131,7 @@ it's worth looking into. And even for the other ones, if you manage to find a qu
 (respectively) that can be improved! Finding that time in a large JavaScript app can be hard.
 
 ---
-
+exclude: true
 # Target audience
 
 ???
@@ -139,6 +139,7 @@ it's worth looking into. And even for the other ones, if you manage to find a qu
 I should mention who I designed this talk for. A few groups of people:
 
 --
+exclude: true
 - ⚡ Performance engineers
 
 ???
@@ -147,6 +148,7 @@ Perf folks are going to be interested in every part of the performance equation,
 not the #1 most important thing all of the time.
 
 --
+exclude: true
 - 🛠️ Framework authors
 
 ???
@@ -155,6 +157,7 @@ If you're building a JavaScript framework or design system, then small decisions
 can have large cascading effects downstream.
 
 --
+exclude: true
 - 🌍 Complex webapp authors
 
 ???
@@ -163,6 +166,7 @@ Large web apps (e.g. SPAs) tend to have more problems with style/layout than sta
 as you saw with the 3 news sites, they can have high style/layout costs too.)
 
 --
+exclude: true
 - 🙋 Anyone interested in how browsers work
 
 ???
@@ -384,6 +388,8 @@ figures out where to actually place things within the given browser window, with
 
 ---
 
+exclude: true
+
 # Style vs layout performance
 
 ```css
@@ -401,6 +407,8 @@ So how to think about style vs layout performance? One way to think about it is.
 
 ---
 
+exclude: true
+
 # Style vs layout performance
 
 ```css
@@ -417,6 +425,8 @@ So how to think about style vs layout performance? One way to think about it is.
 ...that style calculation is about the part outside of the braces
 
 ---
+
+exclude: true
 
 # Style vs layout performance
 
@@ -516,25 +526,13 @@ slightly more time in style than in layout. I've also seen traces where style is
 
 ---
 
+class: center,middle
+
 # Style performance
 
 ???
 
-To understand style vs layout performance a bit more, we need to go into detail on how each one works. Let's start with style.
-
---
-```css
-*h1 {
-  padding: 5px;
-}
-*h2 {
-  padding: 10px;
-}
-```
-
-???
-
-Remember: this is the part outside of the braces.
+To understand style vs layout performance a bit more, we need to go into detail on how each one works. Let's go into style.
 
 ---
 
@@ -1156,30 +1154,13 @@ Chromium devs.
 
 ---
 
+class: center,middle
+
 # Layout performance
 
 ???
 
 OK, so now that I've covered all the bases on style performance, I want to move on to layout performance.
-
-Now remember, I've been trying to convince you that style and layout are not the same thing! Up until
-this point, I haven't talked about layout at all – I haven't talked about the geometry of the page, or how text flows,
-or anything like that. So if you see high style calculation costs, remember that it's all about your CSS selectors, not your page layout.
-
-Going back to our example from earlier, layout performance is the part inside of the curly braces, whereas style performance is the
-part outside of it.
-
-Now when it comes to layout, I'm going to admit that I'm not a huge expert on this topic, so I'm not going to spend a lot of time on it. But I do have some tricks I can share.
-
---
-```css
-h1 {
-* padding: 5px;
-}
-h2 {
-* padding: 10px;
-}
-```
 
 ---
 
@@ -1412,6 +1393,8 @@ large portions of the page while still allowing them to be searchable with Cmd-F
 So I'd say if you have high layout costs, try CSS containment first, then try these techniques.
 
 ---
+
+class: center,middle
 
 # Invalidation
 
@@ -1872,6 +1855,8 @@ This tells us how many CSS rules matched, and how many were rejected using the "
 filter) and how many were rejected more slowly (using e.g. DOM traversal).
 
 ---
+
+class: center,middle
 
 # Conclusion
 
