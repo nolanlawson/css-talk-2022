@@ -1,8 +1,25 @@
 import {slideshow} from './slideshow.js';
+import './popper.js'
+
+const elementsToPoppers = new Map()
 
 customElements.define('pointing-arrow', class extends HTMLElement {
   constructor() {
     super()
+    this.attachShadow({ mode: 'open' }).innerHTML = `
+      <style>
+        .arrow {
+            font-size: 3rem;
+            margin-left: 1rem;
+        }
+        .hidden {
+            display: none;
+        }
+      </style>
+      <div class="arrow">
+        ⬅️
+      </div>  
+    `
   }
 
   get showPrevious () {
@@ -15,11 +32,19 @@ customElements.define('pointing-arrow', class extends HTMLElement {
 
     if (isVisible) {
       requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const allArrows = [...slideNode.querySelectorAll('pointing-arrow')]
+          const index = allArrows.indexOf(this)
+          const tr = slideNode.querySelector(`tbody tr:nth-child(${index + 1})`)
 
-        const index = [...slideNode.querySelectorAll('pointing-arrow')].indexOf(this)
-        const trs = [...slideNode.querySelectorAll('tbody tr')]
-        trs.forEach((tr, i) => {
-          tr.classList.toggle('arrowed', i <=index && i >= (index - this.showPrevious))
+          if (!this._popper) {
+            this._popper = Popper.createPopper(tr, this, {
+              placement: 'right'
+            })
+          }
+
+          const showArrow = index === allArrows.length - 1
+          this.shadowRoot.querySelector('.arrow').classList.toggle('hidden', !showArrow)
         })
       })
     }
