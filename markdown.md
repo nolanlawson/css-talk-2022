@@ -970,7 +970,7 @@ class: relative
 | ⚠️| Attribute name  | `[foo]`                      |
 | 🌶️️| Attribute value | `[foo="bar"]`&nbsp;&nbsp;&nbsp;`[foo~="bar"]`              |
 | 🌶️ | Sibling         | `.foo ~ bar`&nbsp;&nbsp;&nbsp;`.foo + .bar`                |
-| 🌶️ | Pseudo-class    | `:nth-child()`&nbsp;&nbsp;&nbsp;`:not()`&nbsp;&nbsp;&nbsp;`:disabled` |
+| 🌶️ | Pseudo-class    | `:nth-child()`&nbsp;&nbsp;&nbsp;`:not()`&nbsp;&nbsp;&nbsp;`:nth-of-type()` |
 
 ???
 
