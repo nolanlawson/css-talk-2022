@@ -12,24 +12,36 @@ customElements.define('stamp-text', class extends HTMLElement {
         display: flex;
         justify-content: center;
         align-items: center;
-        transform: rotate(-25deg);
+        transform: rotate(-20deg);
+        text-align: center;
       }
       .stamp {
         border-radius: 2rem;
         border: 1rem solid #e00909;
         text-shadow: 0.1em 0.1em #fff, -0.1em -0.1em #fff, 0.1em -0.1em #fff, -0.1em 0.1em #fff;
-        background: rgba(255, 255, 255, 0.3);
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 3rem;
+        /* via https://codepen.io/555/pen/pdwvBP */
+        -webkit-mask-image: url("../images/grunge.png");
+                mask-image: url("../images/grunge.png");
+        -webkit-mask-size: 944px 604px;
+                mask-size: 944px 604px;
+        mix-blend-mode: multiply;
       }
-      ::slotted(*) {
+      .slot-wrapper {
+        display: contents;
         color: #e00909;
-        padding: 3rem;
         font-size: 8rem;
         font-weight: bold;
         font-family: monospace;
+        flex: 1;
       }
       </style>
       <div class="stamp">
-        <slot></slot>
+        <div class="slot-wrapper">
+          <slot></slot>
+        </div>
       </div>
     `
   }

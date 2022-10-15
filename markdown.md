@@ -10,6 +10,9 @@ class: center, middle
 
 Hi, my name is Nolan Lawson and today I'd like to talk to you about CSS runtime performance.
 
+Quick note: these slides are available online; I'll provide a URL at the end. The speaker notes have lots of
+links if you want more details on what I'm saying.
+
 ---
 .left-column-66[![TODO](./images/20150424081933-cropped-2.jpg)]
 .right-column-33[
@@ -516,7 +519,7 @@ can actually reason about why one is expensive versus the other.
 
 <h1 class="smaller">Three news sites</h1>
 
-.center[![TODO](./images/news-sites-style-layout.png)]
+.center[![TODO](./images/news-sites-style-layout-2.png)]
 
 ???
 
@@ -967,7 +970,7 @@ class: relative
 | ⚠️| Attribute name  | `[foo]`                      |
 | 🌶️️| Attribute value | `[foo="bar"]`&nbsp;&nbsp;&nbsp;`[foo~="bar"]`              |
 | 🌶️ | Sibling         | `.foo ~ bar`&nbsp;&nbsp;&nbsp;`.foo + .bar`                |
-| 🌶️ | Pseudo-class    | `:nth-of-type()`&nbsp;&nbsp;&nbsp;`:not()`&nbsp;&nbsp;&nbsp;`:nth-child()` |
+| 🌶️ | Pseudo-class    | `:nth-child()`&nbsp;&nbsp;&nbsp;`:not()`&nbsp;&nbsp;&nbsp;`:disabled` |
 
 ???
 
@@ -1012,7 +1015,7 @@ Sibling selectors also tend to be less optimized.
 Pseudos like `:nth-child()` and `:nth-of-type()` tend to be less optimized, although browsers tend to have specific optimizations for common ones like `:hover`.
 
 --
-<stamp-text><span>IT DEPENDS</span></stamp-text>
+<stamp-text>IT DEPENDS</stamp-text>
 
 ???
 
