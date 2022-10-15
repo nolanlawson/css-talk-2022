@@ -30,12 +30,11 @@ customElements.define('stamp-text', class extends HTMLElement {
         mix-blend-mode: multiply;
       }
       .slot-wrapper {
-        display: contents;
+        flex: 1;
         color: #e00909;
         font-size: 8rem;
         font-weight: bold;
         font-family: monospace;
-        flex: 1;
       }
       </style>
       <div class="stamp">
