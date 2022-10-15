@@ -261,9 +261,9 @@ Let's take a simple example. In this case, we have a 5px-padding h1 and a 10px-p
 .center[![TODO](./images/pixel-pipeline-style.png)]
 
 ```css
-h1 {
+*h1 {
 * padding: 5px;
-}
+*}
 h2 {
   padding: 10px;
 }
@@ -276,7 +276,7 @@ h2 {
 
 ???
 
-this h1 is 5px padding and 
+this rule applies to this h1
 
 ---
 
@@ -286,9 +286,9 @@ this h1 is 5px padding and
 h1 {
   padding: 5px;
 }
-h2 {
+*h2 {
 * padding: 10px;
-}
+*}
 ```
 
 ```html
@@ -298,7 +298,7 @@ h2 {
 
 ???
 
-this h2 is 10px padding.
+this rule applies to this h2.
 
 In this case, style calculation is (basically) about applying the CSS selectors, and figuring out that `h1` refers to the `<h1>` element,
 and `h2` refers to the `<h2>` element.
@@ -355,6 +355,11 @@ However, this is a good fact about style calculation to internalize: it's mostly
 
 .center[![TODO](./images/pixel-pipeline-layout.png)]
 
+```html
+<h1 style="padding: 5px;" >Hello</h1>
+<h2 style="padding: 10px;">World</h2>
+```
+
 ???
 
 Now let's move on to layout. Note that, with style, at no point were we talking about the geometry of the page.
@@ -363,12 +368,6 @@ calculation.
 
 So recall we have our h1 and h2 where the browser has figured out that one has 5px padding and the other
 has 10px padding.
-
---
-```html
-<h1 style="padding: 5px;" >Hello</h1>
-<h2 style="padding: 10px;">World</h2>
-```
 
 ---
 
@@ -385,14 +384,66 @@ figures out where to actually place things within the given browser window, with
 
 ---
 
+# Style vs layout performance
+
+```css
+h1 {
+  padding: 5px;
+}
+h2 {
+  padding: 10px;
+}
+```
+
+???
+
+So how to think about style vs layout performance? One way to think about it is...
+
+---
+
+# Style vs layout performance
+
+```css
+*h1 {
+  padding: 5px;
+}
+*h2 {
+  padding: 10px;
+}
+```
+
+???
+
+...that style calculation is about the part outside of the braces
+
+---
+
+# Style vs layout performance
+
+```css
+h1 {
+* padding: 5px;
+}
+h2 {
+* padding: 10px;
+}
+```
+
+???
+
+..whereas layout calculation is about the part inside of the braces.
+
+
+---
+
 # What slows down style/layout
 
-|                                 | Style | Layout |
-|---------------------------------|:-----:|:------:|
-| Size/complexity of CSS          |   ✅   |   ❌    |
-| Complexity of layout            |   ❌   |   ✅    |
-| Size/depth of DOM               |   ✅   |   ✅    |
-| Repeated re-renders (thrashing) |   ✅   |   ✅    |
+|                                 | Style  | Layout |
+|---------------------------------|:------:|:------:|
+| Size/complexity of CSS          |   🐌   |        |
+| Complexity of layout            |        |   🐌   |
+| Size/depth of DOM               |   🐌   |    🐌    |
+| Repeated re-renders (thrashing) |    🐌    |    🐌    |
 
 ???
 
@@ -465,60 +516,13 @@ slightly more time in style than in layout. I've also seen traces where style is
 
 ---
 
-# Style vs layout performance
-
-```css
-h1 {
-  padding: 5px;
-}
-h2 {
-  padding: 10px;
-}
-```
-
-???
-
-So conceptually, how can we think about the performance implications of style versus layout? What makes one slow
-versus the other?
-
----
-
-# Style vs layout performance
-
-```css
-*h1 {
-  padding: 5px;
-}
-*h2 {
-  padding: 10px;
-}
-```
-
-???
-
-Well, speaking in generalities, we can say that style calculation is about the part outside of the braces (i.e. selectors that locate elements on the page).
-
----
-
-# Style vs layout performance
-
-```css
-h1 {
-* padding: 5px;
-}
-h2 {
-* padding: 10px;
-}
-```
-
-???
-
-Whereas layout calculation is about the part inside of the braces (i.e. the rules that actually place things geometrically on the page).
-
----
-
 # Style performance
 
+???
+
+To understand style vs layout performance a bit more, we need to go into detail on how each one works. Let's start with style.
+
+--
 ```css
 *h1 {
   padding: 5px;
@@ -530,8 +534,7 @@ Whereas layout calculation is about the part inside of the braces (i.e. the rule
 
 ???
 
-To understand style vs layout performance a bit more, we need to go into detail on how each one works. Let's start with style. Remember: this
-is the part outside of the braces.
+Remember: this is the part outside of the braces.
 
 ---
 
@@ -790,6 +793,9 @@ tag name, IDs, and classes.
 This means that if we're on `div`, and we want to figure out if `.foo` is an ancestor, then we don't have to walk up the tree – we know
 instantly, because `.foo` is in the Bloom filter.
 
+This particular optimization was first applied by WebKit [in 2011](https://bugs.webkit.org/show_bug.cgi?id=53880) and now
+all browsers have it.
+
 ---
 
 class: fill-custom
@@ -952,6 +958,8 @@ of these will probably not wreck your page's performance, but in aggregate, thes
 
 ---
 
+class: relative
+
 <h1 class="smaller">Rough selector cost estimate</h1>
 
 | ~Cost | Type       | Examples                                 |
@@ -1004,6 +1012,14 @@ an attribute value – this is going to require a slow string search.
 Sibling selectors also tend to be less optimized.
 
 Pseudos like `:nth-child()` and `:nth-of-type()` tend to be less optimized, although browsers tend to have specific optimizations for common ones like `:hover`.
+
+--
+<stamp-text><span>IT DEPENDS</span></stamp-text>
+
+???
+
+And just to repeat: this will vary from browser to browser, this could change tomorrow, and it's not perfectly
+accurate (e.g. some browsers have unique optimizations for common pseudos like `:hover`).
 
 ---
 
