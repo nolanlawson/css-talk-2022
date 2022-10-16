@@ -631,7 +631,7 @@ mapping those strings to the list of selectors for that string.
 
 This is pretty reasonable, because tag names for an element never change, and IDs and classes are pretty small and simple most of the time.
 
-- [Chromium source](https://chromium.googlesource.com/chromium/src/+/993ea953282d39b23658448d4a3f95ffeff310d3/third_party/blink/renderer/core/css/element_rule_collector.cc#308)
+- [Chromium source](https://chromium.googlesource.com/chromium/src/+/993ea953282d39b23658448d4a3f95ffeff310d3/third_party/blink/renderer/core/css/element_rule_collector.cc#522)
 - [Firefox source](https://hg.mozilla.org/mozilla-central/file/cf3860b3652e0a2105ab963c2c0dec25c033527a/servo/components/style/selector_map.rs#l70)
 - [WebKit source](https://github.com/WebKit/WebKit/blob/7384255396ccd97db7ad12e77963ee283ced2955/Source/WebCore/style/ElementRuleCollector.cpp#L179-L214)
 
