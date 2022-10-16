@@ -1,5 +1,6 @@
 import {slideshow} from './slideshow.js';
 
+
 customElements.define('pointing-arrow', class extends HTMLElement {
   constructor() {
     super()
@@ -17,9 +18,9 @@ customElements.define('pointing-arrow', class extends HTMLElement {
       requestAnimationFrame(() => {
 
         const index = [...slideNode.querySelectorAll('pointing-arrow')].indexOf(this)
-        const trs = [...slideNode.querySelectorAll('tbody tr')]
-        trs.forEach((tr, i) => {
-          tr.classList.toggle('arrowed', i <=index && i >= (index - this.showPrevious))
+        const tds = [...slideNode.querySelectorAll('tbody tr td:last-child')]
+        tds.forEach((td, i) => {
+          td.classList.toggle('arrowed', i <=index && i >= (index - this.showPrevious))
         })
       })
     }
