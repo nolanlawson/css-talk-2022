@@ -201,7 +201,9 @@ customElements.define('layout-visualization', class extends HTMLElement {
 
   _onShowSlide = (slide) => {
     const slideNode = document.querySelector(`.remark-slide-container:nth-child(${slide.getSlideIndex() + 1})`)
-    const isVisible = slideNode && slideNode.contains(this.getRootNode().host)
+    const previewArea = document.querySelector('.remark-container.remark-presenter-mode .remark-preview-area')
+    const host = this.getRootNode().host
+    const isVisible = (slideNode && slideNode.contains(host)) || (previewArea && previewArea.contains(host))
 
     if (isVisible) {
       this._draw()
