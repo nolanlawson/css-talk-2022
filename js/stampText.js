@@ -23,8 +23,8 @@ customElements.define('stamp-text', class extends HTMLElement {
         flex-direction: column;
         padding: 1rem 3rem;
         /* via https://codepen.io/555/pen/pdwvBP */
-        -webkit-mask-image: url("../images/grunge.png");
-                mask-image: url("../images/grunge.png");
+        -webkit-mask-image: url("./images/grunge.png");
+                mask-image: url("./images/grunge.png");
         -webkit-mask-size: 944px 604px;
                 mask-size: 944px 604px;
         mix-blend-mode: multiply;
