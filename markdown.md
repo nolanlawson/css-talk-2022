@@ -1082,6 +1082,10 @@ This has some style calc benefits I'll mention later.
 :nth-child(2) *            /* Input */
 ```
 
+```css
+.xyz:nth-child(2) .xyz     /* Svelte output */
+```
+
 ???
 
 An alternative to shadow DOM is to use style scoping from frameworks like Vue, Svelte, or CSS Modules. In a sense,
@@ -1091,29 +1095,11 @@ There are different ways to do style scoping. But knowing what you know now abou
 style calculation, you can see how this effectively can turn unperformant selectors (like the first one)
 into a more performant selectors that leverage the hash map and/or Bloom filter optimizations.
 
---
-
-```css
-:nth-child(2) *[xyz]       /* Vue */
-```
-
---
-
-```css
-.xyz:nth-child(2) .xyz     /* Svelte */
-```
-
---
-
-```css
-my-tag :nth-child(2) *     /* Enhance */
-```
-
 ---
 
 class: contain-vertical
 
-.center[![TODO](./images/selector-benchmark-latest.png)]
+.center[![TODO](./images/selector-benchmark-latest-2.png)]
 
 ???
 
