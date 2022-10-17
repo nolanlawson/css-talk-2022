@@ -547,21 +547,17 @@ To understand style vs layout performance a bit more, we need to go into detail 
 
 ???
 
-Now first off, I want to clear a bit of a misunderstanding. When we talk about style performance, we're mostly going to be talking
-about selector performance.
+When we talk about style performance, we're mostly talking about selector performance. This needs some clarification.
 
-There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote from my colleague Greg Whitworth (whom I respect greatly), but there are others.
+There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote Greg Whitworth. I'm picking on Greg because I work with him, but if you Google
+"CSS performance," you'll see this [repeated](https://calendar.perfplanet.com/2011/css-selector-performance-has-changed-for-the-better/) [in](https://calibreapp.com/blog/css-performance) [multiple](https://ecss.benfrain.com/appendix2.html) [places](https://meiert.com/en/blog/performance-of-css-selectors-2/).
 
-Now to be clear, this is probably true for most sites. If you micro-optimize your CSS selectors, it's probably premature optimization.
+I think this is true at the micro level: if you try to micro-optimize your CSS selectors, you're probably wasting your time. But
+it's less true at the macro level: if you're building a framework or design system, or if you're writing selector patterns
+that are repeated multiple times on a page, then selector performance can really matter.
 
-However, sometimes you have a large webapp with a lot of CSS, or sometimes your framework or design system that repeats some unperformant CSS selectors multiple times. So this may be true at the micro level, but not at the macro level.
-
-And the proof is in the pudding: if you have high style calculation costs, then it is worth looking into selector performance.
-
-- https://calendar.perfplanet.com/2011/css-selector-performance-has-changed-for-the-better/
-- https://calibreapp.com/blog/css-performance
-- https://ecss.benfrain.com/appendix2.html
-- https://meiert.com/en/blog/performance-of-css-selectors-2/
+I've seen perf regressions that were almost entirely driven by selector performance. And if you see high style calculation
+costs, then you very likely have a selector perf problem too. So we need to discover the "lost art" of selector performance.
 
 ---
 
@@ -944,7 +940,7 @@ So trim that unused CSS!
 # Avoid excessive complexity in selectors
 
 ```css
-[class*="foo"] :nth-child(2) > * + *
+[class*="foo"] :nth-child(2) > p ~ *
 ```
 
 ???
