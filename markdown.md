@@ -14,7 +14,7 @@ Quick note: these slides are available online; I'll provide a URL at the end. Th
 links if you want more details on what I'm saying.
 
 ---
-.left-column-66[![TODO](./images/20150424081933-cropped-2.jpg)]
+.left-column-66[![Photo of Nolan Lawson on a bike](./images/20150424081933-cropped-2.jpg)]
 .right-column-33[
 
 - `nolanlawson.com`
@@ -35,7 +35,7 @@ and now I work on Lightning Web Components at Salesforce, which is our JavaScrip
 
 class: contain-vertical
 
-.center[![TODO](./images/stickshift.jpg)]
+.center[![Car stick shift photo](./images/stickshift.jpg)]
 
 ???
 
@@ -53,7 +53,7 @@ actually [an efficient use of fuel](https://jalopnik.com/here-is-when-engine-bra
 
 class: contain-vertical
 
-.center[![TODO](./images/internal-combustion-engine.jpg)]
+.center[![Internal combustion engine photo](./images/internal-combustion-engine.jpg)]
 
 ???
 
@@ -66,7 +66,7 @@ to the engine and seeing how it reacted to my actions, I learned a lot about how
 
 class: contain-vertical
 
-.center[![TODO](./images/browser.png)]
+.center[![Composite browser logo of several browsers](./images/browser.png)]
 
 ???
 
@@ -80,7 +80,7 @@ I also think that if you know _just a bit_ about how the engine works, you can b
 
 ---
 
-.center[![TODO](./images/devtools1.png)]
+.center[![Chrome DevTools yellow JS part and purple style/layout part](./images/devtools1.png)]
 
 ???
 
@@ -119,7 +119,7 @@ I want to try to demystify some of that "purple part" so that it's less of a bla
 ---
 <h1 class="smaller">Three news sites</h1>
 
-.center[![TODO](./images/news-sites-overview.png)]
+.center[![Three news sites pie chart, mostly JS but 2.6, 3.5, and 4 seconds style/layout in each](./images/news-sites-overview.png)]
 
 ???
 
@@ -180,7 +180,7 @@ I'm also speaking to anyone interested in how browsers work. This stuff is just 
 
 # How browsers render
 
-.center[![TODO](./images/pixel-pipeline.png)]
+.center[![Pixel pipeline - JS, style/layout, paint/composite](./images/pixel-pipeline.png)]
 
 ???
 
@@ -205,7 +205,7 @@ out of scope for this talk.
 
 # How browsers render
 
-.center[![TODO](./images/pixel-pipeline-style-layout.png)]
+.center[![Style layout](./images/pixel-pipeline-style-layout.png)]
 
 ???
 
@@ -213,21 +213,21 @@ Let's focus on the style/layout part.
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style-layout.png)]
+.center[![Style layout](./images/pixel-pipeline-style-layout.png)]
 
 ???
 
 So let's break down style and layout calculation first. These are two separate steps.
 
 --
-.float-left[![TODO](./images/style.png)]
+.float-left[![Style](./images/style.png)]
 
 ???
 
 With style, we're figuring out which CSS rules apply to which elements and computing styles.
 
 --
-.float-right[![TODO](./images/layout.png)]
+.float-right[![Layout](./images/layout.png)]
 
 <footer class="muted">Illustrations by <a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/">Lin Clark</a></footer>
 
@@ -240,7 +240,7 @@ passed to the paint (green) step that actually lays out pixels on the screen.
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style.png)]
+.center[![Illustration by Lin Clark of style calculation](./images/pixel-pipeline-style.png)]
 
 ```css
 h1 {
@@ -265,7 +265,7 @@ Let's take a simple example. In this case, we have a 5px-padding h1 and a 10px-p
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style.png)]
+.center[![Illustration by Lin Clark of layout calculation](./images/pixel-pipeline-style.png)]
 
 ```css
 *h1 {
@@ -287,7 +287,7 @@ this rule applies to this h1
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style.png)]
+.center[![Style](./images/pixel-pipeline-style.png)]
 
 ```css
 h1 {
@@ -314,7 +314,7 @@ So in a sense, it's almost as if the browser is taking this page, and turning it
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-style.png)]
+.center[![Style](./images/pixel-pipeline-style.png)]
 
 ```html
 <h1 style="padding: 5px;" >Hello</h1>
@@ -360,7 +360,7 @@ However, this is a good fact about style calculation to internalize: it's mostly
 
 ---
 
-.center[![TODO](./images/pixel-pipeline-layout.png)]
+.center[![Layout](./images/pixel-pipeline-layout.png)]
 
 ```html
 <h1 style="padding: 5px;" >Hello</h1>
@@ -380,7 +380,7 @@ has 10px padding.
 
 class: contain-vertical
 
-.center[![TODO](./images/helloworld2.png)]
+.center[![Hello world layout with padding/margin highlighted](./images/helloworld2.png)]
 
 
 ???
@@ -494,7 +494,7 @@ Or you are doing repeated re-renders over time, also called thrashing, which slo
 
 # Style vs layout performance
 
-.center[![TODO](./images/style-layout.png)]
+.center[![Two traces, one with lots of style and the other with lots of layout](./images/style-layout.png)]
 
 ???
 
@@ -505,7 +505,7 @@ problem with style calculation, layout calculation, or both. Because these two t
 
 # Style vs layout performance
 
-.center[![TODO](./images/style-layout-annotated.png)]
+.center[![Two traces, annotated showing style and layout sections](./images/style-layout-annotated.png)]
 
 ???
 
@@ -519,7 +519,7 @@ can actually reason about why one is expensive versus the other.
 
 <h1 class="smaller">Three news sites</h1>
 
-.center[![TODO](./images/news-sites-style-layout-2.png)]
+.center[![Three news sites, style vs layout, mostly layout but one has more style than layout](./images/news-sites-style-layout-2.png)]
 
 ???
 
@@ -683,7 +683,7 @@ class: contain-vertical-no-fill
 
 <h1 class="smaller">Style optimization 2: right-to-left</h1>
 
-.center[![TODO](./images/foo-and-bar.png)]
+.center[![Foo pointing at bar, bar pointing at foo](./images/foo-and-bar.png)]
 
 ???
 
@@ -760,7 +760,7 @@ descendants than ancestors, just due to the shape of the tree. So how can we sol
 
 # Style optimization 3: Bloom filter
 
-.center[![TODO](./images/bloom-filter.svg)]
+.center[![Bloom filter illustration from Wikipedia](./images/bloom-filter.svg)]
 
 ???
 
@@ -923,7 +923,7 @@ calculation costs?
 
 # Remove unused CSS
 
-.center[![TODO](./images/unused-css.png)]
+.center[![Unused CSS in Chrome coverage tool](./images/unused-css.png)]
 
 ???
 
@@ -1022,7 +1022,7 @@ accurate (e.g. some browsers have unique optimizations for common pseudos like `
 
 class: contain-vertical
 
-.center[![TODO](./images/blink-debug.png)]
+.center[![chrome tracing, edit categories, blink.debug](./images/blink-debug.png)]
 
 ???
 
@@ -1033,7 +1033,7 @@ released in Chromium earlier this year. If you enable `blink.debug` when using C
 
 class: contain-vertical
 
-.center[![TODO](./images/selector-stats-2.png)]
+.center[![chrome tracing, document update style, selector stats slice, table of data](./images/selector-stats-2.png)]
 
 ???
 
@@ -1095,7 +1095,7 @@ into a more performant selectors that leverage the hash map and/or Bloom filter 
 
 class: contain-vertical
 
-.center[![TODO](./images/selector-benchmark-latest-2.png)]
+.center[![Benchmark data, see blog post for full details](./images/selector-benchmark-latest-2.png)]
 
 ???
 
@@ -1121,7 +1121,7 @@ class: contain-vertical-no-fill
 
 <h1 class="smaller less-margin">Concatenate stylesheets (Chromium-only)</h1>
 
-.center[![TODO](./images/concat-benchmark-3.png)]
+.center[![Benchmark data showing Chrome getting slower for more stylesheets](./images/concat-benchmark-3.png)]
 
 ???
 
@@ -1284,7 +1284,7 @@ and see if it improves layout performance.
 
 class: contain-vertical
 
-.center[![TODO](./images/css-contain-benchmark-1.png)]
+.center[![Containment benchmark, Chrome improves for contain content and contain strict, Firefox only for strict, Safari not at all](./images/css-contain-benchmark-1.png)]
 
 ???
 
@@ -1421,7 +1421,7 @@ Invalidation could be as simple as this – changing the margin on an element.
 
 # Invalidation
 
-.center[![TODO](./images/pixel-pipeline-raf.png)]
+.center[![Pixel pipeline, requestAnimationFrame between JS and style](./images/pixel-pipeline-raf.png)]
 
 ???
 
@@ -1549,7 +1549,7 @@ And here we are writing to the DOM
 
 ---
 
-.center[![TODO](./images/thrashing.png)]
+.center[![Layout thrashing, many small purple slices](./images/thrashing.png)]
 
 ???
 
@@ -1611,7 +1611,7 @@ the writes.
 
 # Solving layout thrashing
 
-.center[![TODO](./images/no-thrashie.png)]
+.center[![One big purple slice in dev tools](./images/no-thrashie.png)]
 
 ???
 
@@ -1624,7 +1624,7 @@ the browser to be more efficient because it's doing all the calculations at once
 
 # Don't be misled
 
-.center[![TODO](./images/not-thrashing1.png)]
+.center[![Chrome warning about forced reflow on big purple style](./images/not-thrashing1.png)]
 
 ???
 
@@ -1636,7 +1636,7 @@ But if you're only reading from the DOM once, then it's useless to eliminate tha
 
 # Don't be misled
 
-.center[![TODO](./images/not-thrashing2.png)]
+.center[![Big purple slice of same size, no warning](./images/not-thrashing2.png)]
 
 ???
 
@@ -1667,7 +1667,7 @@ would you expect this empty rAF callback to trigger a style invalidation?
 
 class: contain-vertical
 
-.center[![TODO](./images/style-battery-drain.png)]
+.center[![Many small style calc costs](./images/style-battery-drain.png)]
 
 ???
 
@@ -1682,7 +1682,7 @@ costs and causing a battery drain on your page.
 
 class: contain-vertical
 
-.center[![TODO](./images/empty-raf-trace.png)]
+.center[![Chrome dev tools says Schedule Style Recalculation](./images/empty-raf-trace.png)]
 
 ???
 
@@ -1764,7 +1764,7 @@ do for both style and layout.
 
 # Typical page flow
 
-.center[![TODO](./images/typical-flow.png)]
+.center[![One big upfront style/layout cost, many small subsequent ones](./images/typical-flow.png)]
 
 ???
 
@@ -1778,7 +1778,7 @@ why something was invalidated and is causing these high residual costs.
 
 class: contain-vertical
 
-.center[![TODO](./images/invalidation-tracking-1.png)]
+.center[![Invalidation tracking option in devtools settings](./images/invalidation-tracking-1.png)]
 
 ???
 
@@ -1791,7 +1791,7 @@ heuristics and different performance characteristics when it comes to invalidati
 
 class: contain-vertical
 
-.center[![TODO](./images/invalidation-tracking-2.png)]
+.center[![List of CSS selectors corresponding to invalidated elements](./images/invalidation-tracking-2.png)]
 
 ???
 
@@ -1880,7 +1880,7 @@ You kind of just have to know how the browser works, and also do a lot of guessw
 
 ---
 
-.center[![TODO](./images/devtools1.png)]
+.center[![Chrome DevTools yellow JS part and purple style/layout part](./images/devtools1.png)]
 
 .float-left[
 JavaScript (yellow part)
@@ -1936,7 +1936,7 @@ You can use `EXPLAIN`.
 
 class: contain-vertical
 
-.center[![TODO](./images/sql-explain-2.png)]
+.center[![SQL explain output showing what made query slow](./images/sql-explain-2.png)]
 
 ???
 
@@ -1949,7 +1949,7 @@ spent in each part of the algorithm. So now you can map this back to the declara
 
 class: contain-vertical
 
-.center[![TODO](./images/car-dashboard.jpg)]
+.center[![Photo of a classic car dashboard](./images/car-dashboard.jpg)]
 
 ???
 
