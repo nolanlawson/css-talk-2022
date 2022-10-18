@@ -1051,6 +1051,28 @@ in our CSS scoping logic that was creating overly-generic selectors.
 
 ---
 
+class: smaller-table
+
+| Elapsed (μs) | Fast reject count | Match attempts | Match count | Selector                                 |
+|--------------|-------------------|----------------|-------------|------------------------------------------|
+| 2816         | 8579              | 8599           | 0           | `.toastManager .toastContainer > *`      |
+| 2029         | 6201              | 8599           | 340         | `.fmwk-button:disabled *`                |
+| 792          | 0                 | 481            | 0           | `[dir="rtl"] .fmwk-form-element _label`  |
+| 748          | 0                 | 5215           | 0           | `[class*="fmwk-icon-action-"]`           |
+| 608          | 0                 | 5215           | 0           | `[class*="fmwk-x-small-size"]`           |
+| 602          | 0                 | 8599           | 8202        | `::selection`                            |
+| 602          | 0                 | 8599           | 8202        | `*`                                      |
+| 598          | 0                 | 13498          | 1584        | `div`                                    |
+| 594          | 6883              | 8599           | 1683        | `[fmwk-input_input] ::before`            |
+| 573          | 0                 | 5215           | 0           | `[class*="fmwk-col_padded"]`             |
+| 516          | 0                 | 440            | 0           | `[dir="rtl"] .fmwk-form-element control` |
+
+???
+
+Here is the same table, blown up a bit.
+
+---
+
 # Use shadow DOM
 
 ```html
