@@ -10,8 +10,9 @@ class: center, middle
 
 Hi, my name is Nolan Lawson and today I'd like to talk to you about CSS runtime performance.
 
-Quick note: these slides are available online; I'll provide a URL at the end. The speaker notes have lots of
-links if you want more details on what I'm saying.
+Quick note: these slides are available online; I'll provide a URL at the end.
+
+The speaker notes have links with details.
 
 ---
 .left-column-66[![Photo of Nolan Lawson on a bike](./images/20150424081933-cropped-2.jpg)]
@@ -23,19 +24,23 @@ links if you want more details on what I'm saying.
 ]
 ???
 
-First off, who am I?
+So who am I?
 
-Most likely if you've seen me on the internet, it's from [my blog](https://nolanlawson.com) where I talk about performance, 
-accessibility, web components, and various web development topics.
+If you know me from the internet, it's probably from [my blog](https://nolanlawson.com) where I talk about performance, 
+accessibility, web components, etc.
 
 I was on the Microsoft Edge performance team for a couple years, then moved to the performance team at Salesforce,
-and now I work on Lightning Web Components at Salesforce, which is our JavaScript framework.
+and now I work on our JavaScript framework, Lightning Web Components.
 
 ---
 
 class: contain-vertical
 
 .center[![Car stick shift photo](./images/stickshift.jpg)]
+
+<footer class="muted absolute">
+  Via <a href="https://www.flickr.com/photos/154073030@N05/28577829138">Flickr</a>
+</footer>
 
 ???
 
@@ -47,20 +52,22 @@ is doing. By listening to the sounds of the engine, I developed a feel for when 
 from one gear to another, or how to do things like "engine braking," which is
 actually [an efficient use of fuel](https://jalopnik.com/here-is-when-engine-braking-can-save-more-gas-than-coas-1819484925).
 
-[Image source](https://www.flickr.com/photos/154073030@N05/28577829138)
-
 ---
 
 class: contain-vertical
 
 .center[![Internal combustion engine photo](./images/internal-combustion-engine.jpg)]
 
+<footer class="muted absolute">
+  Via <a href="https://www.flickr.com/photos/ell-r-brown/3824067984/">Flickr</a>
+</footer>
+
 ???
 
-Of course, I have no idea how an internal combustion engine actually works. It's a hugely complex thing. But by listening
-to the engine and seeing how it reacted to my actions, I learned a lot about how to use an engine efficiently.
+Of course, I have no idea how an internal combustion engine actually works. It's a hugely complex thing.
 
-[Image source](https://www.flickr.com/photos/ell-r-brown/3824067984/)
+But by listening
+to the engine and seeing how it reacted to my actions, I learned how to use an engine efficiently.
 
 ---
 
@@ -68,15 +75,17 @@ class: contain-vertical
 
 .center[![Composite browser logo of several browsers](./images/browser.png)]
 
+<footer class="muted absolute">
+  Via <a href="https://github.com/alrra/browser-logos">alrra/browser-logos</a>
+</footer>
+
 ???
 
-This is sort of how I feel about web performance. A browser engine is an enormously complicated thing, and I'm not a C/C++/Rust developer.
+This is sort of how I feel about web performance. A browser engine is an very complex. And I'm not a C/C++/Rust developer.
 
-But through observation of how the engine responds to my inputs, I can try to be a better web developer, and write more efficient web apps.
+But through observation of how the engine responds to my inputs, I can become a better web developer, and write more efficient web apps.
 
-I also think that if you know _just a bit_ about how the engine works, you can be an even better web developer.
-
-[Browser logos source](https://github.com/alrra/browser-logos)
+And if you know _just a bit_ about how the engine works, you can be an even better web developer.
 
 ---
 
@@ -84,11 +93,9 @@ I also think that if you know _just a bit_ about how the engine works, you can b
 
 ???
 
-So to take it back to browsers, let's look at a performance trace like this one (from the Chrome DevTools).
+Let's look at a browser perf trace like this one (from the Chrome DevTools).
 
-If you've worked in performance for a while, you've probably spent a lot of time with these.
-
-And there are two main parts here: the yellow (JavaScript) part, and the purple (style/layout) part.
+There are two main parts: the yellow (JavaScript) part, and the purple (style/layout) part.
 
 --
 .float-left[
@@ -97,8 +104,11 @@ JavaScript (yellow part)
 
 ???
 
-If you're an experienced web dev, you might look at the JavaScript side and feel pretty comfortable with it. It has
-function names we recognize. We see our frameworks and libraries doing work, and our own code doing work.
+<hr/>
+
+If you're an experienced web dev, you might look at the JavaScript side and feel pretty comfortable with it.
+
+We see names of functions we wrote. We see libraries we installed from npm. We see frameworks like React.
 
 --
 .float-right[
@@ -107,14 +117,16 @@ Style/Layout (purple part)
 
 ???
 
-But a lot of folks look at the purple part, and it's kind of a black box. They think, "That's just the browser doing browser things. I
-couldn't possibly understand that." So we shrug our shoulders and don't try to optimize it as much as the yellow part.
+<hr/>
 
-Some people also say "well, that purple part doesn't matter." But I think this is kind of a learned helplessness – we don't
-understand what's going on in there or what to do about it, so we try to convince ourselves it doesn't matter.
+But many people look at the purple part and see a black box. "That's just the browser doing browser things. I
+couldn't possibly understand that."
 
-But the thing is, sometimes that purple part is pretty big. It can have a real impact on web performance. In this talk,
-I want to try to demystify some of that "purple part" so that it's less of a black box.
+Or we say "the purple part doesn't matter." As if the user cares whether their click was delayed by the yellow part or purple part!
+
+This is kind of a "learned helplessness." We feel helpless, so we try to tell ourselves it doesn't matter.
+
+In this talk, I'd like to convince you that the purple part _can_ matter, and that you _can_ understand what's going on in there.
 
 ---
 <h1 class="smaller">Three news sites</h1>
@@ -130,8 +142,9 @@ Then I categorized the time spent on the main thread in the trace as Loading (ne
 Rendering (Style/Layout), or Paint.
 
 As you can see, the purple part is not the most important part, but it can be quite big. For the third site in particular,
-it's worth looking into. And even for the other ones, if you manage to find a quick win, then there are 2.6s and 3.5s
-(respectively) that can be improved! Finding that time in a large JavaScript app can be hard.
+it's worth looking into.
+
+And even for the others, in absolute terms, 2.6s and 3.5s are pretty big! If we can find some quick wins here, that would be great.
 
 ---
 exclude: true
@@ -182,16 +195,14 @@ I'm also speaking to anyone interested in how browsers work. This stuff is just 
 
 .center[![Pixel pipeline - JS, style/layout, paint/composite](./images/pixel-pipeline.png)]
 
-???
+<footer class="muted absolute">
+  Via <a href="https://web.dev/rendering-performance/#the-pixel-pipeline">web.dev</a>
+</footer>
 
+???
 
 To understand the purple part, we first need to start with how browsers render content. This process is called
 ["updating the rendering"](https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering) in the HTML spec.
-
-This graphic is taken from [a blog post on web dot dev](https://web.dev/rendering-performance/#the-pixel-pipeline) where they call it "the pixel pipeline."
-
-The main steps here are JavaScript, style/layout, and paint/composite. Helpfully, these
-are color-coded in the same way they would be in the Chrome DevTools.
 
 The first step, JavaScript, is where we run some JavaScript that modifies the DOM. Typically this will be your JavaScript
 framework rendering, such as React doing its virtual DOM diffing and then eventually putting elements into the DOM.
@@ -229,7 +240,7 @@ With style, we're figuring out which CSS rules apply to which elements and compu
 --
 .float-right[![Layout illustration by Lin Clark showing measurements and geometry on a page](./images/layout.png)]
 
-<footer class="muted">Illustrations by <a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/">Lin Clark</a></footer>
+<footer class="muted absolute">Illustrations by <a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/">Lin Clark</a></footer>
 
 ???
 
@@ -326,7 +337,7 @@ So in a sense, it's almost as if the browser is taking this page, and turning it
 Conceptually, this is what style calculation is: it's giving us the same page we would have had if we had used
 inline styles.
 
-It's also computing the `em`s, `rem`s, etc. and turning them into `px`s, as well as resolving custom properties, `calc`s, etc, 
+It's also computing the `em`s, `rem`s, etc. and turning them into `px`s, as well as resolving custom properties, cascade, inheritance, etc, 
 but this has less of an impact on perf in my experience.
 
 ---
@@ -369,12 +380,7 @@ However, this is a good fact about style calculation to internalize: it's mostly
 
 ???
 
-Now let's move on to layout. Note that, with style, at no point were we talking about the geometry of the page.
-Style calculation has nothing to do with where things actually go geometrically on the page; that's the job of layout
-calculation.
-
-So recall we have our h1 and h2 where the browser has figured out that one has 5px padding and the other
-has 10px padding.
+Now let's move on to layout. Conceptually, the output of style is the "inline styles," and that's the input to layout.
 
 ---
 
@@ -386,7 +392,9 @@ class: contain-vertical
 ???
 
 Now we finally get to the geometry of the page. Layout calculation is where the styles, which have been associated with
-each element, actually get applied. In this case, the browser figures takes the margin, padding, font size, and
+each element, actually get applied.
+
+In this case, the browser figures takes the margin, padding, font size, and
 figures out where to actually place things within the given browser window, with text wrapping and all that good stuff.
 
 ---
@@ -453,9 +461,9 @@ h2 {
 
 |                                 | Style  | Layout |
 |---------------------------------|:------:|:------:|
-| Size/complexity of CSS          |   🐌   |        |
+| Complexity of CSS               |   🐌   |        |
 | Complexity of layout            |        |   🐌   |
-| Size/depth of DOM               |   🐌   |    🐌    |
+| DOM size                        |   🐌   |    🐌    |
 | Repeated re-renders (thrashing) |    🐌    |    🐌    |
 
 ???
@@ -467,7 +475,8 @@ At a high level, if you're seeing a large amount of time spent in style or layou
 
 ???
 
-Either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation. Computations like `calc`s and custom properties can also play a role here. Note this has no effect on layout calculation.
+Typically either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation.
+Note this has no effect on layout calculation.
 
 --
 <pointing-arrow></pointing-arrow>
@@ -593,12 +602,14 @@ To understand style performance, first it's important to note how browsers actua
 already optimized.
 
 To illustrate, let's imagine we're building a browser. Here is a naive implementation of style calculation that we might have.
+--
+.center[`O(n * m)`]
+
+???
 
 Unfortunately this naive implementation has a big problem: this is an `O(n * m)` operation, where `n` is the number of elements and `m` is the number of CSS rules. On any reasonably-sized page, the browser would slow to a crawl. So browsers try to avoid this naive case
 wherever possible.
 
---
-.center[`O(n * m)`]
 
 ---
 
@@ -776,19 +787,17 @@ descendants than ancestors, just due to the shape of the tree. So how can we sol
 
 .center[![Bloom filter illustration from Wikipedia](./images/bloom-filter.svg)]
 
+<footer class="muted absolute">Via <a href="https://commons.wikimedia.org/wiki/File:Bloom_filter.svg">Wikipedia</a></footer>
+
 ???
 
-Enter the Bloom filter. WebKit came up with the optimization first, and now it exists in all browsers.
+Enter the Bloom filter. [WebKit](https://github.com/servo/servo/wiki/Css-selector-matching-meeting-2013-07-19) began using this technique in 2011.
+All browsers have it now.
 
-> "We stole the Bloom filter from [WebKit]. The idea is to optimize cases where the page author writes a descendant combinator and the thing to the [right-hand side] matches a lot, e.g. `.foo div`."
- 
-– Boris Zbarsky (Mozilla), via [Servo meeting notes](https://github.com/servo/servo/wiki/Css-selector-matching-meeting-2013-07-19) (2013)
+You can think of a Bloom filter as a Hash Set that may give false positives, but never gives false negatives. It's fast and has low memory overhead.
 
-So how does the Bloom filter work? Basically, you can think of it as a Hash Set that may give false positives, but never gives false negatives. The main thing is, it's very fast with low memory overhead, so it can be used widely.
+Here, we hash the strings x, y, and z, and insert them into the Bloom filter. Then we check if w is in there by hashing it.
 
-In this example, we have x, y, and z, which (let's say) are CSS classes. Each of those strings is hashed and then bits are flipped in the Bloom filter from 0 to 1. If we want to check if the Bloom filter contains x, we hash x again and check up the 1s. Now, because we're spraying 1s all over the place, this might also match some other string. So that's a false positive. But it's a tradeoff we're willing to make since this data structure is so fast.
-
-Taken from https://commons.wikimedia.org/wiki/File:Bloom_filter.svg
 
 ---
 
@@ -816,7 +825,9 @@ class: fill-custom
 ???
 
 So now we can quickly filter all the `divs` based on the Bloom filter, "fast rejecting" any
-that couldn't possibly have `.foo` as an ancestor. Note that, because we could have false positives, we still
+that couldn't possibly have `.foo` as an ancestor.
+
+Note that, because we could have false positives, we still
 need to walk the ancestor chain to check that it really has `.foo` as an ancestor, but we are still eliminating a lot
 of work.
 
@@ -1279,7 +1290,7 @@ CSS containment.
 
 class: fill-custom
 
-<layout-example-1 version="1" draw-text="contain:strict|contain:strict|contain:strict"></layout-example-1>
+<layout-example-1 version="1" draw-text="contain:content|contain:content|contain:content"></layout-example-1>
 
 ???
 
@@ -1304,7 +1315,7 @@ class: fill-custom
 
 <layout-example-1
 version="1"
-draw-text="contain:strict||"
+draw-text="contain:content||"
 truncate-dropdown="true"
 draw-dropdown="true"></layout-example-1>
 
@@ -1997,6 +2008,10 @@ class: contain-vertical
 
 .center[![Photo of a classic car dashboard](./images/car-dashboard.jpg)]
 
+<footer class="muted absolute">
+  Via <a href="https://www.flickr.com/photos/lex-photographic/26665512361">Flickr</a>
+</footer>
+
 ???
 
 So wouldn't it be cool if browsers could give us the same thing? A `CSS EXPLAIN`?
@@ -2004,8 +2019,6 @@ So wouldn't it be cool if browsers could give us the same thing? A `CSS EXPLAIN`
 Going back to my original metaphor of the stick shift and the car, I'd really like to have a dashboard to give me
 more insights into what the browser is doing. It's great to listen to the engine and rely on intuition, but
 the browser vendors could provide more details so I didn't have to guess.
-
-[Image source: Flickr](https://www.flickr.com/photos/lex-photographic/26665512361)
 
 ---
 
