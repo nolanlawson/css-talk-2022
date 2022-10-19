@@ -865,8 +865,12 @@ Originally it was only IDs, classes, and tags.
 
 ???
 
-In 2018 WebKit added attributes, and
-Firefox and Chrome added them in 2021 when I filed bugs on them (you're welcome). Note that the attribute optimization
+<hr/>
+
+In 2018 [WebKit](https://trac.webkit.org/changeset/229090/webkit) added attributes, and
+[Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1704551) and [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=1196474) added them in 2021 after I filed bugs on them.
+
+Note that the attribute optimization
 only applies to attribute names, not values, but attribute value selectors can kind of piggyback off of them because
 the browser will quickly check if any ancestors even have the attribute name, before checking the value.
 
@@ -875,20 +879,15 @@ the browser will quickly check if any ancestors even have the attribute name, be
 
 ???
 
+<hr/>
+
 Other stuff could be optimized in theory, but last I checked (late 2022), no browsers have expanded the Bloom filter to anything else.
-
-Bugs adding attributes:
-
-- https://trac.webkit.org/changeset/229090/webkit
-- https://bugs.chromium.org/p/chromium/issues/detail?id=1196474
-- https://bugzilla.mozilla.org/show_bug.cgi?id=1704551
 
 Bloom filter source:
 
-- https://github.com/WebKit/WebKit/blob/596fdf7c2cec599f8c826787363c54c4b008a7fe/Source/WebCore/css/SelectorFilter.h#L57-L60
-- https://chromium.googlesource.com/chromium/src/+/refs/tags/107.0.5258.1/third_party/blink/renderer/core/css/selector_filter.cc#43
-- https://phabricator.services.mozilla.com/source/mozilla-central/browse/default/servo/components/style/bloom.rs$114
-
+- [WebKit](https://github.com/WebKit/WebKit/blob/596fdf7c2cec599f8c826787363c54c4b008a7fe/Source/WebCore/css/SelectorFilter.h#L57-L60)
+- [Chromium](https://chromium.googlesource.com/chromium/src/+/refs/tags/107.0.5258.1/third_party/blink/renderer/core/css/selector_filter.cc#43)
+- [Firefox](https://phabricator.services.mozilla.com/source/mozilla-central/browse/default/servo/components/style/bloom.rs$114)
 
 ---
 
@@ -954,9 +953,9 @@ calculation costs?
 
 Well, one thing you can do to reduce style calculation costs is to remove unused CSS. (The example shows a screenshot from Chrome Dev Tools "Coverage" tool.)
 
-This is a really important point, because it's an area where unused CSS is actually different from unused JavaScript. Both cost you
-in terms of transfer time, and JavaScript costs you in terms of parse and compile time, but unused CSS costs you in terms of parse, compile, _and_
-in making all of your style calculations slower. After all, the browser doesn't _know_ your selectors are unused until it runs the style calculation algorithm! This can actually end up costing you multiple times over the lifetime of your page for every style recalculation, or in cases of layout thrashing (which I'll get to later).
+After all, the browser doesn't _know_ your CSS is unused until it runs the algorithm to determine that it's unused. And it may have to
+run this algorithm every time something on the page changes. So unused CSS can cost you on the main thread throughout the
+lifetime of your web app.
 
 So trim that unused CSS!
 
@@ -970,13 +969,12 @@ So trim that unused CSS!
 
 ???
 
-Now, I don't want to get too deep into this, because again, it's hard to predict these kinds of things. But just don't use zany selectors like these.
+These kinds of selectors are cute, but if we imagine matching right-to-left, we can see why they might be expensive.
 
-And if you think I'm exaggerating, the thing is that it's pretty easy to generate stuff like this if you're not careful. Using tools like SASS
-and LESS, it's really easy to deeply nest things, or to have for-loops that generate all sorts of `:nth-child()` selectors.
+Now, you can probably have a few of these on your page and you'll be fine. It's more of a problem at the
+macro level, e.g. if you're building a framework or design system that repeats these selectors multiple times.
 
-One or two
-of these will probably not wreck your page's performance, but in aggregate, these can do a lot of damage.
+Some folks use preprocessors like Sass or Less, and it's easy to put something like this in a for-loop.
 
 ---
 
@@ -989,14 +987,13 @@ class: relative
 | ✅ | ID, class, tag  | `#id`&nbsp;&nbsp;&nbsp;`.cls`&nbsp;&nbsp;&nbsp;`a`                         |
 | ⚠️| Descendant      | `.foo *`&nbsp;&nbsp;&nbsp;`.foo > *`                 |
 | ⚠️| Attribute name  | `[foo]`                      |
-| 🌶️️| Attribute value | `[foo="bar"]`&nbsp;&nbsp;&nbsp;`[foo~="bar"]`              |
-| 🌶️ | Sibling         | `.foo ~ bar`&nbsp;&nbsp;&nbsp;`.foo + .bar`                |
+| 🌶️️| Attribute value | `[foo="bar"]`&nbsp;&nbsp;&nbsp;`[foo*="bar"]`              |
+| 🌶️ | Sibling         | `.foo ~ *`&nbsp;&nbsp;&nbsp;`.foo + *`                |
 | 🌶️ | Pseudo-class    | `:nth-child()`&nbsp;&nbsp;&nbsp;`:not()`&nbsp;&nbsp;&nbsp;`:nth-of-type()` |
 
 ???
 
-This is my extremely rough estimate of selector costs. Again, this doesn't really matter at the micro level, but it
-might matter in aggregate. And it could change tomorrow or vary from browser to browser. But this is just based on my experience.
+This is my extremely rough estimate of selector costs.
 
 --
 <pointing-arrow></pointing-arrow>
@@ -1011,14 +1008,11 @@ In general, browsers have heavily optimized for things like tag names, IDs, and 
 
 ???
 
-Attribute names are also fairly optimized, although a bit less so historically. As I mentioned, descendant selectors
-have the Bloom filter optimization, but it doesn't always work depending on what's in the ancestor position, and it
-can still be slow if the right-hand side is very generic.
+Descendant selectors have the Bloom filter optimize, but it doesn't always work.
 
-Note recent attribute optimizations though:
-
-- [WebKit](https://github.com/WebKit/WebKit/commit/c27218b87632ef954d3e431abe4b585a030e23b2)
-- [Firefox](https://bugzil.la/1728851)
+Attribute names have historically been less optimized. They're still typically slower than classes, but
+[WebKit](https://github.com/WebKit/WebKit/commit/c27218b87632ef954d3e431abe4b585a030e23b2) and [Firefox](https://bugzil.la/1728851)
+made optimizations recently (in addition to the Bloom filter optimizations), after I began writing about this on my blog.
 
 --
 <pointing-arrow></pointing-arrow>
@@ -1027,21 +1021,18 @@ Note recent attribute optimizations though:
 
 ???
 
-Attribute values tend to be less optimized than attribute names, because attribute names go in things like the hashmap
-optimization and Bloom filter but attribute values don't. This is especially true for selectors that search through
-an attribute value – this is going to require a slow string search.
+Unlike attribute names, ttribute values don't go in the hashmap or Bloom filter. Watch out especially for slow "search" selectors.
 
-Sibling selectors also tend to be less optimized.
+Sibling selectors tend to be less optimized. Non-adjacent selector and generic right-hand-side can cause a lot of matching.
 
-Pseudos like `:nth-child()` and `:nth-of-type()` tend to be less optimized, although browsers tend to have specific optimizations for common ones like `:hover`.
+Pseudos like `:nth-child()` and `:nth-of-type()` tend to be less optimized, although browsers have specific optimizations for common ones like `:hover` and `:focus`.
 
 --
 <stamp-text>IT DEPENDS</stamp-text>
 
 ???
 
-And just to repeat: this will vary from browser to browser, this could change tomorrow, and it's not perfectly
-accurate (e.g. some browsers have unique optimizations for common pseudos like `:hover`).
+But remember: this varies from browser to browser, it could change tomorrow, and there are always exceptions.
 
 ---
 
@@ -1063,16 +1054,7 @@ class: contain-vertical
 ???
 
 Then you can get this view of the "selector stats." If you sort by elapsed time, you can actually see your
-most expensive CSS rules ranked from most to least expensive. Note that this may actually be an underestimate,
-because of how selectors play into invalidation, which I'll discuss later.
-
-I also want to draw your attention to the elapsed time on the left. It's in nanoseconds, so those first two selectors
-are each taking up more than 2 milliseconds. This was taken on a fast MacBook Pro for a real website.
-That's a lot of time for two lines of CSS!
-
-I also want to emphasize that this kind of analysis is more useful at the macro level than the micro level. For instance,
-this tool helped me find [a bug](https://github.com/salesforce/lwc/issues/3051) 
-in our CSS scoping logic that was creating overly-generic selectors.
+most expensive CSS rules ranked from most to least expensive.
 
 ---
 
@@ -1095,6 +1077,15 @@ class: smaller-table
 ???
 
 Here is the same table, blown up a bit.
+
+I also want to draw your attention to the elapsed time on the left. It's in nanoseconds, so those first two selectors
+are taking up almost 5 milliseconds. This was taken on a fast MacBook Pro for a real website.
+That's a lot of time for two lines of CSS!
+
+We also have match attempts, match count, and fast reject count. Fast reject count is Bloom filter rejections.
+
+Note this tool may be more useful at the macro level than the micro level. Look for repeated patterns coming from
+a framework or CSS processor.
 
 ---
 
@@ -1150,17 +1141,12 @@ This chart runs my benchmark, median of 25 iterations, on a 2014 Mac Mini. The b
 CSS, and compares running it through various scoping algorithms vs using shadow DOM vs just leaving the styles unscoped.
 It uses 1,000 generated "components," with 10 styles per component.
 
-In this chart "RHS only" means "right-hand-side only," i.e. only scope the right-hand-most selector. "Full" means
-scope every part of the selector. "Tag prefix" means just put the component tag name as a prefix.
-
-Note though that this is a microbenchmark, and this is not exactly comparing apples-to-apples (the scoping strategies
-match slightly different elements, and the unscoped styles match many more elements on the page).
-But the point is to show that scoped styles do have a perf impact.
+Note though that this is a microbenchmark, and this is not exactly comparing apples-to-apples.
+But the point is to show that shadow DOM and scoped styles do have a perf impact.
 
 If you're writing a framework yourself, you may be interested in the differences between the scoping strategies,
-but overall they're all pretty good.
+which is covered in [my blog post](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/).
 
-[Blog post with details and benchmark](https://nolanlawson.com/2022/06/22/style-scoping-versus-shadow-dom-which-is-fastest/)
 
 ---
 
