@@ -220,14 +220,14 @@ Let's focus on the style/layout part.
 So let's break down style and layout calculation first. These are two separate steps.
 
 --
-.float-left[![Style](./images/style.png)]
+.float-left[![Style illustration by Lin Clark showing CSS rules being matched with DOM nodes](./images/style.png)]
 
 ???
 
 With style, we're figuring out which CSS rules apply to which elements and computing styles.
 
 --
-.float-right[![Layout](./images/layout.png)]
+.float-right[![Layout illustration by Lin Clark showing measurements and geometry on a page](./images/layout.png)]
 
 <footer class="muted">Illustrations by <a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/">Lin Clark</a></footer>
 
@@ -240,7 +240,7 @@ passed to the paint (green) step that actually lays out pixels on the screen.
 
 ---
 
-.center[![Illustration by Lin Clark of style calculation](./images/pixel-pipeline-style.png)]
+.center[![Style](./images/pixel-pipeline-style.png)]
 
 ```css
 h1 {
@@ -265,7 +265,7 @@ Let's take a simple example. In this case, we have a 5px-padding h1 and a 10px-p
 
 ---
 
-.center[![Illustration by Lin Clark of layout calculation](./images/pixel-pipeline-style.png)]
+.center[![Style](./images/pixel-pipeline-style.png)]
 
 ```css
 *h1 {
@@ -539,7 +539,21 @@ To understand style vs layout performance a bit more, we need to go into detail 
 
 ---
 
-# Style performance
+class: contain-vertical
+
+.center[![Style illustration by Lin Clark showing CSS rules being matched with DOM nodes](./images/style.png)]
+
+
+<footer class="muted absolute">Illustration by <a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/">Lin Clark</a></footer>
+
+???
+
+Remember, this is about matching up CSS rules with DOM nodes, and computing styles.
+
+
+---
+
+# Selector performance
 
 > "For most websites I would posit that selector performance is not the best area to spend your time trying to find performance optimizations."
 
@@ -1168,6 +1182,18 @@ class: center,middle
 ???
 
 OK, so now that I've covered all the bases on style performance, I want to move on to layout performance.
+
+---
+
+class: contain-vertical
+
+.center[![Layout illustration by Lin Clark showing measurements and geometry on a page](./images/layout.png)]
+
+<footer class="muted absolute">Illustration by <a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/">Lin Clark</a></footer>
+
+???
+
+Remember, this is about the geometry of the page.
 
 ---
 
