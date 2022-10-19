@@ -1929,9 +1929,8 @@ And the browser Dev Tools, in all three browsers, are frankly not very good at d
 
 ```sql
 
-SELECT Order.date, Customer.name
-FROM Order
-INNER JOIN Customer ON Order.customerId = Customer.id;
+SELECT height, weight FROM pokemon 
+INNER JOIN pokemon_types ON pokemon.id = pokemon_types.id;
 ```
 
 ???
@@ -1945,9 +1944,8 @@ most databases have a way to ask the database why your query is slow.
 
 ```sql
 EXPLAIN
-SELECT Order.date, Customer.name
-FROM Order
-INNER JOIN Customer ON Order.customerId = Customer.id;
+SELECT height, weight FROM pokemon 
+INNER JOIN pokemon_types ON pokemon.id = pokemon_types.id;
 ```
 
 ???
@@ -1958,7 +1956,7 @@ You can use `EXPLAIN`.
 
 class: contain-vertical
 
-.center[![SQL explain output showing what made query slow](./images/sql-explain-2.png)]
+.center[![SQL explain output showing what made query slow](./images/sql-explain-3.png)]
 
 ???
 
@@ -1990,8 +1988,8 @@ the browser vendors could provide more details so I didn't have to guess.
 | **Style**                                         | 400 |
 | &nbsp;&nbsp;├──&nbsp;&nbsp;Bloom filter misses    | 200 |
 | &nbsp;&nbsp;├──&nbsp;&nbsp;Pseudo selectors       | 130 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;Custom properties      | 50  |
-| &nbsp;&nbsp;└──&nbsp;&nbsp;`calc()`s              | 20  |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;Sibling selectors      | 50  |
+| &nbsp;&nbsp;└──&nbsp;&nbsp;Custom properties      | 20  |
 |                                                   |     |
 | **Layout**                                        | 600 |
 | &nbsp;&nbsp;├──&nbsp;&nbsp;`<nav>` (grid)         | 300 |
