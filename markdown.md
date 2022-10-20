@@ -1334,7 +1334,7 @@ class: contain-vertical
 ???
 
 It's a bit hard to predict what optimizations a browser will apply, but here is [a benchmark](https://github.com/nolanlawson/css-containment-benchmark) I put together based on one built by Manuel Rego Casasnovas. It renders
-100 items, changes the text 100 times, and measures the result. (Median of 25 iterations.)
+100 items, changes the text 100 times, and measures the result. (Median of 25 iterations, 500 items.)
 
 As you can see, in Chrome you get most of the benefit with `contain: content` and don't need to go as far as
 `contain: strict`. With Firefox, the benefit only comes with `contain: strict`. In Safari there isn't any effect.
@@ -1342,6 +1342,8 @@ As you can see, in Chrome you get most of the benefit with `contain: content` an
 Keep in mind that browsers may implement multiple different optimizations for CSS containment, or none at all. The spec
 doesn't require that a browser implement any optimizations – only that the observable effects of containment apply.
 Also note that this is just one benchmark, and you may see different results in your own page.
+
+(Also note that I tested in Firefox Nightly, and they seem to have the same perf optimization as Chrome now.)
 
 ---
 
