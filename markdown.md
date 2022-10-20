@@ -457,6 +457,43 @@ h2 {
 
 ---
 
+# Style vs layout performance
+
+.center[![Two traces, one with lots of style and the other with lots of layout](./images/style-layout.png)]
+
+???
+
+Now first off, when you're looking at a perf trace, it's important to understand whether you primarily have a
+problem with style calculation, layout calculation, or both. Because these two traces are not the same!
+
+---
+
+# Style vs layout performance
+
+.center[![Two traces, annotated showing style and layout sections](./images/style-layout-annotated.png)]
+
+???
+
+These two look similar because they're both purple. But in one trace, we have huge style costs, and in the other,
+we have huge layout costs. The causes of slowness in these two cases is very different!
+
+If you don't remember anything else from my talk, please remember this: style and layout are not the same thing! And you
+can actually reason about why one is expensive versus the other.
+
+---
+
+<h1 class="smaller">Three news sites</h1>
+
+.center[![Three news sites, style vs layout, mostly layout but one has more style than layout](./images/news-sites-style-layout-2.png)]
+
+???
+
+Just to give an idea of what the style vs layout breakdown might look like, here are those three news sites
+from earlier. Layout is usually the biggest part, but style is occasionally pretty big. In fact, for the first site, it's spending
+slightly more time in style than in layout. I've also seen traces where style is almost 100% of the style/layout cost.
+
+---
+
 # What slows down style/layout
 
 |                                 | Style  | Layout |
@@ -498,43 +535,6 @@ Or your DOM is very large. A bigger DOM just means more work for the browser to 
 ???
 
 Or you are doing repeated re-renders over time, also called thrashing, which slows down both style and layout.
-
----
-
-# Style vs layout performance
-
-.center[![Two traces, one with lots of style and the other with lots of layout](./images/style-layout.png)]
-
-???
-
-Now first off, when you're looking at a perf trace, it's important to understand whether you primarily have a
-problem with style calculation, layout calculation, or both. Because these two traces are not the same!
-
----
-
-# Style vs layout performance
-
-.center[![Two traces, annotated showing style and layout sections](./images/style-layout-annotated.png)]
-
-???
-
-These two look similar because they're both purple. But in one trace, we have huge style costs, and in the other, 
-we have huge layout costs. The causes of slowness in these two cases is very different!
-
-If you don't remember anything else from my talk, please remember this: style and layout are not the same thing! And you
-can actually reason about why one is expensive versus the other.
-
----
-
-<h1 class="smaller">Three news sites</h1>
-
-.center[![Three news sites, style vs layout, mostly layout but one has more style than layout](./images/news-sites-style-layout-2.png)]
-
-???
-
-Just to give an idea of what the style vs layout breakdown might look like, here are those three news sites
-from earlier. Layout is usually the biggest part, but style is occasionally pretty big. In fact, for the first site, it's spending
-slightly more time in style than in layout. I've also seen traces where style is almost 100% of the style/layout cost.
 
 ---
 
