@@ -1918,12 +1918,7 @@ CSS has been getting a lot of new features recently. Here are some new and draft
 
 Layout has been getting new features too.
 
-All of these features are cool, and you should be using them. CSS is great. 
-The more work you do in the purple part and the less in the yellow part, the more performant your page will tend to be.
-
-But the more complex that CSS and layout becomes, and the bigger and more ambitious apps we're trying to build, I believe the
-more likely we are to run into high style and layout calculation costs. And right now, it's really hard to debug.
-You kind of just have to know how the browser works, and also do a lot of guesswork.
+All of these features are cool, and you should be using them. CSS is great.
 
 ---
 
@@ -1939,14 +1934,13 @@ Style/Layout (purple part)
 
 ???
 
-Going back to the performance trace I showed at the beginning, I think part of the reason it can be so much
-harder to understand the "purple part" than the yellow part is that JavaScript is imperative, whereas CSS is declarative.
-With JavaScript, we procedurally tell the browser exactly what to do, and the performance trace is a one-to-one
-mapping of the algorithm we wrote.
+The more work you do in the purple part and the less in the yellow part, the more performant your page will tend to be.
 
-With CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm. And every
-browser does it differently. So when something goes wrong, it's really hard to tell what we did to cause the problem.
-And the browser Dev Tools, in all three browsers, are frankly not very good at debugging this.
+But the more complex our CSS and layout becomes, and the bigger and more ambitious apps we try to build, I worry that we'll see more time spent in the purple part. And it's not good enough to treat it as a black box.
+
+Unfortunately it's harder to understand the purple than the yellow, because JavaScript is imperative, whereas CSS is declarative. With JavaScript, there's a 1-to-1 mapping between the algorithm we write and the perf trace. Whereas with CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm.
+
+Browser DevTools are just not very good at showing what's going on here.
 
 ---
 
