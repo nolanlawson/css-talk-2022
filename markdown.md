@@ -1276,7 +1276,7 @@ CSS containment.
 
 class: fill-custom
 
-<layout-example-1 version="1" draw-text="contain:content|contain:content|contain:content"></layout-example-1>
+<layout-example-1 version="1" draw-text="contain:strict|contain:strict|contain:strict"></layout-example-1>
 
 ???
 
@@ -1301,7 +1301,7 @@ class: fill-custom
 
 <layout-example-1
 version="1"
-draw-text="contain:content||"
+draw-text="contain:strict||"
 truncate-dropdown="true"
 draw-dropdown="true"></layout-example-1>
 
