@@ -1696,46 +1696,6 @@ the next style/layout calc on the next frame. The total time spent is the same. 
 [Demo](https://nolanlawson.github.io/measure-style-and-layout/)
 
 ---
-
-# Beware excessive rAFs
-
-```js
-requestAnimationFrame(() => {
-  
-})
-```
-
-???
-
-Sometimes invalidation can be really tricky to debug. For instance, 
-would you expect this empty rAF callback to trigger a style invalidation?
-
----
-
-class: contain-vertical
-
-.center[![Many small style calc costs](./images/style-battery-drain.png)]
-
-???
-
-As it turns out, it does, and I have a [repro](http://bl.ocks.org/nolanlawson/raw/3139d2e2d609531e1ca55b6542ef9705/)
-that reproduces this in all 3 engines. (See also [Chrome bug](https://bugs.chromium.org/p/chromium/issues/detail?id=997274).)
-
-This can be a big problem because some people like to use rAF to measure stuff, or check the status of the page,
-so they may be calling rAF on every frame. If you do this, then you may end up just paying constant style calculation
-costs and causing a battery drain on your page.
-
----
-
-class: contain-vertical
-
-.center[![Chrome dev tools says Schedule Style Recalculation](./images/empty-raf-trace.png)]
-
-???
-
-Sadly, the Chrome DevTools (or any browser DevTools) do not actually tell you what caused the invalidation.
-It just says "Schedule Style Calculation." So you just have to know.
----
 exclude: true
 
 # Invalidation optimizations
@@ -1795,13 +1755,10 @@ More on this topic:
 
 ???
 
-Now most of the time, browsers have a lot of optimizations for invalidation. They try
-to avoid doing any unnecessary work. You change a class, and they try to only
-check rules related to that class. You change one part of the DOM, and they try to
-only redo layout for that part of the DOM (although containment can help).
+Browsers have a lot of invalidation optimizations. They try to avoid unnecessary work.
 
-Here is a partial list of some reading material on the kinds of optimizations browsers
-do for both style and layout.
+You change a class, and they try to only check rules related to that class. You change one part of the DOM, and they try to
+only redo layout for that part of the DOM (although containment can help).
 
 - [Invalidation sets (Chromium)](https://chromium.googlesource.com/chromium/src/+/HEAD/third_party/blink/renderer/core/css/style-invalidation.md)
 - [Rule Tree (Firefox)](https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/)
@@ -1888,6 +1845,47 @@ filter) and how many were rejected more slowly (using e.g. DOM traversal).
 
 ---
 
+# Beware excessive rAFs
+
+```js
+(function rAF() {
+  requestAnimationFrame(rAF);
+})();
+```
+
+???
+
+Sometimes invalidation can be really tricky to debug. For instance,
+would you expect these rAFs to trigger a style invalidation?
+
+---
+
+class: contain-vertical
+
+.center[![Many small style calc costs](./images/style-battery-drain.png)]
+
+???
+
+As it turns out, it does in certain cases where animations are involved. I have a [repro](http://bl.ocks.org/nolanlawson/raw/3139d2e2d609531e1ca55b6542ef9705/)
+that reproduces this in all 3 engines. (See also [Chrome bug](https://bugs.chromium.org/p/chromium/issues/detail?id=997274).)
+
+This can be a big problem because some people like to use rAF to measure stuff, or check the status of the page,
+so they may be calling rAF on every frame. If you do this, then you may end up just paying constant style calculation
+costs and causing a battery drain on your page.
+
+---
+
+class: contain-vertical
+
+.center[![Chrome dev tools says Schedule Style Recalculation](./images/empty-raf-trace.png)]
+
+???
+
+Sadly, the Chrome DevTools (or any browser DevTools) do not actually tell you what caused the invalidation.
+It just says "Schedule Style Calculation." So you just have to know.
+
+---
+
 class: center,middle
 
 # Conclusion
@@ -1936,7 +1934,7 @@ Style/Layout (purple part)
 
 The more work you do in the purple part and the less in the yellow part, the more performant your page will tend to be.
 
-But the more complex our CSS and layout becomes, and the bigger and more ambitious apps we try to build, I worry that we'll see more time spent in the purple part. And it's not good enough to treat it as a black box.
+But the more we lean on CSS, and the more ambitious apps we try to build, I worry that we'll see more time spent in the purple part. And it's not good enough to treat it as a black box.
 
 Unfortunately it's harder to understand the purple than the yellow, because JavaScript is imperative, whereas CSS is declarative. With JavaScript, there's a 1-to-1 mapping between the algorithm we write and the perf trace. Whereas with CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm.
 
@@ -1954,8 +1952,9 @@ INNER JOIN pokemon_types ON pokemon.id = pokemon_types.id;
 
 ???
 
-You know, another declarative language with performance considerations is SQL. But one thing I like about SQL is that
-most databases have a way to ask the database why your query is slow.
+I think there's an interesting analogy here with SQL. Like CSS, SQL is declarative.
+
+And like CSS, SQL has performance considerations. A slow query can result in time spent waiting on the database.
 
 ---
 
@@ -1969,7 +1968,7 @@ INNER JOIN pokemon_types ON pokemon.id = pokemon_types.id;
 
 ???
 
-You can use `EXPLAIN`.
+But unlike CSS, SQL has an EXPLAIN.
 
 ---
 
@@ -1979,10 +1978,9 @@ class: contain-vertical
 
 ???
 
-If you ask Postgres to explain itself, it'll tell you exactly what algorithm it implemented, and how much time it
-spent in each part of the algorithm. So now you can map this back to the declarative query you wrote.
+If we ask Postgres to EXPLAIN, it'll tell us how many rows it scanned, which indexes it used, how it joined the tables, etc.
 
-[Image source](https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-explain/)
+So we can map this back to the declarative SQL we wrote.
 
 ---
 
@@ -1999,8 +1997,9 @@ class: contain-vertical
 So wouldn't it be cool if browsers could give us the same thing? A `CSS EXPLAIN`?
 
 Going back to my original metaphor of the stick shift and the car, I'd really like to have a dashboard to give me
-more insights into what the browser is doing. It's great to listen to the engine and rely on intuition, but
-the browser vendors could provide more details so I didn't have to guess.
+more insights into what the browser is doing.
+
+Sure, I can listen to the engine's noises and rely on intuition, but this is not a great way to do perf analysis.
 
 ---
 
@@ -2030,10 +2029,10 @@ A `SQL EXPLAIN`, but for CSS, would be amazing! Here is a mockup.
 
 ## 🌎 nolanlawson.com
 
-<footer class="muted">
+<footer class="muted smaller">
   <p>
   Thanks to Emilio Cobos Álvarez, Manuel Rego Casasnovas, and Daniel Libby for help with research for this talk.
-  </p><p>Also thanks to Rune Lillesveen and Steinar H Gunderson for answering my Blink style bug questions.
+  </p><p>Also thanks to Robert Flack, Steinar Gunderson, and Rune Lillesveen for answering my Chromium style bug questions.
   </p><p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-sa/3.0/)">Creative Commons Attribution Share-Alike License v3.0</a>.
   </p>
 </footer>
@@ -2042,5 +2041,7 @@ A `SQL EXPLAIN`, but for CSS, would be amazing! Here is a mockup.
 
 So that's my talk on style/layout performance. I hope you enjoyed it and learned something about how browsers work
 and how to optimize style/layout calculation.
+
+Thank you to all the people who helped with research for this talk.
 
 If you'd like to follow my work online, I'd recommend going to my website and following the RSS feed. Thanks a lot!
