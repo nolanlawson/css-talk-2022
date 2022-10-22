@@ -1021,7 +1021,7 @@ made optimizations recently (in addition to the Bloom filter optimizations), aft
 
 ???
 
-Unlike attribute names, ttribute values don't go in the hashmap or Bloom filter. Watch out especially for slow "search" selectors.
+Unlike attribute names, attribute values don't go in the hashmap or Bloom filter. Watch out especially for slow "search" selectors.
 
 Sibling selectors tend to be less optimized. Non-adjacent selector and generic right-hand-side can cause [a lot of matching](https://bl.ocks.org/nolanlawson/raw/c1b690c16beead306ab2c4ac7e06c90a/).
 
