@@ -12,7 +12,7 @@ function generateHslaColors (saturation, lightness, alpha, amount) {
 
 
 
-export const LIGHT_YELLOW = 'rgba(255, 255, 0, 0.4)'
+export const LIGHT_YELLOW = 'rgba(235, 235, 0, 0.4)'
 
 export const DARK_YELLOW = 'rgb(187,187,13)'
 
