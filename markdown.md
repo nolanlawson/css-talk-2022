@@ -1901,8 +1901,21 @@ when you insert new CSS rules at the global level, the browser (typically) recal
 styles for every existing element on the page.
 
 In [this benchmark](https://nolanlawson.com/2022/10/22/style-performance-and-concurrent-rendering/), I'm inserting `<style>` tags in each `rAF`, and you can see the style costs just steadily
-increasing, even though I'm not inserting any new DOM nodes. So a best practice is to batch
-your CSS rule insertions.
+increasing, even though I'm not inserting any new DOM nodes.
+
+---
+
+# Avoid invalidating global CSS
+
+.center[![Chrome dev tools showing large style cost at beginning and smaller throughout](./images/less-raf-thrashing.png)]
+
+???
+
+So a best practice is to batch your CSS rule insertions. Here I'm running the exact same experiment, but with
+inserting new DOM nodes each frame instead of new styles. You can see the costs are much lower overall (about 10x),
+and there isn't a steadily increasing growth in style costs.
+
+(You probably still don't want to insert DOM nodes on each `rAF`, but this shows the difference.)
 
 ---
 
