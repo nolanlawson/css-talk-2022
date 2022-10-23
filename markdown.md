@@ -1903,9 +1903,13 @@ styles for every existing element on the page.
 In [this benchmark](https://nolanlawson.com/2022/10/22/style-performance-and-concurrent-rendering/), I'm inserting `<style>` tags in each `rAF`, and you can see the style costs just steadily
 increasing, even though I'm not inserting any new DOM nodes.
 
+So the best practice is to batch your CSS rule insertions.
+
 ---
 
 # Avoid invalidating global CSS
+
+exclude: true
 
 .center[![Chrome dev tools showing large style cost at beginning and smaller throughout](./images/less-raf-thrashing.png)]
 
