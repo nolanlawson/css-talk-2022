@@ -1869,7 +1869,8 @@ class: contain-vertical
 As it turns out, it does in certain cases where animations are involved. I have a [repro](http://bl.ocks.org/nolanlawson/raw/3139d2e2d609531e1ca55b6542ef9705/)
 that reproduces this in all 3 engines. (See also [Chrome bug](https://bugs.chromium.org/p/chromium/issues/detail?id=997274).)
 
-This can be a big problem because some people like to use rAF to measure stuff, or check the status of the page,
+This can be a big problem because some people like to use rAF to measure framerate, or implement
+a ResizeObserver/IntersectionObserver polyfill,
 so they may be calling rAF on every frame. If you do this, then you may end up just paying constant style calculation
 costs and causing a battery drain on your page.
 
@@ -1877,12 +1878,31 @@ costs and causing a battery drain on your page.
 
 class: contain-vertical
 
+exclude: true
+
 .center[![Chrome dev tools says Schedule Style Recalculation](./images/empty-raf-trace.png)]
 
 ???
 
 Sadly, the Chrome DevTools (or any browser DevTools) do not actually tell you what caused the invalidation.
 It just says "Schedule Style Calculation." So you just have to know.
+
+---
+
+# Avoid invalidating global CSS
+
+.center[![Chrome dev tools showing steadily increasing style costs](./images/raf-thrashing.png)]
+
+???
+
+Another thing to be aware of with invalidation: not all invalidations are created equal. In
+general, invalidating CSS rules is more expensive than invalidating DOM elements. In particular,
+when you insert new CSS rules at the global level, the browser (typically) recalculates all
+styles for every existing element on the page.
+
+In [this benchmark](https://nolanlawson.com/2022/10/22/style-performance-and-concurrent-rendering/), I'm inserting `<style>` tags in each `rAF`, and you can see the style costs just steadily
+increasing, even though I'm not inserting any new DOM nodes. So a best practice is to batch
+your CSS rule insertions.
 
 ---
 
