@@ -1907,9 +1907,9 @@ So the best practice is to batch your CSS rule insertions.
 
 ---
 
-# Avoid invalidating global CSS
-
 exclude: true
+
+# Avoid invalidating global CSS
 
 .center[![Chrome dev tools showing large style cost at beginning and smaller throughout](./images/less-raf-thrashing.png)]
 
@@ -1973,7 +1973,7 @@ The more work you do in the purple part and the less in the yellow part, the mor
 
 But the more we lean on CSS, and the more ambitious apps we try to build, I worry that we'll see more time spent in the purple part. And it's not good enough to treat it as a black box.
 
-Unfortunately it's harder to understand the purple than the yellow, because JavaScript is imperative, whereas CSS is declarative. With JavaScript, there's a 1-to-1 mapping between the algorithm we write and the perf trace. Whereas with CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm.
+Unfortunately it's harder to understand the purple than the yellow, because JavaScript is **imperative**, whereas CSS is **declarative**. With JavaScript, there's a 1-to-1 mapping between the algorithm we write and the perf trace. Whereas with CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm.
 
 Browser DevTools are just not very good at showing what's going on here.
 
@@ -2081,4 +2081,6 @@ and how to optimize style/layout calculation.
 
 Thank you to all the people who helped with research for this talk.
 
-If you'd like to follow my work online, I'd recommend going to my website and following the RSS feed. Thanks a lot!
+These slides are available online, and you can pop open the speaker notes to find links.
+
+Follow me on my website using RSS!
