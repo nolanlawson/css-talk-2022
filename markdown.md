@@ -739,7 +739,7 @@ It turns out we check a lot fewer DOM nodes this way.
 
 You may have heard that [browser engines evaluate CSS selectors from right to left](ttps://css-tricks.com/why-browsers-read-selectors-right-to-left/).
 If you've ever wondered why,
-this is the reason! Any given node in the DOM tree tends to have fewer ancestors than descendants, so this optimization
+[this is the reason](https://stackoverflow.com/a/5813672)! Any given node in the DOM tree tends to have fewer ancestors than descendants, so this optimization
 works out really well for most DOM trees.
 
 ---
