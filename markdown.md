@@ -619,7 +619,7 @@ wherever possible.
 
 class: fill-custom
 
-<example-1></example-1>
+<example-1 aria-label="Small DOM tree, four CSS rules, traversing full DOM and matching against every rule"></example-1>
 
 ???
 
@@ -631,7 +631,7 @@ need to match them with DOM nodes.
 
 class: fill-custom
 
-<example-1 animate="true" slow="true"></example-1>
+<example-1 animate="true" slow="true" aria-label="Small DOM tree, four CSS rules, traversing full DOM and matching against every rule"></example-1>
 
 ???
 
@@ -664,7 +664,7 @@ This is pretty reasonable, because tag names for an element never change, and ID
 
 class: fill-custom
 
-<example-1></example-1>
+<example-1 aria-label="Small DOM tree, only matching those rules that may match"></example-1>
 
 ???
 
@@ -675,7 +675,7 @@ short-circuit to only those selectors that could possibly match
 
 class: fill-custom
 
-<example-1 animate="true"></example-1>
+<example-1 animate="true" aria-label="Small DOM tree, only matching those rules that may match"></example-1>
 
 ???
 
@@ -686,7 +686,7 @@ short-circuit to only those selectors that could possibly match
 
 class: fill-custom
 
-<example-2></example-2>
+<example-2 aria-label="Medium DOM tree, traversing all descendants of foo"></example-2>
 
 ???
 
@@ -697,7 +697,7 @@ Now, there's still a problem with our algorithm. What about descendant selectors
 
 class: fill-custom
 
-<example-2 animate="true" strategy="naive-descendant"></example-2>
+<example-2 animate="true" strategy="naive-descendant" aria-label="Medium DOM tree, traversing all descendants of foo"></example-2>
 
 ???
 
@@ -725,7 +725,7 @@ So instead of going `foo` then `bar`, we would go `bar` then `foo`.
 
 class: fill-custom
 
-<example-2></example-2>
+<example-2 aria-label="Medium DOM tree, navigating up from foo to bar, traversing fewer"></example-2>
 
 ???
 
@@ -735,7 +735,7 @@ Here is our same DOM tree from before.
 
 class: fill-custom
 
-<example-2 animate="true" strategy="naive-ancestor"></example-2>
+<example-2 animate="true" strategy="naive-ancestor" aria-label="Medium DOM tree, navigating up from foo to bar, traversing fewer"></example-2>
 
 ???
 
@@ -764,7 +764,7 @@ The right-hand-side (i.e. the descendant) is pretty generic. Most DOM trees have
 
 class: fill-custom
 
-<example-3 show-tags="true"></example-3>
+<example-3 show-tags="true" aria-label="Medium DOM tree, lots of divs, traversing up from each one"></example-3>
 
 ???
 
@@ -774,7 +774,7 @@ Consider this DOM tree, where we have a lot of divs and want to find `.foo div`.
 
 class: fill-custom
 
-<example-3 show-tags="true" animate="true" strategy="naive-ancestor"></example-3>
+<example-3 show-tags="true" animate="true" strategy="naive-ancestor" aria-label="Medium DOM tree, lots of divs, traversing up from each one"></example-3>
 
 ???
 
@@ -804,7 +804,7 @@ Here, we hash the strings x, y, and z, and insert them into the Bloom filter. Th
 
 class: fill-custom
 
-<example-3 show-tags="true" show-bloom-filter="true"></example-3>
+<example-3 show-tags="true" show-bloom-filter="true" aria-label="Medium DOM tree, lots of divs, every node has bloom filter of id/class/tag for ancestors, spending less time traversing up"></example-3>
 
 ???
 
@@ -821,7 +821,7 @@ all browsers have it.
 
 class: fill-custom
 
-<example-3 show-tags="true" show-bloom-filter="true" animate="true" strategy="bloom-filter"></example-3>
+<example-3 show-tags="true" show-bloom-filter="true" animate="true" strategy="bloom-filter" aria-label="Medium DOM tree, lots of divs, every node has bloom filter of id/class/tag for ancestors, spending less time traversing up"></example-3>
 
 ???
 
@@ -1196,7 +1196,7 @@ Remember, this is about the geometry of the page.
 
 class: fill-custom
 
-<layout-example-1></layout-example-1>
+<layout-example-1 aria-label="three boxes"></layout-example-1>
 
 ???
 
@@ -1209,7 +1209,7 @@ a matter of laying them out.
 
 class: fill-custom
 
-<layout-example-1 draw-more-boxes="true" draw-more-boxes-text="true"></layout-example-1>
+<layout-example-1 draw-more-boxes="true" draw-more-boxes-text="true" aria-label="three boxes, many boxes inside those boxes"></layout-example-1>
 
 ???
 
@@ -1222,7 +1222,7 @@ And the browser has to calculate all the boxes for these things relative to each
 
 class: fill-custom
 
-<layout-example-1></layout-example-1>
+<layout-example-1 aria-label="three boxes"></layout-example-1>
 
 ???
 
@@ -1232,7 +1232,7 @@ So we have our simple layout.
 
 class: fill-custom
 
-<layout-example-1 version="2"></layout-example-1>
+<layout-example-1 version="2" aria-label="three boxes, one grows and another shrinks"></layout-example-1>
 
 ???
 
@@ -1242,7 +1242,7 @@ But let's say our main content suddenly takes up a bit more space, so now the si
 
 class: fill-custom
 
-<layout-example-1 version="2" draw-more-boxes="true"></layout-example-1>
+<layout-example-1 version="2" draw-more-boxes="true" aria-label="three boxes, one grows and another shrinks, multiple boxes inside"></layout-example-1>
 
 ???
 
@@ -1252,7 +1252,7 @@ So now the browser has to recalculate the geometry of all these boxes
 
 class: fill-custom
 
-<layout-example-1 version="2" draw-more-boxes="true" draw-more-boxes-text="true" text-version="2"></layout-example-1>
+<layout-example-1 version="2" draw-more-boxes="true" draw-more-boxes-text="true" text-version="2" aria-label="three boxes, multiple inside, one grew because of long text string"></layout-example-1>
 
 ???
 
@@ -1276,7 +1276,7 @@ CSS containment.
 
 class: fill-custom
 
-<layout-example-1 version="1" draw-text="contain:strict|contain:strict|contain:strict"></layout-example-1>
+<layout-example-1 version="1" draw-text="contain:strict|contain:strict|contain:strict" aria-label="three boxes, all with contain strict"></layout-example-1>
 
 ???
 
@@ -1289,7 +1289,7 @@ class: fill-custom
 
 <layout-example-1 
   version="1" 
-  draw-dropdown="true"></layout-example-1>
+  draw-dropdown="true" aria-label="three boxes, one has dropdown peeking over another"></layout-example-1>
 
 ???
 
@@ -1303,7 +1303,7 @@ class: fill-custom
 version="1"
 draw-text="contain:strict||"
 truncate-dropdown="true"
-draw-dropdown="true"></layout-example-1>
+draw-dropdown="true" aria-label="three boxes, one has dropdown peeking over another, it is cut off because of contain strict"></layout-example-1>
 
 ???
 
@@ -1448,7 +1448,7 @@ This process is called "invalidation."
 
 # Invalidation
 
-<layout-example-2></layout-example-2>
+<layout-example-2 aria-label="three boxes then three boxes with slightly different layout"></layout-example-2>
 
 ???
 
