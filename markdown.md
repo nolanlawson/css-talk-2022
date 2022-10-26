@@ -1849,7 +1849,7 @@ This tells us how many CSS rules matched, and how many were rejected using the "
 filter) and how many were rejected more slowly (using e.g. DOM traversal).
 
 ---
-
+exclude: true
 # Beware excessive rAFs
 
 ```js
@@ -1864,7 +1864,7 @@ Sometimes invalidation can be really tricky to debug. For instance,
 would you expect these rAFs to trigger a style invalidation?
 
 ---
-
+exclude: true
 class: contain-vertical
 
 .center[![Many small style calc costs](./images/style-battery-drain.png)]
