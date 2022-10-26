@@ -1087,6 +1087,8 @@ We also have match attempts, match count, and fast reject count. Fast reject cou
 Note this tool may be more useful at the macro level than the micro level. Look for repeated patterns coming from
 a framework or CSS processor.
 
+This tool [may land in Dev Tools](https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/StyleTracing/explainer.md) soon!
+
 ---
 
 # Use shadow DOM
