@@ -1318,7 +1318,7 @@ draw-dropdown="true" aria-label="three boxes, one has dropdown peeking over anot
 
 ???
 
-Now there are two (major) values: `content` and `strict`. `content` is a little laxer than `strict`, and is easier
+Now there are two (main) values: `content` and `strict`. `content` is a little laxer than `strict`, and is easier
 to apply more broadly, but it doesn't size itself independently of its descendants. So `strict` is a bit harder to pull off.
 
 My recommendation would be to try applying these to logically separate parts of your page
