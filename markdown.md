@@ -1047,40 +1047,14 @@ released in Chromium earlier this year. If you enable `blink.debug` when using C
 
 class: contain-vertical
 
-.center[![chrome tracing, document update style, selector stats slice, table of data](./images/selector-stats-2.png)]
+.center[![chrome tracing, document update style, selector stats slice, table of data, elapsed, fast reject count, match attempts, match count, list of selectors](./images/selector-stats-3.png)]
 
 ???
 
 Then you can get this view of the "selector stats." If you sort by elapsed time, you can actually see your
 most expensive CSS rules ranked from most to least expensive.
 
----
-
-class: smaller-table
-
-| Elapsed (μs) | Fast reject count | Match attempts | Match count | Selector                                 |
-|--------------|-------------------|----------------|-------------|------------------------------------------|
-| 2816         | 8579              | 8599           | 0           | `.toastManager .toastContainer > *`      |
-| 2029         | 6201              | 8599           | 340         | `.fmwk-button:disabled *`                |
-| 792          | 0                 | 481            | 0           | `[dir="rtl"] .fmwk-form-element__label`  |
-| 748          | 0                 | 5215           | 0           | `[class*="fmwk-icon-action-"]`           |
-| 608          | 0                 | 5215           | 0           | `[class*="fmwk-x-small-size"]`           |
-| 602          | 0                 | 8599           | 8202        | `::selection`                            |
-| 602          | 0                 | 8599           | 8202        | `*`                                      |
-| 598          | 0                 | 13498          | 1584        | `div`                                    |
-| 594          | 6883              | 8599           | 1683        | `[fmwk-input_input] ::before`            |
-| 573          | 0                 | 5215           | 0           | `[class*="fmwk-col_padded"]`             |
-| 516          | 0                 | 440            | 0           | `[dir="rtl"] .fmwk-form-element control` |
-
-???
-
-Here is the same table, blown up a bit.
-
-I also want to draw your attention to the elapsed time on the left. It's in microseconds, so those first two selectors
-are taking up almost 5 milliseconds. This was taken on a fast MacBook Pro for a real website.
-That's a lot of time for two lines of CSS!
-
-We also have match attempts, match count, and fast reject count. Fast reject count is Bloom filter rejections.
+The time shown is microseconds. We also have match attempts, match count, and fast reject count. Fast reject count is Bloom filter rejections.
 
 Note this tool may be more useful at the macro level than the micro level. Look for repeated patterns coming from
 a framework or CSS processor.
