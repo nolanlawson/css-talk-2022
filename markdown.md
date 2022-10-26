@@ -135,8 +135,6 @@ In this talk, I'd like to convince you _can_ understand what's going on in there
 
 ???
 
-Style/layout performance can be important.
-
 To put the purple part in context, I tested three news sites. I used WebPageTest, simulated low-end Android phone.
 
 Then I categorized the time spent on the main thread..
@@ -486,7 +484,9 @@ The biggest mistake I see people make is seeing one and thinking it's the other.
 
 Just to give an idea of what the style vs layout breakdown might look like, here are those three news sites
 from earlier. Layout is usually the biggest part, but style is occasionally pretty big. In fact, for the first site, it's spending
-slightly more time in style than in layout. I've also seen traces where style is almost 100% of the style/layout cost.
+slightly more time in style than in layout.
+
+I've seen traces where it's almost all style, and where it's almost all layout, and everything in between. It depends.
 
 ---
 
@@ -1893,7 +1893,7 @@ Sadly, the Chrome DevTools (or any browser DevTools) do not actually tell you wh
 It just says "Schedule Style Calculation." So you just have to know.
 
 ---
-
+exclude: true
 # Avoid invalidating global CSS
 
 .center[![Chrome dev tools showing steadily increasing style costs](./images/raf-thrashing.png)]
@@ -2028,28 +2028,6 @@ So we can map this back to the declarative SQL we wrote.
 
 ---
 
-| Task                                              | ms  |
-|:--------------------------------------------------|-----|
-| **Style**                                         | 400 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;Bloom filter misses    | 200 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;Pseudo selectors       | 130 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;Sibling selectors      | 50  |
-| &nbsp;&nbsp;└──&nbsp;&nbsp;Custom properties      | 20  |
-|                                                   |     |
-| **Layout**                                        | 600 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;`<nav>` (grid)         | 300 |
-| &nbsp;&nbsp;├──&nbsp;&nbsp;`.sidebar` (flexbox)   | 200 |
-| &nbsp;&nbsp;└──&nbsp;&nbsp;`<main>` (normal flow) | 100 |
-
-
-???
-
-Wouldn't it be cool if browsers could give us the same thing? A `CSS EXPLAIN`?
-
-Here is a mockup.
-
----
-
 class: contain-vertical
 
 .center[![Photo of a classic car dashboard](./images/car-dashboard.jpg)]
@@ -2065,6 +2043,26 @@ Going back to my original car metaphor…
 Sure, I can listen to the engine's noises and rely on intuition. But what I'd really like is a dashboard, to give me insight into what the engine is doing.
 
 So my pitch to browser vendors is: please give us a CSS EXPLAIN! SelectorStats and Invalidation Tracking are great, but I want so much more.
+
+---
+
+| Task                                              | ms  |
+|:--------------------------------------------------|-----|
+| **Style**                                         | 400 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;Bloom filter misses    | 200 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;`:nth-child` selectors | 130 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;Sibling selectors      | 50  |
+| &nbsp;&nbsp;└──&nbsp;&nbsp;Custom properties      | 20  |
+|                                                   |     |
+| **Layout**                                        | 600 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;`<nav>` (grid)         | 300 |
+| &nbsp;&nbsp;├──&nbsp;&nbsp;`.sidebar` (flexbox)   | 200 |
+| &nbsp;&nbsp;└──&nbsp;&nbsp;`<main>` (normal flow) | 100 |
+
+
+???
+
+Here is a mockup.
 
 ---
 
