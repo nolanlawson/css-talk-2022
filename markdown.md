@@ -10,9 +10,9 @@ class: center, middle
 
 Hi, my name is Nolan Lawson and today I'd like to talk to you about CSS runtime performance.
 
-Quick note: these slides are available online; I'll provide a URL at the end.
+Quick note: these slides will be available online.
 
-The speaker notes have links with details.
+The speaker notes have lots of links.
 
 ---
 .left-column-66[![Photo of Nolan Lawson on a bike](./images/20150424081933-cropped-2.jpg)]
@@ -47,7 +47,7 @@ class: contain-vertical
 I'd like to start off with a story. When I was learning to drive as a teenager, my car was a stick shift (manual transmission).
 These are much more common in Europe than in the U.S., but growing up in the Seattle area, this is what I had.
 
-It was really difficult! But one thing I like about stick shifts is that you feel more in tune with what the car
+I kinda like stick shifts. You feel more in tune with what the car
 is doing. By listening to the sounds of the engine, I developed a feel for when to shift
 from one gear to another, or how to do things like "engine braking," which is
 actually [an efficient use of fuel](https://jalopnik.com/here-is-when-engine-braking-can-save-more-gas-than-coas-1819484925).
@@ -67,7 +67,7 @@ class: contain-vertical
 Of course, I have no idea how an internal combustion engine actually works. It's a hugely complex thing.
 
 But by listening
-to the engine and seeing how it reacted to my actions, I learned how to use an engine efficiently.
+to the engine and seeing how it reacted to my actions, I learned how to use the engine efficiently.
 
 ---
 
@@ -81,7 +81,7 @@ class: contain-vertical
 
 ???
 
-This is sort of how I feel about web performance. A browser engine is an very complex. And I'm not a C/C++/Rust developer.
+This is kind of what I like about web performance. A browser engine is an very complex. And I'm not a C/C++ developer.
 
 But through observation of how the engine responds to my inputs, I can become a better web developer, and write more efficient web apps.
 
@@ -93,7 +93,7 @@ And if you know _just a bit_ about how the engine works, you can be an even bett
 
 ???
 
-Let's look at a browser perf trace like this one (from the Chrome DevTools).
+Let's look at a browser perf trace like this one (from the Chrome DevTools). This is the main thread.
 
 There are two main parts: the yellow (JavaScript) part, and the purple (style/layout) part.
 
@@ -126,7 +126,7 @@ Or we say "the purple part doesn't matter." As if the user cares whether their c
 
 This is kind of a "learned helplessness." We feel helpless, so we try to tell ourselves it doesn't matter.
 
-In this talk, I'd like to convince you that the purple part _can_ matter, and that you _can_ understand what's going on in there.
+In this talk, I'd like to convince you _can_ understand what's going on in there, if you know a little bit about how browsers work.
 
 ---
 <h1 class="smaller">Three news sites</h1>
@@ -137,9 +137,9 @@ In this talk, I'd like to convince you that the purple part _can_ matter, and th
 
 Style/layout performance can be important.
 
-To prove my point, I ran WebPageTest (simulated Moto G4, 4G) on three major news websites that I chose basically at random.
-Then I categorized the time spent on the main thread in the trace as Loading (network), Scripting (JS),
-Rendering (Style/Layout), or Paint.
+To put the purple part in context, I tested three news sites. I used WebPageTest, simulated low-end Android phone.
+
+Then I categorized the time spent on the main thread..
 
 As you can see, the purple part is not the most important part, but it can be quite big. For the third site in particular,
 it's worth looking into.
@@ -202,15 +202,14 @@ I'm also speaking to anyone interested in how browsers work. This stuff is just 
 ???
 
 To understand the purple part, we first need to start with how browsers render content. This process is called
-["updating the rendering"](https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering) in the HTML spec.
+["updating the rendering"](https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering) in the HTML spec. Let's call it "the render loop."
 
-The first step, JavaScript, is where we run some JavaScript that modifies the DOM. Typically this will be your JavaScript
+The first step, JavaScript, is where we run some JavaScript that modifies the DOM. Typically, this will be your JavaScript
 framework rendering, such as React doing its virtual DOM diffing and then eventually putting elements into the DOM.
 
 The next two steps, style and layout, involve applying your CSS to those DOM elements and then laying them out on the page. This is my focus.
 
-The last two steps, paint and composite, are about actually writing pixels to the screen and doing animations. This part is largely
-out of scope for this talk.
+The last two steps, paint and composite, are about actually writing pixels to the screen. This is where we have layers, GPU animations, opacity, etc. This is out of scope for this talk.
 
 ---
 
@@ -245,9 +244,6 @@ With style, we're figuring out which CSS rules apply to which elements and compu
 ???
 
 With layout, we're figuring out how to place those elements geometrically on the page.
-
-The output of these steps is the calculated layout of the page, which is
-passed to the paint (green) step that actually lays out pixels on the screen.
 
 ---
 
@@ -394,8 +390,7 @@ class: contain-vertical
 Now we finally get to the geometry of the page. Layout calculation is where the styles, which have been associated with
 each element, actually get applied.
 
-In this case, the browser figures takes the margin, padding, font size, and
-figures out where to actually place things within the given browser window, with text wrapping and all that good stuff.
+In this case, the browser figures takes the margin, padding, text wrapping, widths, heights, positions, etc.
 
 ---
 
@@ -477,8 +472,9 @@ problem with style calculation, layout calculation, or both. Because these two t
 These two look similar because they're both purple. But in one trace, we have huge style costs, and in the other,
 we have huge layout costs. The causes of slowness in these two cases is very different!
 
-If you don't remember anything else from my talk, please remember this: style and layout are not the same thing! And you
-can actually reason about why one is expensive versus the other.
+If you don't remember anything else from my talk, please remember this: style and layout are not the same thing!
+
+The biggest mistake I see people make is seeing one and thinking it's the other. For instance, they have a lot of style costs, but they think it has something to do with the geometry of the page.
 
 ---
 
@@ -512,6 +508,8 @@ At a high level, if you're seeing a large amount of time spent in style or layou
 
 ???
 
+<hr/>
+
 Typically either your CSS selectors are too complex, or there are a lot of them, which slows down style calculation.
 Note this has no effect on layout calculation.
 
@@ -520,6 +518,8 @@ Note this has no effect on layout calculation.
 
 ???
 
+<hr/>
+
 Or your layout itself, i.e. the geometry of the page, is very large or complex, which slows down layout calculation. Note this has no effect on style calculation.
 
 --
@@ -527,12 +527,16 @@ Or your layout itself, i.e. the geometry of the page, is very large or complex, 
 
 ???
 
+<hr/>
+
 Or your DOM is very large. A bigger DOM just means more work for the browser to do. This affects both style and layout.
 
 --
 <pointing-arrow></pointing-arrow>
 
 ???
+
+<hr/>
 
 Or you are doing repeated re-renders over time, also called thrashing, which slows down both style and layout.
 
@@ -572,7 +576,7 @@ Remember, this is about matching up CSS rules with DOM nodes, and computing styl
 
 When we talk about style performance, we're mostly talking about selector performance. This needs some clarification.
 
-There's a very common refrain in the web development community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote Greg Whitworth. I'm picking on Greg because I work with him, but if you Google
+There's a common refrain in the web perf community that CSS selector performance "doesn't matter" or you shouldn't worry about it. Here is one representative quote Greg Whitworth. I'm picking on Greg because I work with him, but if you Google
 "CSS performance," you'll see this [repeated](https://calendar.perfplanet.com/2011/css-selector-performance-has-changed-for-the-better/) [in](https://calibreapp.com/blog/css-performance) [multiple](https://ecss.benfrain.com/appendix2.html) [places](https://meiert.com/en/blog/performance-of-css-selectors-2/).
 
 I think this is true at the micro level: if you try to micro-optimize your CSS selectors, you're probably wasting your time. But
@@ -774,12 +778,9 @@ class: fill-custom
 
 ???
 
-With the right-to-left technique, we're able to instantly find every `div` (thanks to the hashmap), but we have
-to crawl up the entire ancestor chain every time just to find `.foo`. So this is a case where it would
-have been faster for us to go left-to-right.
+With the right-to-left technique, we have to traverse a lot of ancestor chains just to find `.foo`. 
 
-But we just established that left-to-right is pretty slow most of the time, since DOM nodes tend to have more
-descendants than ancestors, just due to the shape of the tree. So how can we solve this?
+So how can we solve this?
 
 ---
 
@@ -828,10 +829,7 @@ So now we can quickly filter all the `divs` based on the Bloom filter, "fast rej
 that couldn't possibly have `.foo` as an ancestor.
 
 Note that, because we could have false positives, we still
-need to walk the ancestor chain to check that it really has `.foo` as an ancestor, but we are still eliminating a lot
-of work.
-
-Bloom filters can also be tuned to minimize the number of false positives. It's basically a memory vs CPU tradeoff.
+need to walk the ancestor chain to check that it really has `.foo` as an ancestor, but we are still eliminating a lot of work.
 
 ---
 
@@ -857,7 +855,7 @@ So what's in the Bloom filter?
 
 ???
 
-Originally it was only IDs, classes, and tags.
+Originally it was only IDs, classes, and tags. WebKit invented this in 2011.
 
 --
 <pointing-arrow></pointing-arrow>
@@ -901,29 +899,29 @@ Now, there are many more browser style optimizations than what I've mentioned he
 - WebKit CSS JIT (2014)
 
 ???
+<hr/>
 WebKit has a JIT where they actually compile some selectors directly to assembly. Pretty impressive!
 
 --
 - Firefox Stylo (2017)
 
 ???
-
-Firefox brought their Stylo  engine over from Servo, which is a very fast multithreaded style calculation engine and
-also has some other clever optimizations like the "Rule Tree."
+<hr/>
+Firefox has a multithreaded style calculation engine called Stylo.
 
 --
 - WebKit `:has` (2022)
 
 ???
-
+<hr/>
 And recently both Webkit and Chromium
 implemented `:has()`, which can be thought of as an ancestor selector. (How did they make this fast? You guessed it... another
 Bloom filter. Like the other one, this one has classes, IDs, tags, and attributes, but it also adds `:hover`, and they hint
 that they may add other pseudo classes later.)
 
-My goal in telling you all this is not to tell you to use this CSS selector or this other one. That information could quickly become outdated.
-My goal instead is to give you an appreciation for all the work a browser has to do to do style calculation. So when you see high style
-calculation costs, you understand that a browser is doing some non-trivial work.
+My goal in telling you this is not to say that you need to memorize whatever optimizations browsers have.
+
+I just want to give you an appreciation for all the work a browser has to do to make it so, 9 times out of 10, you _don't have to worry about selector performance.
 
 Notes:
 
@@ -936,7 +934,7 @@ Notes:
 
 ---
 
-# Improving style calculation
+# Improving style performance
 
 ???
 
@@ -974,7 +972,7 @@ These kinds of selectors are cute, but if we imagine matching right-to-left, we 
 Now, you can probably have a few of these on your page and you'll be fine. It's more of a problem at the
 macro level, e.g. if you're building a framework or design system that repeats these selectors multiple times.
 
-Some folks use preprocessors like Sass or Less, and it's easy to put something like this in a for-loop.
+Some folks use preprocessors like SASS or LESS, and it's easy to put something like this in a for-loop.
 
 ---
 
@@ -989,7 +987,7 @@ class: relative
 | ⚠️| Attribute name  | `[foo]`                      |
 | 🌶️️| Attribute value | `[foo="bar"]`&nbsp;&nbsp;&nbsp;`[foo*="bar"]`              |
 | 🌶️ | Sibling         | `.foo ~ *`&nbsp;&nbsp;&nbsp;`.foo + *`                |
-| 🌶️ | Pseudo-class    | `:nth-child()`&nbsp;&nbsp;&nbsp;`:not()`&nbsp;&nbsp;&nbsp;`:nth-of-type()` |
+| 🌶️ | Pseudo-class    | `:nth-child()`&nbsp;&nbsp;&nbsp;`:nth-of-type()` |
 
 ???
 
@@ -999,7 +997,7 @@ This is my extremely rough estimate of selector costs.
 <pointing-arrow></pointing-arrow>
 
 ???
-
+<hr/>
 In general, browsers have heavily optimized for things like tag names, IDs, and classes.
 
 --
@@ -1007,7 +1005,7 @@ In general, browsers have heavily optimized for things like tag names, IDs, and 
 <pointing-arrow show-previous="1"></pointing-arrow>
 
 ???
-
+<hr/>
 Descendant selectors have the Bloom filter optimize, but it doesn't always work.
 
 Attribute names have historically been less optimized. They're still typically slower than classes, but
@@ -1020,7 +1018,7 @@ made optimizations recently (in addition to the Bloom filter optimizations), aft
 <pointing-arrow show-previous="2"></pointing-arrow>
 
 ???
-
+<hr/>
 Unlike attribute names, attribute values don't go in the hashmap or Bloom filter. Watch out especially for slow "search" selectors.
 
 Sibling selectors tend to be less optimized. Non-adjacent selector and generic right-hand-side can cause [a lot of matching](https://bl.ocks.org/nolanlawson/raw/c1b690c16beead306ab2c4ac7e06c90a/).
@@ -1031,7 +1029,7 @@ Pseudos like `:nth-child()` and `:nth-of-type()` tend to be less optimized, alth
 <stamp-text>IT DEPENDS</stamp-text>
 
 ???
-
+<hr/>
 But remember: this varies from browser to browser, it could change tomorrow, and there are always exceptions.
 
 ---
@@ -1064,7 +1062,7 @@ class: smaller-table
 |--------------|-------------------|----------------|-------------|------------------------------------------|
 | 2816         | 8579              | 8599           | 0           | `.toastManager .toastContainer > *`      |
 | 2029         | 6201              | 8599           | 340         | `.fmwk-button:disabled *`                |
-| 792          | 0                 | 481            | 0           | `[dir="rtl"] .fmwk-form-element _label`  |
+| 792          | 0                 | 481            | 0           | `[dir="rtl"] .fmwk-form-element__label`  |
 | 748          | 0                 | 5215           | 0           | `[class*="fmwk-icon-action-"]`           |
 | 608          | 0                 | 5215           | 0           | `[class*="fmwk-x-small-size"]`           |
 | 602          | 0                 | 8599           | 8202        | `::selection`                            |
@@ -1078,7 +1076,7 @@ class: smaller-table
 
 Here is the same table, blown up a bit.
 
-I also want to draw your attention to the elapsed time on the left. It's in nanoseconds, so those first two selectors
+I also want to draw your attention to the elapsed time on the left. It's in microseconds, so those first two selectors
 are taking up almost 5 milliseconds. This was taken on a fast MacBook Pro for a real website.
 That's a lot of time for two lines of CSS!
 
@@ -1108,8 +1106,6 @@ Shadow DOM is interesting because it encapsulates styles. They don't bleed in an
 Because of this scoping, this reduces both the `n` and the `m` in our `O (n*m)` algorithm earlier. The browser
 doesn't need to check as many rules against as many elements – it's clear which ones can apply to each other.
 
-This has some style calc benefits I'll mention later.
-
 ---
 
 # Use scoped styles
@@ -1124,8 +1120,10 @@ This has some style calc benefits I'll mention later.
 
 ???
 
-An alternative to shadow DOM is to use style scoping from frameworks like Vue, Svelte, or CSS Modules. In a sense,
+An alternative to shadow DOM is to use style scoping from frameworks like Vue or Svelte. In a sense,
 these "polyfill" shadow DOM style scoping by modifying the selectors with unique classes, tags, or attributes.
+
+In this case, you can see how Svelte effectively turns an inefficient selector into an efficient selector that benefits from both the hashmap and Bloom filter optimization.
 
 There are different ways to do style scoping. But knowing what you know now about how browsers do
 style calculation, you can see how this effectively can turn unperformant selectors (like the first one)
@@ -1366,6 +1364,7 @@ What's the difference?
 <pointing-arrow></pointing-arrow>
 
 ???
+<hr/>
 
 Well, shadow DOM encapsulates your _styles_ and improves style
 calculation. Whereas CSS containment encapsulates your _layout_ and improves layout performance.
@@ -1378,6 +1377,7 @@ shadow DOM can't help.
 <pointing-arrow></pointing-arrow>
 
 ???
+<hr/>
 
 Also note that CSS containment can only make _subsequent_ layouts faster. It provides a hint that if one part of the DOM
 changed, then another part doesn't need to be invalidated.
@@ -1389,7 +1389,7 @@ algorithm I mentioned.
 
 ---
 
-# Principles of layout performance
+# Improving layout performance
 
 ???
 
@@ -1400,6 +1400,7 @@ Other than CSS containment, I can only share a few general tips on improving lay
 - Explicit is better than implicit
 
 ???
+<hr/>
 
 First off, explicitly
 telling the browser the sizes of things will always be less work than asking it to run its layout algorithm. If you
@@ -1410,6 +1411,7 @@ Absolute/relative positioninng is always fast.
 - Use fewer DOM nodes (e.g. virtualization)
 
 ???
+<hr/>
 
 Also, of course, use fewer DOM nodes. If you have an infinite-scrolling list, use virtualization so that you're not
 rendering a bunch of DOM nodes that are off-screen.
@@ -1418,6 +1420,7 @@ rendering a bunch of DOM nodes that are off-screen.
 - Use `display:none` and `content-visibility`
 
 ???
+<hr/>
 
 If you use something like `display:none`, it will also avoid paying the layout cost for everything that is currently being hidden.
 
@@ -1975,9 +1978,11 @@ The more work you do in the purple part and the less in the yellow part, the mor
 
 But the more we lean on CSS, and the more ambitious apps we try to build, I worry that we'll see more time spent in the purple part. And it's not good enough to treat it as a black box.
 
-Unfortunately it's harder to understand the purple than the yellow, because JavaScript is **imperative**, whereas CSS is **declarative**. With JavaScript, there's a 1-to-1 mapping between the algorithm we write and the perf trace. Whereas with CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm.
+Unfortunately it's harder to understand the purple than the yellow, because JavaScript is **imperative**, whereas CSS is **declarative**.
 
-Browser DevTools are just not very good at showing what's going on here.
+With JavaScript, there's a 1-to-1 mapping between the algorithm we write and the perf trace.
+
+Whereas with CSS, we give a big declarative blob to the browser and tell the browser to implement the algorithm.
 
 ---
 
@@ -2023,25 +2028,6 @@ So we can map this back to the declarative SQL we wrote.
 
 ---
 
-class: contain-vertical
-
-.center[![Photo of a classic car dashboard](./images/car-dashboard.jpg)]
-
-<footer class="muted absolute">
-  Via <a href="https://www.flickr.com/photos/lex-photographic/26665512361">Flickr</a>
-</footer>
-
-???
-
-So wouldn't it be cool if browsers could give us the same thing? A `CSS EXPLAIN`?
-
-Going back to my original metaphor of the stick shift and the car, I'd really like to have a dashboard to give me
-more insights into what the browser is doing.
-
-Sure, I can listen to the engine's noises and rely on intuition, but this is not a great way to do perf analysis.
-
----
-
 | Task                                              | ms  |
 |:--------------------------------------------------|-----|
 | **Style**                                         | 400 |
@@ -2058,7 +2044,27 @@ Sure, I can listen to the engine's noises and rely on intuition, but this is not
 
 ???
 
-A `SQL EXPLAIN`, but for CSS, would be amazing! Here is a mockup.
+Wouldn't it be cool if browsers could give us the same thing? A `CSS EXPLAIN`?
+
+Here is a mockup.
+
+---
+
+class: contain-vertical
+
+.center[![Photo of a classic car dashboard](./images/car-dashboard.jpg)]
+
+<footer class="muted absolute">
+  Via <a href="https://www.flickr.com/photos/lex-photographic/26665512361">Flickr</a>
+</footer>
+
+???
+
+Going back to my original car metaphor…
+
+Sure, I can listen to the engine's noises and rely on intuition. But what I'd really like is a dashboard, to give me insight into what the engine is doing.
+
+So my pitch to browser vendors is: please give us a CSS EXPLAIN! SelectorStats and Invalidation Tracking are great, but I want so much more.
 
 ---
 
@@ -2084,5 +2090,3 @@ and how to optimize style/layout calculation.
 Thank you to all the people who helped with research for this talk.
 
 These slides are available online, and you can pop open the speaker notes to find links.
-
-Follow me on my website using RSS!
