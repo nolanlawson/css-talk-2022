@@ -1867,7 +1867,7 @@ Sadly, the Chrome DevTools (or any browser DevTools) do not actually tell you wh
 It just says "Schedule Style Calculation." So you just have to know.
 
 ---
-exclude: true
+
 # Avoid invalidating global CSS
 
 .center[![Chrome dev tools showing steadily increasing style costs](./images/raf-thrashing.png)]
@@ -1876,7 +1876,7 @@ exclude: true
 
 Another thing to be aware of with invalidation: not all invalidations are created equal. In
 general, invalidating CSS rules is more expensive than invalidating DOM elements. In particular,
-when you insert new CSS rules at the global level, the browser (typically) recalculates all
+when you insert new CSS rules at the global level, the browser may recalculate all
 styles for every existing element on the page.
 
 In [this benchmark](https://nolanlawson.com/2022/10/22/style-performance-and-concurrent-rendering/), I'm inserting `<style>` tags in each `rAF`, and you can see the style costs just steadily
