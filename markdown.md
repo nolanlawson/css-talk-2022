@@ -1134,7 +1134,7 @@ I hesitated to mention this one, because it only applies to Chromium, but it's a
 
 It turns out that in Chromium, [one big stylesheet is faster than multiple small stylesheets](https://bugs.chromium.org/p/chromium/issues/detail?id=1337599) for style calculation. It has no impact on Safari or Firefox, and the Chromium devs may fix it eventually, but it's something to be aware of.
 
-In [this benchmark](https://gist.github.com/nolanlawson/214f22ddf5b26ab3e218a9c65faf90fa), this is median of 35 iterations. The styles are exactly the same; it's just the number of
+In [this benchmark](https://gist.github.com/nolanlawson/214f22ddf5b26ab3e218a9c65faf90fa), this is median of 25 iterations. The styles are exactly the same; it's just the number of
 individual `<style>`s that's different. The fastest is to concatenate everything into one big stylesheet.
 
 So the advice would be to concatenate stylesheets as much as possible across pages, similar to how we do concatenation and chunking
