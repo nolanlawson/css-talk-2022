@@ -611,6 +611,8 @@ To illustrate, let's imagine we're building a browser. Here is a naive implement
 
 ???
 
+<br/>
+
 Unfortunately this naive implementation has a big problem: this is an `O(n * m)` operation, where `n` is the number of elements and `m` is the number of CSS rules. On any reasonably-sized page, the browser would slow to a crawl. So browsers try to avoid this naive case
 wherever possible.
 
@@ -703,7 +705,7 @@ class: fill-custom
 
 So we have to traverse the descendants of `.foo` to try to find all the `.bar` elements.
 
-Thanks to the hashmap, we can quickly find the `.foo` elements, but this is still pretty inefficient. We're walking a
+The hashmap doesn't really help us here, because it's more about the relationship between the two nodes. So this is pretty inefficient. We're walking a
 lot of DOM nodes just to find the `.bar` elements.
 
 ---
