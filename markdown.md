@@ -1377,7 +1377,6 @@ Other than CSS containment, I can only share a few general tips on improving lay
 First off, explicitly
 telling the browser the sizes of things will always be less work than asking it to run its layout algorithm. If you
 know the exact width/height of something, you can set the explicit size rather than letting the browser calculate it.
-Absolute/relative positioning is always fast.
 
 --
 - Use fewer DOM nodes (e.g. virtualization)
