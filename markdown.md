@@ -1101,10 +1101,6 @@ these "polyfill" shadow DOM style scoping by modifying the selectors with unique
 
 In this case, you can see how Svelte effectively turns an inefficient selector into an efficient selector that benefits from both the hashmap and Bloom filter optimization.
 
-There are different ways to do style scoping. But knowing what you know now about how browsers do
-style calculation, you can see how this effectively can turn unperformant selectors (like the first one)
-into a more performant selectors that leverage the hash map and/or Bloom filter optimizations.
-
 ---
 
 class: contain-vertical
