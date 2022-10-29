@@ -810,7 +810,7 @@ class: fill-custom
 
 ???
 
-How does this work in the DOM tree? Well basically, the browser keeps a little Bloom filter hash on each node of its parents'
+How does this work in the DOM tree? Well basically, the browser keeps a little Bloom filter hash on each node of its ancestors'
 tag name, IDs, and classes.
 
 This means that if we're on `div`, and we want to figure out if `.foo` is an ancestor, then we don't have to walk up the tree – we know
